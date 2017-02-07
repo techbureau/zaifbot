@@ -1,4 +1,5 @@
 # moving_average.py
+
 import sqlite3
 import time
 import urllib.request
