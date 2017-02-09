@@ -50,14 +50,30 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
         _params = []
 
         if i > (length - 2) and _mv_avrg_result[i][3] is None:
-            # prepare numbers to calculate moving average
-            for j in range(0, length):
-                _nums.append(_mv_avrg_result[i - j][1])
-
             if sma_ema == 'sma':
+                # prepare numbers to calculate sma
+                for j in range(0, length):
+                    _nums.append(_mv_avrg_result[i - j][1])
+
                 # calculate sma
                 _value = np.sum(_nums) / length
                 _sma.append(
+                    {'time_stamp': _mv_avrg_result[i][0], 'value': _value})
+            elif sma_ema == 'ema':
+                # for the first time ema calculation
+                if len(_ema) == 0:
+                    # prepare numbers for first calculation of last value
+                    for j in range(1, length + 1):
+                        _nums.append(_mv_avrg_result[i - j][1])
+
+                    _last_val = np.sum(_nums) / length
+                else:
+                    _last_val = _ema[i - 1]['value']
+
+                # calculate ema
+                _value = _calculate_ema(
+                    _mv_avrg_result[i][1], _last_val, length)
+                _ema.append(
                     {'time_stamp': _mv_avrg_result[i][0], 'value': _value})
 
             if(_mv_avrg_result[i][2] == 1):
@@ -86,3 +102,10 @@ def get_moving_average(currency_pair, count=1000, to_epoch_time=int(time.time())
 
     _check_moving_average(currency_pair, period, length,
                           _start_time, _end_time, count, sma_ema)
+
+
+def _calculate_ema(current_val, last_val, length):
+    _k = 2 / (length + 1)
+    _ema = current_val * k + last_val * (1 - k)
+
+    return _ema

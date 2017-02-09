@@ -49,7 +49,6 @@ class Tradelogs():
     """
 
     def __init__(self, currency_pair, period):
-        # super().__init__()
         self._instance = ZaifbotDb()
         self._table_name = 'tradelogs_{}_{}'.format(currency_pair, period)
 
@@ -93,7 +92,6 @@ class MovingAverage():
     """
 
     def __init__(self, currency_pair, period, length, sma_ema):
-        # super().__init__()
         self._instance = ZaifbotDb()
         self._trdlg_table_name = 'tradelogs_{}_{}'.format(
             currency_pair, period)
