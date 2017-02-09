@@ -7,83 +7,82 @@ import json
 import sqlalchemy.pool as pool
 from zaifapi import ZaifPublicApi
 from db import Tradelogs, MovingAverage
+import numpy as np
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
                '1h': 3600, '1m': 60, '5m': 300, '15m': 900, '30m': 1800}
-DB_NAME = 'zaif_bot.db'
-DB_KIND = 'sqlite3'
 
 
-def check_tradelogs(currency_pair, period, length, start_time, end_time, count):
-    tradelogs = Tradelogs(DB_KIND, DB_NAME, currency_pair, period)
-    
+def _check_tradelogs(currency_pair, period, length, start_time, end_time, count):
+    _tradelogs = Tradelogs(currency_pair, period)
+
     # create tradelogs table if not exsit
-    tradelogs.create_table()
+    _tradelogs.create_table()
 
     # get tradelogs count
-    tradelogs_count = tradelogs.get_tradelogs_count(end_time, start_time)
+    _tradelogs_count = _tradelogs.get_tradelogs_count(end_time, start_time)
 
     # update tradelogs from API if some tradelogs are missing
-    if tradelogs_count < (count + length - 1):
-        public_api = ZaifPublicApi()
-        tradelogs_api = public_api.everything('ohlc_data', currency_pair, {'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
+    if _tradelogs_count < (count + length - 1):
+        _public_api = ZaifPublicApi()
+        _tradelogs_api_result = _public_api.everything('ohlc_data', currency_pair, {
+            'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
 
-        tradelogs.update_tradelog(tradelogs_api)
+        _tradelogs.update_tradelog(_tradelogs_api_result)
 
-def check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema):
-    moving_average = MovingAverage(DB_KIND, DB_NAME, currency_pair, period, length, sma_ema)
+
+def _check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema):
+    _moving_average = MovingAverage(
+        currency_pair, period, length, sma_ema)
 
     # create moving_average table if not exsit
-    moving_average.create_table()
+    _moving_average.create_table()
 
     # get moving_average from table
-    mv_avrg_result = moving_average.get_moving_average(end_time, start_time)
-    
-    sma = []
-    ema = []
-    insert_params = []
+    _mv_avrg_result = _moving_average.get_moving_average(end_time, start_time)
 
-    for i in range(0, len(mv_avrg_result)):
-        nums = []
-        params = []
+    _sma = []
+    _ema = []
+    _insert_params = []
 
-        if i > (length - 2) and mv_avrg_result[i][3] is None:
+    for i in range(0, len(_mv_avrg_result)):
+        _nums = []
+        _params = []
+
+        if i > (length - 2) and _mv_avrg_result[i][3] is None:
             # prepare numbers to calculate moving average
             for j in range(0, length):
-                nums.append(mv_avrg_result[i-j][1])
+                _nums.append(_mv_avrg_result[i - j][1])
 
             if sma_ema == 'sma':
-                value = calculate_sma(nums, length)
-                sma.append({'time_stamp': mv_avrg_result[i][0],'value': value})
+                # calculate sma
+                _value = np.sum(_nums) / length
+                _sma.append(
+                    {'time_stamp': _mv_avrg_result[i][0], 'value': _value})
 
-            if(mv_avrg_result[i][2] == 1):
-                insert_params.append((mv_avrg_result[i][0], value))
-                
+            if(_mv_avrg_result[i][2] == 1):
+                _insert_params.append((_mv_avrg_result[i][0], _value))
+
         elif i > (length - 2):
             if sma_ema == 'sma':
-                sma.append({'time_stamp': mv_avrg_result[i][0],'value': mv_avrg_result[i][2]})
+                _sma.append({'time_stamp': _mv_avrg_result[i][
+                    0], 'value': _mv_avrg_result[i][2]})
             elif sma_ema == 'ema':
-                ema.append({'time_stamp': mv_avrg_result[i][0],'value': mv_avrg_result[i][2]})
+                _ema.append({'time_stamp': _mv_avrg_result[i][
+                    0], 'value': _mv_avrg_result[i][2]})
 
-    moving_average.update_moving_average(insert_params)
+    _moving_average.update_moving_average(_insert_params)
 
-def get_moving_average(currency_pair, count=1000, to_epoch_time=int(time.time()), period="1d", length=5, sma_ema='sma'):
-    start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
-    end_time = to_epoch_time
 
-    if(count > 1000):
-        count = 1000
+def get_moving_average(currency_pair, count=1000, to_epoch_time=int(time.time()), period='1d', length=5, sma_ema='sma'):
+    _LIMIT_COUNT = 1000
+    _start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
+    _end_time = to_epoch_time
 
-    check_tradelogs(currency_pair, period, length, start_time, end_time, count)
+    count = min(count, _LIMIT_COUNT)
 
-    check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema)
+    _check_tradelogs(currency_pair, period, length,
+                     _start_time, _end_time, count)
 
-def calculate_sma(nums, length):
-    sum = 0
-
-    for i in nums:
-        sum = sum + i
-
-    result = sum / length
-
-    return result
+    _check_moving_average(currency_pair, period, length,
+                          _start_time, _end_time, count, sma_ema)
