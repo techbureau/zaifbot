@@ -1,5 +1,3 @@
-# moving_average.py
-
 import time
 from zaifapi import ZaifPublicApi
 from db import Tradelogs, MovingAverage
