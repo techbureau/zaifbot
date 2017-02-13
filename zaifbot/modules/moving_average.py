@@ -1,7 +1,7 @@
-from bot_common.db import ZaifbotDb
+#from bot_common.db import ZaifbotDb
+from bot_common.db import DbAccessor
 
-
-class Tradelogs:
+class Tradelogs(DbAccessor):
     _CREATE_TABLE = """
       CREATE TABLE IF NOT EXISTS {}
       (
@@ -61,12 +61,13 @@ class Tradelogs:
     """
 
     def __init__(self, currency_pair, period):
-        self._instance = ZaifbotDb()
+        super().__init__()
         self._table_name = 'tradelogs_{}_{}'.format(currency_pair, period)
 
     def create_table(self):
-        self._instance.conn.execute(
-            self._CREATE_TABLE.format(self._table_name))
+        con = self.get_connection()
+        con.execute(self._CREATE_TABLE.format(self._table_name))
+        con.close()
 
     def get_tradelogs_count(self, end_time, start_time):
         query = self._SELECT_COUNT.format(self._table_name)
@@ -95,7 +96,7 @@ class Tradelogs:
         self._instance.conn.commit()
 
 
-class MovingAverage:
+class MovingAverage(DbAccessor):
     _CREATE_TABLE = """
       CREATE TABLE IF NOT EXISTS {}
       (

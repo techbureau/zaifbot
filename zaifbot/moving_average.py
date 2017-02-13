@@ -8,25 +8,30 @@ PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
 LIMIT_COUNT = 1000
 
 
-def _check_tradelogs(currency_pair, period, length, start_time, end_time, count):
+def _check_tradelogs(currency_pair, period,
+                     length, start_time, end_time, count):
     tradelogs = Tradelogs(currency_pair, period)
 
     # create tradelogs table if not exsit
     tradelogs.create_table()
-    #
+    '''
     # get tradelogs count
     tradelogs_count = tradelogs.get_tradelogs_count(end_time, start_time)
 
     # update tradelogs from API if some tradelogs are missing
     if tradelogs_count < (count + length - 1):
         public_api = ZaifPublicApi()
-        tradelogs_api_result = public_api.everything('ohlc_data',
-                                                     currency_pair, {'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
+        trdlgs_api_rtrn = public_api.everything('ohlc_data', currency_pair,
+                                                {'period': period,
+                                                 'count': count + length - 1,
+                                                 'to_epoch_time': end_time})
 
-        tradelogs.create_data(tradelogs_api_result)
+        tradelogs.create_data(trdlgs_api_rtrn)
+    '''
 
 
-def _check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema):
+def _check_moving_average(currency_pair, period, length,
+                          start_time, end_time, count, sma_ema):
     moving_average = MovingAverage(currency_pair, period, length, sma_ema)
 
     # create moving_average table if not exsit
@@ -58,7 +63,7 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
                     # prepare numbers for first calculation of last value
                     for j in range(1, length + 1):
                         nums.append(mv_avrg_result[i - j][1])
-
+                        print(nums)
                     last_val = np.sum(nums) / length
                 else:
                     last_val = ema[i - 1]['value']
@@ -83,7 +88,9 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
     moving_average.update_moving_average(insert_params)
 
 
-def get_moving_average(currency_pair, count=LIMIT_COUNT, to_epoch_time=int(time.time()), period='1d', length=5, sma_ema='sma'):
+def get_moving_average(currency_pair, count=LIMIT_COUNT,
+                       to_epoch_time=int(time.time()), period='1d',
+                       length=5, sma_ema='sma'):
     start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
 
     count = min(count, LIMIT_COUNT)
@@ -91,8 +98,8 @@ def get_moving_average(currency_pair, count=LIMIT_COUNT, to_epoch_time=int(time.
     _check_tradelogs(currency_pair, period, length,
                      start_time, to_epoch_time, count)
 
-    _check_moving_average(currency_pair, period, length,
-                          start_time, to_epoch_time, count, sma_ema)
+    # _check_moving_average(currency_pair, period, length,
+    #                      start_time, to_epoch_time, count, sma_ema)
 
 
 def _calculate_ema(current_val, last_val, length):

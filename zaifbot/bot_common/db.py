@@ -1,32 +1,42 @@
-import sqlalchemy.pool as pool
 import sqlite3
+import threading
+from abc import ABCMeta, abstractmethod
+from sqlalchemy import create_engine
 
-DB_NAME = 'zaif_bot.db'
+
+class _DbConnectionPool(metaclass=ABCMeta):
+    _instance = None
+    _lock = threading.Lock()
+    _engine = None
+    _test = 'test'
+
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._engine = cls.get_connection_instance
+        return cls._instance
+
+    def get_con(self):
+        engine = self._engine.connect()
+        return engine
+
+    @abstractmethod
+    def get_connection_instance(self):
+        raise NotImplementedError()
 
 
-class ZaifbotDb:
+class _Sqlite3Pool(_DbConnectionPool):
+    _DB_NAME = 'zaif_bot.db'
 
-    class __ZaifbotDb:
+    def get_connection_instance(self):
+        return create_engine('sqlite:///{}'.format(self._DB_NAME),
+                             echo="debug")
 
-        def __init__(self):
 
-            self.connect_db()
+class DbAccessor(metaclass=ABCMeta):
+    def __init__(self):
+        self._engine = _Sqlite3Pool()
 
-        def connect_db(self):
-            self._pool = pool.QueuePool(
-                self._getconn, max_overflow=10, pool_size=5)
-            self.conn = self._pool.connect()
-            self.cursor = self.conn.cursor()
-
-        def _getconn(self):
-            _c = sqlite3.connect(DB_NAME)
-
-            return _c
-
-    instance = None
-
-    def __new__(class_):
-        if not ZaifbotDb.instance:
-            ZaifbotDb.instance = ZaifbotDb.__ZaifbotDb()
-
-        return ZaifbotDb.instance
+    def get_connection(self):
+        return self._engine.get_con()
