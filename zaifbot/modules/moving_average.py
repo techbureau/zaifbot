@@ -44,6 +44,22 @@ class Tradelogs:
             (?,?,?,?,?,?,?,?)
     """
 
+    _UPDATE = """
+        UPDATE {}
+        SET
+            open=?,
+            high=?,
+            low=?,
+            close=?,
+            average=?,
+            volume=?,
+            closed=?
+        WHERE
+            time=?
+            AND closed=0;
+
+    """
+
     def __init__(self, currency_pair, period):
         self._instance = ZaifbotDb()
         self._table_name = 'tradelogs_{}_{}'.format(currency_pair, period)
@@ -60,7 +76,7 @@ class Tradelogs:
 
         return trade_logs_count[0]
 
-    def update_tradelog(self, tradelogs_api):
+    def create_data(self, tradelogs_api):
         insert_params = []
         update_params = []
         for i in tradelogs_api:
@@ -71,9 +87,11 @@ class Tradelogs:
                                   i['average'], i['volume'], int(i['closed']),
                                   i['time']))
 
-        # insert if missing
+        # insert if missing or update if exist but not closed
         insert_query = self._INSERT.format(self._table_name)
+        update_query = self._UPDATE.format(self._table_name)
         self._instance.conn.executemany(insert_query, insert_params)
+        self._instance.conn.executemany(update_query, update_params)
         self._instance.conn.commit()
 
 

@@ -20,10 +20,10 @@ def _check_tradelogs(currency_pair, period, length, start_time, end_time, count)
     # update tradelogs from API if some tradelogs are missing
     if tradelogs_count < (count + length - 1):
         public_api = ZaifPublicApi()
-        tradelogs_api_result = public_api.everything('ohlc_data', currency_pair, {
-                                                     'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
+        tradelogs_api_result = public_api.everything('ohlc_data',
+                                                     currency_pair, {'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
 
-        tradelogs.update_tradelog(tradelogs_api_result)
+        tradelogs.create_data(tradelogs_api_result)
 
 
 def _check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema):
