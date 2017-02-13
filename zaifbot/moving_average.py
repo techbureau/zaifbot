@@ -7,6 +7,7 @@ import numpy as np
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
                '1h': 3600, '1m': 60, '5m': 300, '15m': 900, '30m': 1800}
+LIMIT_COUNT = 1000
 
 
 def _check_tradelogs(currency_pair, period, length, start_time, end_time, count):
@@ -85,8 +86,7 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
     moving_average.update_moving_average(insert_params)
 
 
-def get_moving_average(currency_pair, count=1000, to_epoch_time=int(time.time()), period='1d', length=5, sma_ema='sma'):
-    LIMIT_COUNT = 1000
+def get_moving_average(currency_pair, count=LIMIT_COUNT, to_epoch_time=int(time.time()), period='1d', length=5, sma_ema='sma'):
     start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
 
     count = min(count, LIMIT_COUNT)
