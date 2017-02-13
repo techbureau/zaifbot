@@ -14,98 +14,98 @@ PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
 
 
 def _check_tradelogs(currency_pair, period, length, start_time, end_time, count):
-    _tradelogs = Tradelogs(currency_pair, period)
+    tradelogs = Tradelogs(currency_pair, period)
 
     # create tradelogs table if not exsit
-    _tradelogs.create_table()
+    tradelogs.create_table()
 
     # get tradelogs count
-    _tradelogs_count = _tradelogs.get_tradelogs_count(end_time, start_time)
+    tradelogs_count = tradelogs.get_tradelogs_count(end_time, start_time)
 
     # update tradelogs from API if some tradelogs are missing
-    if _tradelogs_count < (count + length - 1):
-        _public_api = ZaifPublicApi()
-        _tradelogs_api_result = _public_api.everything('ohlc_data', currency_pair, {
+    if tradelogs_count < (count + length - 1):
+        public_api = ZaifPublicApi()
+        tradelogs_api_result = public_api.everything('ohlc_data', currency_pair, {
             'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
 
-        _tradelogs.update_tradelog(_tradelogs_api_result)
+        tradelogs.update_tradelog(tradelogs_api_result)
 
 
 def _check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema):
-    _moving_average = MovingAverage(
+    moving_average = MovingAverage(
         currency_pair, period, length, sma_ema)
 
     # create moving_average table if not exsit
-    _moving_average.create_table()
+    moving_average.create_table()
 
     # get moving_average from table
-    _mv_avrg_result = _moving_average.get_moving_average(end_time, start_time)
+    mv_avrg_result = moving_average.get_moving_average(end_time, start_time)
 
-    _sma = []
-    _ema = []
-    _insert_params = []
+    sma = []
+    ema = []
+    insert_params = []
 
-    for i in range(0, len(_mv_avrg_result)):
-        _nums = []
-        _params = []
+    for i in range(0, len(mv_avrg_result)):
+        nums = []
+        params = []
 
-        if i > (length - 2) and _mv_avrg_result[i][3] is None:
+        if i > (length - 2) and mv_avrg_result[i][3] is None:
             if sma_ema == 'sma':
                 # prepare numbers to calculate sma
                 for j in range(0, length):
-                    _nums.append(_mv_avrg_result[i - j][1])
+                    nums.append(mv_avrg_result[i - j][1])
 
                 # calculate sma
-                _value = np.sum(_nums) / length
-                _sma.append(
-                    {'time_stamp': _mv_avrg_result[i][0], 'value': _value})
+                value = np.sum(nums) / length
+                sma.append(
+                    {'time_stamp': mv_avrg_result[i][0], 'value': value})
             elif sma_ema == 'ema':
                 # for the first time ema calculation
                 if len(_ema) == 0:
                     # prepare numbers for first calculation of last value
                     for j in range(1, length + 1):
-                        _nums.append(_mv_avrg_result[i - j][1])
+                        nums.append(_mv_avrg_result[i - j][1])
 
-                    _last_val = np.sum(_nums) / length
+                    last_val = np.sum(_nums) / length
                 else:
-                    _last_val = _ema[i - 1]['value']
+                    last_val = _ema[i - 1]['value']
 
                 # calculate ema
-                _value = _calculate_ema(
-                    _mv_avrg_result[i][1], _last_val, length)
-                _ema.append(
-                    {'time_stamp': _mv_avrg_result[i][0], 'value': _value})
+                value = _calculate_ema(
+                    _mv_avrg_result[i][1], last_val, length)
+                ema.append(
+                    {'time_stamp': _mv_avrg_result[i][0], 'value': value})
 
-            if(_mv_avrg_result[i][2] == 1):
-                _insert_params.append((_mv_avrg_result[i][0], _value))
+            if(mv_avrg_result[i][2] == 1):
+                insert_params.append((mv_avrg_result[i][0], value))
 
         elif i > (length - 2):
             if sma_ema == 'sma':
-                _sma.append({'time_stamp': _mv_avrg_result[i][
-                    0], 'value': _mv_avrg_result[i][2]})
+                sma.append({'time_stamp': mv_avrg_result[i][
+                    0], 'value': mv_avrg_result[i][2]})
             elif sma_ema == 'ema':
-                _ema.append({'time_stamp': _mv_avrg_result[i][
-                    0], 'value': _mv_avrg_result[i][2]})
+                ema.append({'time_stamp': _mv_avrg_result[i][
+                    0], 'value': mv_avrg_result[i][2]})
 
-    _moving_average.update_moving_average(_insert_params)
+    moving_average.update_moving_average(insert_params)
 
 
 def get_moving_average(currency_pair, count=1000, to_epoch_time=int(time.time()), period='1d', length=5, sma_ema='sma'):
-    _LIMIT_COUNT = 1000
-    _start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
-    _end_time = to_epoch_time
+    LIMIT_COUNT = 1000
+    start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
+    end_time = to_epoch_time
 
-    count = min(count, _LIMIT_COUNT)
+    count = min(count, LIMIT_COUNT)
 
     _check_tradelogs(currency_pair, period, length,
-                     _start_time, _end_time, count)
+                     start_time, end_time, count)
 
     _check_moving_average(currency_pair, period, length,
-                          _start_time, _end_time, count, sma_ema)
+                          start_time, end_time, count, sma_ema)
 
 
 def _calculate_ema(current_val, last_val, length):
-    _k = 2 / (length + 1)
-    _ema = current_val * k + last_val * (1 - k)
+    k = 2 / (length + 1)
+    ema = current_val * k + last_val * (1 - k)
 
-    return _ema
+    return ema
