@@ -26,14 +26,13 @@ def _check_tradelogs(currency_pair, period, length, start_time, end_time, count)
     if tradelogs_count < (count + length - 1):
         public_api = ZaifPublicApi()
         tradelogs_api_result = public_api.everything('ohlc_data', currency_pair, {
-            'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
+                                                     'period': period, 'count': count + length - 1, 'to_epoch_time': end_time})
 
         tradelogs.update_tradelog(tradelogs_api_result)
 
 
 def _check_moving_average(currency_pair, period, length, start_time, end_time, count, sma_ema):
-    moving_average = MovingAverage(
-        currency_pair, period, length, sma_ema)
+    moving_average = MovingAverage(currency_pair, period, length, sma_ema)
 
     # create moving_average table if not exsit
     moving_average.create_table()
@@ -82,10 +81,10 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
         elif i > (length - 2):
             if sma_ema == 'sma':
                 sma.append({'time_stamp': mv_avrg_result[i][
-                    0], 'value': mv_avrg_result[i][2]})
+                           0], 'value': mv_avrg_result[i][2]})
             elif sma_ema == 'ema':
                 ema.append({'time_stamp': _mv_avrg_result[i][
-                    0], 'value': mv_avrg_result[i][2]})
+                           0], 'value': mv_avrg_result[i][2]})
 
     moving_average.update_moving_average(insert_params)
 
@@ -93,15 +92,14 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
 def get_moving_average(currency_pair, count=1000, to_epoch_time=int(time.time()), period='1d', length=5, sma_ema='sma'):
     LIMIT_COUNT = 1000
     start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
-    end_time = to_epoch_time
 
     count = min(count, LIMIT_COUNT)
 
     _check_tradelogs(currency_pair, period, length,
-                     start_time, end_time, count)
+                     start_time, to_epoch_time, count)
 
     _check_moving_average(currency_pair, period, length,
-                          start_time, end_time, count, sma_ema)
+                          start_time, to_epoch_time, count, sma_ema)
 
 
 def _calculate_ema(current_val, last_val, length):
