@@ -1,6 +1,6 @@
 from bot_common.db import ZaifbotDb
 
-class Tradelogs():
+class Tradelogs:
     _CREATE_TABLE = """
       CREATE TABLE IF NOT EXISTS {}
       (
@@ -48,7 +48,7 @@ class Tradelogs():
         self._instance.conn.commit()
 
 
-class MovingAverage():
+class MovingAverage:
     _CREATE_TABLE = """
       CREATE TABLE IF NOT EXISTS {}
       (
