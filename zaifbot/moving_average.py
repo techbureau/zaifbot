@@ -1,10 +1,6 @@
 # moving_average.py
 
-import sqlite3
 import time
-import urllib.request
-import json
-import sqlalchemy.pool as pool
 from zaifapi import ZaifPublicApi
 from db import Tradelogs, MovingAverage
 import numpy as np
@@ -67,13 +63,13 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
 
                     last_val = np.sum(_nums) / length
                 else:
-                    last_val = _ema[i - 1]['value']
+                    last_val = ema[i - 1]['value']
 
                 # calculate ema
                 value = _calculate_ema(
-                    _mv_avrg_result[i][1], last_val, length)
+                    mv_avrg_result[i][1], last_val, length)
                 ema.append(
-                    {'time_stamp': _mv_avrg_result[i][0], 'value': value})
+                    {'time_stamp': mv_avrg_result[i][0], 'value': value})
 
             if(mv_avrg_result[i][2] == 1):
                 insert_params.append((mv_avrg_result[i][0], value))
@@ -83,7 +79,7 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
                 sma.append({'time_stamp': mv_avrg_result[i][
                            0], 'value': mv_avrg_result[i][2]})
             elif sma_ema == 'ema':
-                ema.append({'time_stamp': _mv_avrg_result[i][
+                ema.append({'time_stamp': mv_avrg_result[i][
                            0], 'value': mv_avrg_result[i][2]})
 
     moving_average.update_moving_average(insert_params)
