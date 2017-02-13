@@ -1,6 +1,6 @@
 import time
 from zaifapi import ZaifPublicApi
-from db import Tradelogs, MovingAverage
+from modules.moving_average import Tradelogs, MovingAverage
 import numpy as np
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
@@ -13,7 +13,7 @@ def _check_tradelogs(currency_pair, period, length, start_time, end_time, count)
 
     # create tradelogs table if not exsit
     tradelogs.create_table()
-
+    #
     # get tradelogs count
     tradelogs_count = tradelogs.get_tradelogs_count(end_time, start_time)
 
@@ -41,7 +41,6 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
 
     for i in range(0, len(mv_avrg_result)):
         nums = []
-        params = []
 
         if i > (length - 2) and mv_avrg_result[i][3] is None:
             if sma_ema == 'sma':
@@ -55,12 +54,12 @@ def _check_moving_average(currency_pair, period, length, start_time, end_time, c
                     {'time_stamp': mv_avrg_result[i][0], 'value': value})
             elif sma_ema == 'ema':
                 # for the first time ema calculation
-                if len(_ema) == 0:
+                if len(ema) == 0:
                     # prepare numbers for first calculation of last value
                     for j in range(1, length + 1):
-                        nums.append(_mv_avrg_result[i - j][1])
+                        nums.append(mv_avrg_result[i - j][1])
 
-                    last_val = np.sum(_nums) / length
+                    last_val = np.sum(nums) / length
                 else:
                     last_val = ema[i - 1]['value']
 
