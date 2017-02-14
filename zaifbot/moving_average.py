@@ -1,8 +1,7 @@
 import time
-
 import numpy as np
-
 from zaifbot.modules.dao.moving_average import TradeLogsDao
+from zaifapi import ZaifPublicApi
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
                '1h': 3600, '1m': 60, '5m': 300, '15m': 900, '30m': 1800}
@@ -10,22 +9,50 @@ LIMIT_COUNT = 1000
 
 
 def _check_trade_logs(currency_pair, period, length, start_time, end_time, count):
-    tradelogs = TradeLogsDao(currency_pair,period)
+    tradelogs = TradeLogsDao(currency_pair, period)
+    tradelogs_record = tradelogs.get_record(end_time, start_time)
 
-    
-    # get tradelogs count
-    tradelogs_count = tradelogs.get_record_count(end_time, start_time)
-    '''
-    # update tradelogs from API if some tradelogs are missing
-    if tradelogs_count < (count + length - 1):
-        public_api = ZaifPublicApi()
-        trdlgs_api_rtrn = public_api.everything('ohlc_data', currency_pair,
-                                                {'period': period,
-                                                 'count': count + length - 1,
-                                                 'to_epoch_time': end_time})
+    missing_records = _check_missing_records(tradelogs_record, start_time, end_time, count, period)
 
-        tradelogs.create_data(trdlgs_api_rtrn)
-    '''
+    if len(missing_records) > 0:
+        api_records = _get_api_records(missing_records, currency_pair, period)
+        for i in api_records:
+            print(i)
+        tradelogs.create_data(api_records, currency_pair, period)
+
+
+def _check_missing_records(tradelogs_record, start_time, end_time, count, period):
+    missing_records = []
+    last_time = start_time
+
+    for record in tradelogs_record:
+        if record.time > (last_time + PERIOD_SECS[period]):
+            to_epoch_time = (record.time - PERIOD_SECS[period])
+            count = int((record.time - last_time) / PERIOD_SECS[period])
+            missing_records.append({'to_epoch_time': to_epoch_time, 'count': count})
+
+        last_time = record.time
+
+    if last_time < (end_time - PERIOD_SECS[period]):
+        count = int((end_time - last_time) / PERIOD_SECS[period])
+        missing_records.append({'to_epoch_time': end_time, 'count': count})
+
+
+    return missing_records
+
+
+def _get_api_records(missing_records, currency_pair, period):
+    api_records = []
+    public_api = ZaifPublicApi()
+
+    for record in missing_records:
+        api_params = {'period': period, 'count': record['count'],
+                      'to_epoch_time': record['to_epoch_time']}
+
+        for each_record in public_api.everything('ohlc_data', currency_pair, api_params):
+            api_records.append(each_record)
+
+    return api_records
 
 
 def _check_moving_average(currency_pair, period, length,

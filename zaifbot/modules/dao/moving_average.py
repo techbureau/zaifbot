@@ -46,14 +46,25 @@ class TradeLogsDao(DaoBase):
     def get_model(self):
         return TradeLogs
 
-    def get_record_count(self, end_time, start_time):
+    def get_record(self, end_time, start_time):
         session = self.get_session()
         return session.query(self.model).filter(and_(self.model.time <= end_time,
                                                      self.model.time >= start_time,
                                                      self.model.currency_pair == self._currency_pair,
-                                                     self.model.period == self._period)).count()
+                                                     self.model.period == self._period,
+                                                     self.model.closed == 1)).all()
 
-    def create_data(self, trade_logs):
+    def create_data(self, trade_logs, currency_pair, period):
+        session = self.get_session()
+        insert = self.model(time=trade_logs[100]['time'], currency_pair=currency_pair,
+                     period=period, open=trade_logs[100]['open'],
+                       high=trade_logs[100]['high'], low=trade_logs[100]['low'],
+                       close=trade_logs[100]['close'], average=trade_logs[100]['average'],
+                       volume=trade_logs[100]['volume'], closed=trade_logs[100]['closed'])
+
+        session.add(insert)
+        session.commit()
+        '''
         insert_params = []
         update_params = []
         for i in trade_logs:
@@ -70,7 +81,7 @@ class TradeLogsDao(DaoBase):
         self._instance.conn.executemany(insert_query, insert_params)
         self._instance.conn.executemany(update_query, update_params)
         self._instance.conn.commit()
-
+        '''
 # class MovingAverage(DbAccessor):
 #     _CREATE_TABLE = """
 #       CREATE TABLE IF NOT EXISTS {}
