@@ -1,7 +1,7 @@
-#from bot_common.db import ZaifbotDb
-from bot_common.db import DbAccessor
+from zaifbot.bot_common.db import DbAccessor
 
-class Tradelogs(DbAccessor):
+
+class TradeLogs(DbAccessor):
     _CREATE_TABLE = """
       CREATE TABLE IF NOT EXISTS {}
       (
@@ -125,7 +125,7 @@ class MovingAverage(DbAccessor):
     """
 
     def __init__(self, currency_pair, period, length, sma_ema):
-        self._instance = ZaifbotDb()
+        #self._instance = ZaifbotDb()
         self._trdlg_table_name = 'tradelogs_{}_{}'.format(
             currency_pair, period)
         self._mvavrg_table_name = 'moving_average_{}_{}_{}'.format(

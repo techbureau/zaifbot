@@ -1,6 +1,5 @@
 import time
-from zaifapi import ZaifPublicApi
-from modules.moving_average import Tradelogs, MovingAverage
+from zaifbot.modules.moving_average import TradeLogs, MovingAverage
 import numpy as np
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
@@ -8,9 +7,8 @@ PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
 LIMIT_COUNT = 1000
 
 
-def _check_tradelogs(currency_pair, period,
-                     length, start_time, end_time, count):
-    tradelogs = Tradelogs(currency_pair, period)
+def _check_trade_logs(currency_pair, period, length, start_time, end_time, count):
+    tradelogs = TradeLogs(currency_pair, period)
 
     # create tradelogs table if not exsit
     tradelogs.create_table()
@@ -95,8 +93,7 @@ def get_moving_average(currency_pair, count=LIMIT_COUNT,
 
     count = min(count, LIMIT_COUNT)
 
-    _check_tradelogs(currency_pair, period, length,
-                     start_time, to_epoch_time, count)
+    _check_trade_logs(currency_pair, period, length, start_time, to_epoch_time, count)
 
     # _check_moving_average(currency_pair, period, length,
     #                      start_time, to_epoch_time, count, sma_ema)
