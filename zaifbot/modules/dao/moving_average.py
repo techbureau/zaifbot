@@ -1,9 +1,9 @@
 from sqlalchemy import and_
 from zaifbot.modules.dao import DaoBase
-from zaifbot.models.moving_avarage.trade_logs import TradeLog1d, TradeLog1h
+from zaifbot.models.moving_avarage.moving_average import TradeLogs
 
 
-class TradeLogs(DaoBase):
+class TradeLogsDao(DaoBase):
     _INSERT = """
         INSERT OR IGNORE
         INTO {}
@@ -37,23 +37,19 @@ class TradeLogs(DaoBase):
 
     """
 
-    def __init__(self, period):
-        self._model = self._get_model(period)
-        super().__init__(self._model)
+    def __init__(self, currency_pair, period):
+        self._currency_pair = currency_pair
+        self._period = period
 
-    @classmethod
-    def _get_model(cls, period):
-        # ここを増やしていく(ちょと汚い、いい方法ないかな)
-        if period == '1h':
-            return TradeLog1h
-        if period == '1d':
-            return TradeLog1d
-        return None
+    def get_model(self):
+        return TradeLogs
 
     def get_trade_logs_count(self, end_time, start_time):
         session = self.get_session()
-        return session.query(self._model).filter(
-            and_(self._model.time <= end_time, self._model.time >= start_time)).count()
+        return session.query(self.model).filter(and_(self.model.time <= end_time,
+                                                     self.model.time >= start_time,
+                                                     self.model.currency_pair == self._currency_pair,
+                                                     self.model.period == self._period)).count()
 
     def create_data(self, tradelogs_api):
         insert_params = []
@@ -72,7 +68,6 @@ class TradeLogs(DaoBase):
         self._instance.conn.executemany(insert_query, insert_params)
         self._instance.conn.executemany(update_query, update_params)
         self._instance.conn.commit()
-
 
 # class MovingAverage(DbAccessor):
 #     _CREATE_TABLE = """
