@@ -38,8 +38,10 @@ class TradeLogsDao(DaoBase):
     """
 
     def __init__(self, currency_pair, period):
+        super().__init__()
         self._currency_pair = currency_pair
         self._period = period
+        self._table_name = 'trade_logs_{}_{}'.format(currency_pair, period)
 
     def get_model(self):
         return TradeLogs
