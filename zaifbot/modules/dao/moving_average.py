@@ -44,17 +44,17 @@ class TradeLogsDao(DaoBase):
     def get_model(self):
         return TradeLogs
 
-    def get_trade_logs_count(self, end_time, start_time):
+    def get_record_count(self, end_time, start_time):
         session = self.get_session()
         return session.query(self.model).filter(and_(self.model.time <= end_time,
                                                      self.model.time >= start_time,
                                                      self.model.currency_pair == self._currency_pair,
                                                      self.model.period == self._period)).count()
 
-    def create_data(self, tradelogs_api):
+    def create_data(self, trade_logs):
         insert_params = []
         update_params = []
-        for i in tradelogs_api:
+        for i in trade_logs:
             insert_params.append((i['time'], i['open'], i['high'], i['low'],
                                   i['close'], i['average'], i['volume'],
                                   int(i['closed'])))
