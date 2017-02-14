@@ -1,6 +1,8 @@
 import time
-from zaifbot.modules.moving_average import TradeLogs, MovingAverage
+
 import numpy as np
+
+from zaifbot.modules.dao.moving_average import TradeLogs, MovingAverage
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
                '1h': 3600, '1m': 60, '5m': 300, '15m': 900, '30m': 1800}
@@ -8,10 +10,8 @@ LIMIT_COUNT = 1000
 
 
 def _check_trade_logs(currency_pair, period, length, start_time, end_time, count):
-    tradelogs = TradeLogs(currency_pair, period)
+    tradelogs = TradeLogs(period)
 
-    # create tradelogs table if not exsit
-    tradelogs.create_table()
     '''
     # get tradelogs count
     tradelogs_count = tradelogs.get_tradelogs_count(end_time, start_time)
