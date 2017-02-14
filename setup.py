@@ -17,5 +17,5 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License'
     ],
-    install_requires=['zaifapi==1.3.1', 'numpy==1.12.0']
+    install_requires=['zaifapi==1.3.1', 'numpy==1.12.0', 'SQLAlchemy==1.1.5']
 )
