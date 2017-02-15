@@ -66,9 +66,10 @@ def get_moving_average(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
                        to_epoch_time=int(time.time()),
                        length=5, sma_ema='sma'):
     count = min(count, LIMIT_COUNT)
-    start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
+    end_time = to_epoch_time - (to_epoch_time % PERIOD_SECS[period])
+    start_time = end_time - ((count + length) * PERIOD_SECS[period])
     trade_logs = TradeLogsManager(currency_pair, period)
-    trade_logs.setup(start_time, to_epoch_time)
+    trade_logs.setup(start_time, end_time)
 
     # _check_moving_average(currency_pair, period, length,
     #                      start_time, to_epoch_time, count, sma_ema)
