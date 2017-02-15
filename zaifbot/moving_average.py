@@ -116,9 +116,8 @@ def _check_moving_average(currency_pair, period, length,
 def get_moving_average(currency_pair, period='1d', count=LIMIT_COUNT,
                        to_epoch_time=int(time.time()),
                        length=5, sma_ema='sma'):
-    start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
-
     count = min(count, LIMIT_COUNT)
+    start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
 
     _check_trade_logs(currency_pair, period, length, start_time, to_epoch_time, count)
 
