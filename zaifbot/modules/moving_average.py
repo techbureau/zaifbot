@@ -13,8 +13,9 @@ class TradeLogsManager:
         target_epoch_times = self._get_target_epoch_times(start_epoch_time, end_epoch_time)
         if len(target_epoch_times) == 0:
             return
-        api_records = self._get_ohlc_data_from_server(end_epoch_time, )
-        target_trade_logs_record = list(filter(lambda x: x.time in target_epoch_times, api_records))
+        api_records = self._get_ohlc_data_from_server(end_epoch_time)
+        target_trade_logs_record = list(filter(lambda x: x['time'] in target_epoch_times, api_records))
+        #ここにtarget_trade_logs_recordをSQLAlcemyのTradeLogsの配列に変換する処理を入れて、下の関数に渡す
         self._trade_logs.create_data(target_trade_logs_record)
 
     def _get_target_epoch_times(self, start_epoch_time, end_epoch_time):
@@ -38,7 +39,7 @@ class TradeLogsManager:
                 yield end_time
                 break
 
-    def _get_ohlc_data_from_server(self, end_time):
+    def _get_ohlc_data_from_server(self, end_epoch_time):
         public_api = ZaifPublicApi()
         api_params = {'period': self._period, 'count': LIMIT_COUNT, 'to_epoch_time': end_time}
         return public_api.everything('ohlc_data', self._currency_pair, api_params)
