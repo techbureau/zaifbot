@@ -4,44 +4,11 @@ from zaifbot.models.moving_avarage.moving_average import TradeLogs
 
 
 class TradeLogsDao(DaoBase):
-    _INSERT = """
-        INSERT OR IGNORE
-        INTO {}
-        (
-            time,
-            open,
-            high,
-            low,
-            close,
-            average,
-            volume,
-            closed
-        )
-        VALUES
-            (?,?,?,?,?,?,?,?)
-    """
-
-    _UPDATE = """
-        UPDATE {}
-        SET
-            open=?,
-            high=?,
-            low=?,
-            close=?,
-            average=?,
-            volume=?,
-            closed=?
-        WHERE
-            time=?
-            AND closed=0;
-
-    """
 
     def __init__(self, currency_pair, period):
         super().__init__()
         self._currency_pair = currency_pair
         self._period = period
-        self._table_name = 'trade_logs_{}_{}'.format(currency_pair, period)
 
     def get_model(self):
         return TradeLogs
@@ -52,36 +19,13 @@ class TradeLogsDao(DaoBase):
                                                      self.model.time >= start_time,
                                                      self.model.currency_pair == self._currency_pair,
                                                      self.model.period == self._period,
-                                                     self.model.closed == 1)).all()
+                                                     self.model.closed == 1)).order_by(self.model.time).all()
 
-    def create_data(self, trade_logs, currency_pair, period):
+    def create_data(self, trade_logs):
         session = self.get_session()
-        insert = self.model(time=trade_logs[100]['time'], currency_pair=currency_pair,
-                     period=period, open=trade_logs[100]['open'],
-                       high=trade_logs[100]['high'], low=trade_logs[100]['low'],
-                       close=trade_logs[100]['close'], average=trade_logs[100]['average'],
-                       volume=trade_logs[100]['volume'], closed=trade_logs[100]['closed'])
-
-        session.add(insert)
+        session.add_all(trade_logs)
         session.commit()
-        '''
-        insert_params = []
-        update_params = []
-        for i in trade_logs:
-            insert_params.append((i['time'], i['open'], i['high'], i['low'],
-                                  i['close'], i['average'], i['volume'],
-                                  int(i['closed'])))
-            update_params.append((i['open'], i['high'], i['low'], i['close'],
-                                  i['average'], i['volume'], int(i['closed']),
-                                  i['time']))
 
-        # insert if missing or update if exist but not closed
-        insert_query = self._INSERT.format(self._table_name)
-        update_query = self._UPDATE.format(self._table_name)
-        self._instance.conn.executemany(insert_query, insert_params)
-        self._instance.conn.executemany(update_query, update_params)
-        self._instance.conn.commit()
-        '''
 # class MovingAverage(DbAccessor):
 #     _CREATE_TABLE = """
 #       CREATE TABLE IF NOT EXISTS {}
