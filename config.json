@@ -1,0 +1,17 @@
+{
+  "system": {
+    "sleep_time": 1,
+    "currency_pairs": "btc_jpy"
+  },
+  "api_keys": {
+    "key": "api_key",
+    "secret": "secret"
+  },
+  "event": {
+    "loss_cut":{
+      "execute": true,
+      "target_value": 110000,
+      "amount": 5
+    }
+  }
+}
