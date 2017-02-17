@@ -1,7 +1,6 @@
 import json
 import sys
 import threading
-
 from zaifbot.bot_common.config.property import ApiKeys, Event, System
 from zaifbot.bot_common.utils import get_current_last_price
 
