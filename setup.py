@@ -17,5 +17,9 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License'
     ],
-    install_requires=['zaifapi==1.3.1', 'numpy==1.12.0', 'SQLAlchemy==1.1.5']
+    install_requires=['zaifapi==1.3.1', 'numpy==1.12.0', 'SQLAlchemy==1.1.5', 'docopt==0.6.2'],
+    entry_points="""\
+      [console_scripts]
+      update_assignee_id = zaifbot:main
+      """,
 )
