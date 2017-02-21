@@ -1,6 +1,7 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from zaifbot.modules.dao import DaoBase
 from zaifbot.models.moving_average import TradeLogs, MovingAverage
+from sqlalchemy import exc
 
 
 class TradeLogsDao(DaoBase):
@@ -20,14 +21,18 @@ class TradeLogsDao(DaoBase):
         session = self.get_session()
         for record in trade_logs:
             session.merge(record)
-        session.commit()
+        try:
+            session.commit()
+            return True
+        except exc.SQLAlchemyError:
+            return False
 
     def get_query(self, end_time, start_time, closed):
         session = self.get_session()
         query_ = session.query(self.model)
         if closed:
             query_ = query_.filter(and_(self.model.time <= end_time,
-                                        self.model.time >= start_time,
+                                        self.model.time > start_time,
                                         self.model.currency_pair == self._currency_pair,
                                         self.model.period == self._period,
                                         self.model.closed == 1
@@ -55,8 +60,33 @@ class MovingAverageDao(DaoBase):
     def get_record(self, end_time, start_time):
         session = self.get_session()
         return session.query(self.model).filter(and_(self.model.time <= end_time,
-                                                     self.model.time >= start_time,
+                                                     self.model.time > start_time,
                                                      self.model.currency_pair == self._currency_pair,
                                                      self.model.period == self._period,
                                                      self.model.length == self._length)
                                                 ).order_by(self.model.time).all()
+
+    def get_trade_logs_moving_average(self, end_time, start_time):
+        session = self.get_session()
+        return session.query(TradeLogs, self.model)\
+            .outerjoin(self.model, and_(
+                TradeLogs.time == self.model.time,
+                TradeLogs.currency_pair == self.model.currency_pair,
+                TradeLogs.period == self.model.period))\
+            .filter(and_(TradeLogs.time <= end_time,
+                         TradeLogs.time > start_time,
+                         TradeLogs.currency_pair == self._currency_pair,
+                         TradeLogs.period == self._period,
+                         or_(self.model.length == self._length,
+                             self.model.length == None))
+                    ).order_by(self.model.time).all()
+
+    def create_data(self, moving_average):
+        session = self.get_session()
+        for record in moving_average:
+            session.merge(record)
+        try:
+            session.commit()
+            return True
+        except exc.SQLAlchemyError:
+            return False
