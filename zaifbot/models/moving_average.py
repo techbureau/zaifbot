@@ -16,6 +16,7 @@ class TradeLogs(Base):
     volume = Column('volume', Float, nullable=False)
     closed = Column('closed', Integer, nullable=False)
 
+
 class MovingAverage(Base):
     __tablename__ = 'moving_average'
     time = Column('time', Integer, primary_key=True)
