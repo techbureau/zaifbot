@@ -1,8 +1,9 @@
-import sys
 import json
+import sys
 import threading
+
+from zaifbot.bot_common.config.property import ApiKeys, Event, System
 from zaifbot.bot_common.utils import get_current_last_price
-from zaifbot.bot_common.config.property.current import ApiKeys, Event, System
 
 
 def load_config():
