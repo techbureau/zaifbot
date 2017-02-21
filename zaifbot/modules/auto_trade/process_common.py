@@ -5,18 +5,17 @@ from zaifbot.bot_common.config import load_config
 
 
 class ProcessBase(Process, metaclass=ABCMeta):
-    def __init__(self):
+    def __init__(self, func):
         super().__init__(name=self.get_name())
         self.config = load_config()
+        self._func = func
 
     def run(self):
         while True:
             sleep(self.config.system.sleep_time)
             if self.is_started() is False:
                 continue
-            stop_process_flg = self.execute()
-            if stop_process_flg:
-                break
+            self._func(self.config)
 
     @abstractmethod
     def get_name(self):
@@ -24,8 +23,4 @@ class ProcessBase(Process, metaclass=ABCMeta):
 
     @abstractmethod
     def is_started(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def execute(self):
         raise NotImplementedError
