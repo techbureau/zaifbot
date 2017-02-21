@@ -9,9 +9,10 @@
   },
   "event": {
     "loss_cut":{
-      "execute": true,
-      "target_value": 110000,
-      "amount": 5
+      "target_value": 110000
+    },
+    "additional_purchase":{
+      "target_value": 110000
     }
   }
 }

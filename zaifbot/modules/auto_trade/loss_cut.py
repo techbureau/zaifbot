@@ -4,7 +4,7 @@ from zaifbot.modules.auto_trade.process_common import ProcessBase
 
 class LossCut(ProcessBase):
     def get_name(self):
-        return 'loss cut process'
+        return 'loss_cut'
 
     def is_started(self):
         last_price = get_current_last_price(self.config.system.currency_pair)
