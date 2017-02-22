@@ -5,6 +5,7 @@ from zaifapi.impl import ZaifPublicApi
 from zaifbot.bot_common.config.property import ApiKeys, Event, System
 
 
+
 def load_config():
     return _ConfigLoader()
 
