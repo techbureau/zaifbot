@@ -1,12 +1,17 @@
 import json
 import sys
 import threading
+from zaifapi.impl import ZaifPublicApi
 from zaifbot.bot_common.config.property import ApiKeys, Event, System
-from zaifbot.bot_common.utils import get_current_last_price
 
 
 def load_config():
     return _ConfigLoader()
+
+
+def _get_current_last_price(currency_pairs):
+    api = ZaifPublicApi()
+    return api.last_price(currency_pairs)['last_price']
 
 
 def _read_config():
@@ -31,7 +36,7 @@ class _ConfigLoader:
                 cls._instance = super().__new__(cls)
                 config_json = _read_config()
                 system = System(config_json)
-                cls._start_time_last_price = get_current_last_price(system.currency_pair)
+                cls._start_time_last_price = _get_current_last_price(system.currency_pair)
         return cls._instance
 
     def __init__(self):

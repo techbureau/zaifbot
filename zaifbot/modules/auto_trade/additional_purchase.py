@@ -8,7 +8,7 @@ class AdditionalPurchase(ProcessBase):
         return 'additional_purchase'
 
     def is_started(self):
-        last_price = get_current_last_price(self.config.system.currency_pair)
+        last_price = get_current_last_price()
         if last_price <= self.config.event.additional_purchase.target_value:
             return True
         return False

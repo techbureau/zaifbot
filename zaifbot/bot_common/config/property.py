@@ -14,6 +14,7 @@ class ApiKeys:
 class System:
     def __init__(self, config_json):
         self._system = config_json['system']
+        self._socket = _Socket(config_json)
 
     @property
     def sleep_time(self):
@@ -22,6 +23,18 @@ class System:
     @property
     def currency_pair(self):
         return self._system['currency_pair']
+
+    @property
+    def api_domain(self):
+        return self._system['api_domain']
+
+    @property
+    def retry_count(self):
+        return self._system['retry_count']
+
+    @property
+    def socket(self):
+        return self._socket
 
 
 class Event:
@@ -54,3 +67,12 @@ class _AdditionalPurchase:
     @property
     def target_value(self):
         return self._additional_purchase['target_value']
+
+
+class _Socket:
+    def __init__(self, config_json):
+        self._socket = config_json['system']['socket']
+
+    @property
+    def port(self):
+        return self._socket['port']

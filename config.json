@@ -1,7 +1,12 @@
 {
   "system": {
     "sleep_time": 1,
-    "currency_pairs": "btc_jpy"
+    "api_domain": "api.zaif.jp",
+    "currency_pair": "btc_jpy",
+    "retry_count": 5,
+    "socket":{
+      "port": 8888
+    }
   },
   "api_keys": {
     "key": "api_key",

@@ -8,7 +8,7 @@ class LossCut(ProcessBase):
         return 'loss_cut'
 
     def is_started(self):
-        last_price = get_current_last_price(self.config.system.currency_pair)
+        last_price = get_current_last_price()
         if last_price <= self.config.event.loss_cut.target_value:
             return True
         return False
