@@ -13,3 +13,11 @@ class ZaifBot:
             process.start()
             running_processes.append(process)
         [x.join() for x in running_processes]
+
+
+"""
+最初にうる、買うがあり、
+その後売る、買うがある
+まずはその２種類でいい、スタートのタイミングも見れればベスト
+あとWebSocketに対応させる
+"""
