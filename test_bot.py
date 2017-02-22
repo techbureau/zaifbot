@@ -1,25 +1,28 @@
 from zaifbot import ZaifBot
+from zaifbot.modules.auto_trade import *
 
 
-def los_cut_func(config):
-    pass
+class MyLosCutProcess(LossCut):
+    def execute(self):
+        return True
 
 
-def additional_purchase_func(config):
-    pass
+class MyAdditionalPurchase(AdditionalPurchase):
+    def execute(self):
+        return True
 
 
-def custom_process_func(config):
-    pass
+class MyCustom(Custom):
+    def execute(self):
+        return True
 
-
-def custom_process_is_start(config):
-    pass
+    def is_started(self):
+        return True
 
 
 if __name__ == '__main__':
     bot = ZaifBot()
-    bot.set_process_func('loss_cut', los_cut_func)
-    bot.set_process_func('additional_purchase', additional_purchase_func)
-    bot.set_process_func('custom_process', custom_process_func, custom_process_is_start)
+    bot.add_running_process(MyLosCutProcess)
+    bot.add_running_process(MyAdditionalPurchase)
+    bot.add_running_process(MyCustom)
     bot.start()
