@@ -93,9 +93,6 @@ class MovingAverageSetUp:
         for i in self._get_moving_average(trade_logs_moving_average, target_epoch_times):
             moving_average_model_data.add(self._get_moving_average_model_dataset(i['time'], i['sma'], i['ema']))
         return self._moving_average.create_data(moving_average_model_data)
-        # if self._moving_average.create_data(moving_average_model_data) is False:
-        #     return False
-        # return self._moving_average.get_records(end_time, ma_start_time)
 
     def _get_target_epoch_times(self, start_time, end_time):
         moving_average_record = self._moving_average.get_records(end_time, start_time)
