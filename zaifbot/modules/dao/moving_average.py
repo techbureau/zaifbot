@@ -1,6 +1,6 @@
 from sqlalchemy import and_, or_
 from zaifbot.modules.dao import DaoBase
-from zaifbot.models.moving_average import TradeLogs, MovingAverage
+from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from sqlalchemy import exc
 
 
@@ -19,15 +19,16 @@ class TradeLogsDao(DaoBase):
 
     def create_data(self, trade_logs):
         session = self.get_session()
-        for record in trade_logs:
-            session.merge(record)
         try:
+            for record in trade_logs:
+                session.merge(record)
             session.commit()
             return True
         except exc.SQLAlchemyError:
-            return False
+            session.rollback()
+        return False
 
-    def get_query(self, end_time, start_time, closed):
+    def get_records(self, end_time, start_time, closed):
         session = self.get_session()
         query_ = session.query(self.model)
         if closed:
@@ -43,7 +44,7 @@ class TradeLogsDao(DaoBase):
                                         self.model.currency_pair == self._currency_pair,
                                         self.model.period == self._period
                                         ))
-        return query_
+        return query_.order_by(self.model.time).all()
 
 
 class MovingAverageDao(DaoBase):
@@ -55,9 +56,9 @@ class MovingAverageDao(DaoBase):
         self._length = length
 
     def get_model(self):
-        return MovingAverage
+        return MovingAverages
 
-    def get_record(self, end_time, start_time):
+    def get_records(self, end_time, start_time):
         session = self.get_session()
         return session.query(self.model).filter(and_(self.model.time <= end_time,
                                                      self.model.time > start_time,
@@ -89,4 +90,5 @@ class MovingAverageDao(DaoBase):
             session.commit()
             return True
         except exc.SQLAlchemyError:
-            return False
+            session.rollback()
+        return False

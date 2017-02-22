@@ -17,8 +17,8 @@ class TradeLogs(Base):
     closed = Column('closed', Integer, nullable=False)
 
 
-class MovingAverage(Base):
-    __tablename__ = 'moving_average'
+class MovingAverages(Base):
+    __tablename__ = 'moving_averages'
     time = Column('time', Integer, primary_key=True)
     currency_pair = Column('currency_pair', String, primary_key=True)
     period = Column('period', String, primary_key=True)
