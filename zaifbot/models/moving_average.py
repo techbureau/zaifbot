@@ -25,3 +25,4 @@ class MovingAverages(Base):
     length = Column('length', Integer, primary_key=True)
     sma = Column('sma', Float, nullable=False)
     ema = Column('ema', Float, nullable=False)
+    closed = Column('closed', Integer, nullable=False)

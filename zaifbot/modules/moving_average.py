@@ -91,7 +91,7 @@ class MovingAverageSetUp:
             return True
         trade_logs_moving_average = self._moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
         for i in self._get_moving_average(trade_logs_moving_average, target_epoch_times):
-            moving_average_model_data.add(self._get_moving_average_model_dataset(i['time'], i['sma'], i['ema']))
+            moving_average_model_data.add(self._get_moving_average_model_dataset(i['time'], i['sma'], i['ema'], i['closed']))
         return self._moving_average.create_data(moving_average_model_data)
 
     def _get_target_epoch_times(self, start_time, end_time):
@@ -114,18 +114,21 @@ class MovingAverageSetUp:
                 nums = self._get_nums(trade_logs_moving_average, i)
                 sma = self._get_sma(nums)
                 ema = self._get_ema(trade_logs_moving_average[i - 1], nums)
-                yield {'time': trade_logs_moving_average[i].TradeLogs.time, 'sma': sma, 'ema': ema}
+                yield {'time': trade_logs_moving_average[i].TradeLogs.time,
+                       'sma': sma,
+                       'ema': ema,
+                       'closed': trade_logs_moving_average[i].TradeLogs.closed}
 
     def _get_nums(self, trade_logs_moving_average, i):
         nums = []
         for j in range(0, self._length):
-            nums.append(trade_logs_moving_average[i - j].TradeLogs.time)
+            nums.append(trade_logs_moving_average[i - j].TradeLogs.close)
         return nums
 
     def _get_ema(self, last_trade_logs_moving_average, nums):
         current_price = nums.pop()
-        if last_trade_logs_moving_average.MovingAverage is not None:
-            last_ema = last_trade_logs_moving_average.MovingAverage.ema
+        if last_trade_logs_moving_average.MovingAverages is not None:
+            last_ema = last_trade_logs_moving_average.MovingAverages.ema
         else:
             last_ema = np.average(nums)
         k = 2 / (self._length + 1)
@@ -136,11 +139,12 @@ class MovingAverageSetUp:
         nums.pop(0)
         return np.average(nums)
 
-    def _get_moving_average_model_dataset(self, time_, sma_, ema_):
+    def _get_moving_average_model_dataset(self, time, sma, ema, closed):
         return MovingAverages(
-            time=time_,
+            time=time,
             currency_pair=self._currency_pair,
             period=self._period,
             length=self._length,
-            sma=sma_,
-            ema=ema_)
+            sma=sma,
+            ema=ema,
+            closed=closed)
