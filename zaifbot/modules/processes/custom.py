@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from zaifbot.modules.auto_trade.process_common import ProcessBase
+from zaifbot.modules.processes.process_common import ProcessBase
 
 
 class Custom(ProcessBase):

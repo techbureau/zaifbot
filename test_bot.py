@@ -1,5 +1,5 @@
 from zaifbot import ZaifBot
-from zaifbot.modules.auto_trade import *
+from zaifbot.modules.processes import *
 
 
 class MyBuy(Buy):
