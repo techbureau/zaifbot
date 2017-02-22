@@ -13,6 +13,9 @@ class MyAdditionalPurchase(AdditionalPurchase):
 
 
 class MyCustom(Custom):
+    def get_name(self):
+        return 'my_custom_process'
+
     def execute(self):
         return True
 
