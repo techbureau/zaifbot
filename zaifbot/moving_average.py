@@ -1,106 +1,53 @@
 import time
-
-import numpy as np
-
-from zaifbot.modules.dao.moving_average import TradeLogs, MovingAverage
-
-PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
-               '1h': 3600, '1m': 60, '5m': 300, '15m': 900, '30m': 1800}
-LIMIT_COUNT = 1000
+from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, lIMIT_LENGTH, UTC_JP_DIFF
+from zaifbot.modules.moving_average import TradeLogsSetUp, MovingAverageSetUp
+from zaifbot.modules.dao.moving_average import MovingAverageDao
 
 
-def _check_trade_logs(currency_pair, period, length, start_time, end_time, count):
-    tradelogs = TradeLogs(period)
-
-    '''
-    # get tradelogs count
-    tradelogs_count = tradelogs.get_tradelogs_count(end_time, start_time)
-
-    # update tradelogs from API if some tradelogs are missing
-    if tradelogs_count < (count + length - 1):
-        public_api = ZaifPublicApi()
-        trdlgs_api_rtrn = public_api.everything('ohlc_data', currency_pair,
-                                                {'period': period,
-                                                 'count': count + length - 1,
-                                                 'to_epoch_time': end_time})
-
-        tradelogs.create_data(trdlgs_api_rtrn)
-    '''
+def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
+            to_epoch_time=int(time.time()), length=lIMIT_LENGTH):
+    return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'sma')
 
 
-def _check_moving_average(currency_pair, period, length,
-                          start_time, end_time, count, sma_ema):
-    moving_average = MovingAverage(currency_pair, period, length, sma_ema)
-
-    # create moving_average table if not exsit
-    moving_average.create_table()
-
-    # get moving_average from table
-    mv_avrg_result = moving_average.get_moving_average(end_time, start_time)
-
-    sma = []
-    ema = []
-    insert_params = []
-
-    for i in range(0, len(mv_avrg_result)):
-        nums = []
-
-        if i > (length - 2) and mv_avrg_result[i][3] is None:
-            if sma_ema == 'sma':
-                # prepare numbers to calculate sma
-                for j in range(0, length):
-                    nums.append(mv_avrg_result[i - j][1])
-
-                # calculate sma
-                value = np.sum(nums) / length
-                sma.append(
-                    {'time_stamp': mv_avrg_result[i][0], 'value': value})
-            elif sma_ema == 'ema':
-                # for the first time ema calculation
-                if len(ema) == 0:
-                    # prepare numbers for first calculation of last value
-                    for j in range(1, length + 1):
-                        nums.append(mv_avrg_result[i - j][1])
-                        print(nums)
-                    last_val = np.sum(nums) / length
-                else:
-                    last_val = ema[i - 1]['value']
-
-                # calculate ema
-                value = _calculate_ema(
-                    mv_avrg_result[i][1], last_val, length)
-                ema.append(
-                    {'time_stamp': mv_avrg_result[i][0], 'value': value})
-
-            if(mv_avrg_result[i][2] == 1):
-                insert_params.append((mv_avrg_result[i][0], value))
-
-        elif i > (length - 2):
-            if sma_ema == 'sma':
-                sma.append({'time_stamp': mv_avrg_result[i][
-                           0], 'value': mv_avrg_result[i][2]})
-            elif sma_ema == 'ema':
-                ema.append({'time_stamp': mv_avrg_result[i][
-                           0], 'value': mv_avrg_result[i][2]})
-
-    moving_average.update_moving_average(insert_params)
+def get_ema(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
+            to_epoch_time=int(time.time()), length=lIMIT_LENGTH):
+    return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'ema')
 
 
-def get_moving_average(currency_pair, count=LIMIT_COUNT,
-                       to_epoch_time=int(time.time()), period='1d',
-                       length=5, sma_ema='sma'):
-    start_time = to_epoch_time - ((count + length) * PERIOD_SECS[period])
-
+def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma_ema):
     count = min(count, LIMIT_COUNT)
+    length = min(length, lIMIT_LENGTH)
+    end_time = _get_end_time(to_epoch_time, period)
+    tl_start_time = end_time - ((count + length) * PERIOD_SECS[period])
+    ma_start_time = end_time - (count * PERIOD_SECS[period])
 
-    _check_trade_logs(currency_pair, period, length, start_time, to_epoch_time, count)
+    trade_logs = TradeLogsSetUp(currency_pair, period, count, length)
+    if trade_logs.execute(tl_start_time, end_time) is False:
+        return {'success': 0, 'error': 'failed to set up trade log'}
 
-    # _check_moving_average(currency_pair, period, length,
-    #                      start_time, to_epoch_time, count, sma_ema)
+    moving_average = MovingAverageSetUp(currency_pair, period, count, length)
+    ma_result = moving_average.execute(ma_start_time, tl_start_time, end_time)
+    if ma_result is False:
+        return {'success': 0, 'error': 'failed to set up trade log'}
+    return _create_return_dict(sma_ema, currency_pair, period, length, end_time, ma_start_time)
 
 
-def _calculate_ema(current_val, last_val, length):
-    k = 2 / (length + 1)
-    ema = current_val * k + last_val * (1 - k)
+def _get_end_time(to_epoch_time, period):
+    if PERIOD_SECS[period] > PERIOD_SECS['1h']:
+        end_time = to_epoch_time - ((to_epoch_time + UTC_JP_DIFF) % PERIOD_SECS[period])
+    else:
+        end_time = to_epoch_time - (to_epoch_time % PERIOD_SECS[period])
+    return end_time
 
-    return ema
+
+def _create_return_dict(sma_ema, currency_pair, period, length, end_time, ma_start_time):
+    return_ = []
+    moving_average = MovingAverageDao(currency_pair, period, length)
+    ma_result = moving_average.get_records(end_time, ma_start_time)
+    for i in ma_result:
+        if sma_ema == 'sma':
+            moving_average = i.sma
+        elif sma_ema == 'ema':
+            moving_average = i.ema
+        return_.append({'time_stamp': i.time, 'value': moving_average})
+    return {'success': 1, 'return': {sma_ema: return_}}
