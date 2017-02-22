@@ -1,26 +1,22 @@
 {
   "system": {
     "sleep_time": 1,
-<<<<<<< HEAD
     "api_domain": "api.zaif.jp",
     "currency_pair": "btc_jpy",
     "retry_count": 5,
     "socket":{
       "port": 8888
     }
-=======
-    "currency_pairs": "btc_jpy"
->>>>>>> 12dbeebf2d3b0824312d63962781ca077393d6d1
   },
   "api_keys": {
     "key": "api_key",
     "secret": "secret"
   },
   "event": {
-    "loss_cut":{
+    "buy":{
       "target_value": 110000
     },
-    "additional_purchase":{
+    "sell":{
       "target_value": 110000
     }
   }

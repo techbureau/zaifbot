@@ -2,12 +2,12 @@ from zaifbot import ZaifBot
 from zaifbot.modules.auto_trade import *
 
 
-class MyLosCutProcess(LossCut):
+class MyBuy(Buy):
     def execute(self):
         return True
 
 
-class MyAdditionalPurchase(AdditionalPurchase):
+class MySell(Sell):
     def execute(self):
         return True
 
@@ -25,7 +25,7 @@ class MyCustom(Custom):
 
 if __name__ == '__main__':
     bot = ZaifBot()
-    bot.add_running_process(MyLosCutProcess)
-    bot.add_running_process(MyAdditionalPurchase)
+    bot.add_running_process(MyBuy)
+    bot.add_running_process(MySell)
     bot.add_running_process(MyCustom)
     bot.start()

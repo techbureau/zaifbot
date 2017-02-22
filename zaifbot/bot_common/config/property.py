@@ -39,34 +39,34 @@ class System:
 
 class Event:
     def __init__(self, config_json):
-        self._loss_cut = _LossCut(config_json)
-        self._additional_purchase = _AdditionalPurchase(config_json)
+        self._buy = _Buy(config_json)
+        self._sell = _Sell(config_json)
 
     @property
-    def loss_cut(self):
-        return self._loss_cut
+    def buy(self):
+        return self._buy
 
     @property
-    def additional_purchase(self):
-        return self._additional_purchase
+    def sell(self):
+        return self._sell
 
 
-class _LossCut:
+class _Buy:
     def __init__(self, config_json):
-        self._loss_cut = config_json['event']['loss_cut']
+        self._buy = config_json['event']['buy']
 
     @property
     def target_value(self):
-        return self._loss_cut['target_value']
+        return self._buy['target_value']
 
 
-class _AdditionalPurchase:
+class _Sell:
     def __init__(self, config_json):
-        self._additional_purchase = config_json['event']['additional_purchase']
+        self._sell = config_json['event']['sell']
 
     @property
     def target_value(self):
-        return self._additional_purchase['target_value']
+        return self._sell['target_value']
 
 
 class _Socket:

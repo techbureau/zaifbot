@@ -1,5 +1,5 @@
-from .loss_cut import LossCut
-from .additional_purchase import AdditionalPurchase
+from .buy import Buy
+from .sell import Sell
 from .custom import Custom
 
-__all__ = ['LossCut', 'AdditionalPurchase', 'Custom']
+__all__ = ['Buy', 'Sell', 'Custom']
