@@ -43,11 +43,11 @@ def _get_end_time(to_epoch_time, period):
 def _create_return_dict(sma_ema, currency_pair, period, length, end_time, ma_start_time):
     return_datas = []
     moving_average = MovingAverageDao(currency_pair, period, length)
-    ma_result = moving_average.get_records(end_time, ma_start_time, False)
+    ma_result = moving_average.get_trade_logs_moving_average(end_time, ma_start_time)
     for i in ma_result:
         if sma_ema == 'sma':
-            moving_average = i.sma
+            moving_average = i.MovingAverages.sma
         elif sma_ema == 'ema':
-            moving_average = i.ema
-        return_datas.append({'time_stamp': i.time, 'value': moving_average})
+            moving_average = i.MovingAverages.ema
+        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average, 'current_price':i.TradeLogs.close})
     return {'success': 1, 'return': {sma_ema: return_datas}}
