@@ -45,9 +45,11 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
     moving_average = MovingAverageDao(currency_pair, period, length)
     ma_result = moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
     for i in ma_result:
-        if sma_ema == 'sma':
+        if sma_ema == 'sma' and i.MovingAverages:
             moving_average = i.MovingAverages.sma
-        elif sma_ema == 'ema':
+        elif sma_ema == 'ema' and i.MovingAverages:
             moving_average = i.MovingAverages.ema
-        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average, 'current_price':i.TradeLogs.close, 'closed':i.TradeLogs.closed})
+        else:
+            moving_average = 0.0
+        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average, 'close':i.TradeLogs.close, 'closed':i.TradeLogs.closed})
     return {'success': 1, 'return': {sma_ema: return_datas}}
