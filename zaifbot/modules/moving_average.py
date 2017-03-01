@@ -5,7 +5,7 @@ from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import numpy as np
 
 
-def _get_need_epoch_times(start_time, end_time, period):
+def get_need_epoch_times(start_time, end_time, period):
     while True:
         yield start_time
         start_time += PERIOD_SECS[period]
@@ -40,7 +40,7 @@ class TradeLogsSetUp:
     def _check_missing_records(trade_logs_record, start_time, end_time, period):
         to_epoch_times = set([x.time for x in trade_logs_record])
         target_epoch_times = set()
-        for need_epoch_time in _get_need_epoch_times(start_time, end_time, period):
+        for need_epoch_time in get_need_epoch_times(start_time, end_time, period):
             if need_epoch_time not in to_epoch_times:
                 target_epoch_times.add(need_epoch_time)
         return target_epoch_times
@@ -112,7 +112,7 @@ class MovingAverageSetUp:
     def _check_missing_records(moving_average_record, start_time, end_time, period):
         to_epoch_times = set([x.time for x in moving_average_record])
         target_epoch_times = set()
-        for need_epoch_time in _get_need_epoch_times(start_time, end_time, period):
+        for need_epoch_time in get_need_epoch_times(start_time, end_time, period):
             if need_epoch_time not in to_epoch_times:
                 target_epoch_times.add(need_epoch_time)
         return target_epoch_times
