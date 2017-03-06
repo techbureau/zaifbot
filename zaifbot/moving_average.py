@@ -18,7 +18,6 @@ def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma
     count = min(count, LIMIT_COUNT)
     length = min(length, LIMIT_LENGTH)
     end_time = get_end_time(to_epoch_time, period)
-    print(end_time)
     tl_start_time = end_time - ((count + length) * PERIOD_SECS[period])
     ma_start_time = end_time - (count * PERIOD_SECS[period])
 

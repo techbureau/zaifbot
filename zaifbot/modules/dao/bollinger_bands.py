@@ -34,8 +34,9 @@ class BollingerBandsDao(DaoBase):
                                                     self.model.period == self._period,
                                                     self.model.length == self._length
                                                     ))
-
-        return select_query.order_by(self.model.time).all()
+        result = select_query.order_by(self.model.time).all()
+        session.close()
+        return result
 
     def create_data(self, bollinger_bands):
         session = self.get_session()
@@ -43,7 +44,9 @@ class BollingerBandsDao(DaoBase):
             for record in bollinger_bands:
                 session.merge(record)
             session.commit()
+            session.close()
             return True
         except exc.SQLAlchemyError:
             session.rollback()
+            session.close()
         return False

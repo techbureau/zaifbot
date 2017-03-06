@@ -24,9 +24,11 @@ class TradeLogsDao(DaoBase):
             for record in trade_logs:
                 session.merge(record)
             session.commit()
+            session.close()
             return True
         except exc.SQLAlchemyError:
             session.rollback()
+            session.close()
         return False
 
     def get_records(self, end_time, start_time, closed):
@@ -45,7 +47,9 @@ class TradeLogsDao(DaoBase):
                                                     self.model.currency_pair == self._currency_pair,
                                                     self.model.period == self._period
                                                     ))
-        return select_query.order_by(self.model.time).all()
+        result = select_query.order_by(self.model.time).all()
+        session.close()
+        return result
 
 
 class MovingAverageDao(DaoBase):
@@ -77,11 +81,13 @@ class MovingAverageDao(DaoBase):
                                                     self.model.period == self._period,
                                                     self.model.length == self._length
                                                     ))
-        return select_query.order_by(self.model.time).all()
+        result = select_query.order_by(self.model.time).all()
+        session.close()
+        return result
 
     def get_trade_logs_moving_average(self, end_time, start_time):
         session = self.get_session()
-        return session.query(TradeLogs, self.model)\
+        result = session.query(TradeLogs, self.model)\
             .outerjoin(self.model, and_(
                 TradeLogs.time == self.model.time,
                 TradeLogs.currency_pair == self.model.currency_pair,
@@ -92,6 +98,8 @@ class MovingAverageDao(DaoBase):
                          TradeLogs.currency_pair == self._currency_pair,
                          TradeLogs.period == self._period)
                     ).order_by(TradeLogs.time).all()
+        session.close()
+        return result
 
     def create_data(self, moving_average):
         session = self.get_session()
@@ -99,7 +107,9 @@ class MovingAverageDao(DaoBase):
             session.merge(record)
         try:
             session.commit()
+            session.close()
             return True
         except exc.SQLAlchemyError:
             session.rollback()
+            session.close()
         return False
