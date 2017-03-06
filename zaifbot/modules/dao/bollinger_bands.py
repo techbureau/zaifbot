@@ -2,6 +2,7 @@ from sqlalchemy import and_
 from zaifbot.modules.dao import DaoBase
 from zaifbot.models.bollinger_bands import BollingerBands
 from sqlalchemy import exc
+from zaifbot.bot_common.bot_const import CLOSED
 
 
 class BollingerBandsDao(DaoBase):
@@ -24,7 +25,7 @@ class BollingerBandsDao(DaoBase):
                                                     self.model.currency_pair == self._currency_pair,
                                                     self.model.period == self._period,
                                                     self.model.length == self._length,
-                                                    self.model.closed == 1
+                                                    self.model.closed == CLOSED
                                                     ))
         else:
             select_query = select_query.filter(and_(self.model.time <= end_time,

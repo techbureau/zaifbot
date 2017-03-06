@@ -25,7 +25,7 @@ class MyCustom(Custom):
 
 if __name__ == '__main__':
     bot = ZaifBot()
-    bot.add_running_process(MyBuy)
-    bot.add_running_process(MySell)
-    bot.add_running_process(MyCustom)
+    bot.add_running_process(MyBuy())
+    bot.add_running_process(MySell())
+    bot.add_running_process(MyCustom())
     bot.start()
