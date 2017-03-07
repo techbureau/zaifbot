@@ -28,8 +28,6 @@ class BollingerBandsSetUp:
                                                     sma_records['return']['sma'][i]['moving_average'],
                                                     standard_deviation,
                                                     sma_records['return']['sma'][i]['closed']))
-        if len(sma_records) == 0:
-            return False
         return self._bollinger_bands.create_data(bollinger_bands_model_data)
 
     def _get_target_epoch_times(self, start_time, end_time):

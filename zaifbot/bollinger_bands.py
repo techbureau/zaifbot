@@ -15,13 +15,15 @@ def get_bollinger_bands(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
 
     if bollinger_bands.execute(start_time, end_time) is False:
         return {'success': 0, 'error': 'failed to set up bollinger bands'}
-    return _create_return_dict(currency_pair, period, length, end_time, start_time)
+    return _create_return_dict(currency_pair, period, length, end_time, start_time, count)
 
 
-def _create_return_dict(currency_pair, period, length, end_time, start_time):
+def _create_return_dict(currency_pair, period, length, end_time, start_time, count):
     return_datas = []
     bollinger_bands = BollingerBandsDao(currency_pair, period, length)
     bollinger_bands_result = bollinger_bands.get_records(end_time, start_time, False)
+    if len(bollinger_bands_result) < count:
+        return {'success': 0, 'error': 'bollinger bands data is missing'}
     for i in bollinger_bands_result:
         return_datas.append({
                             'time_stamp': i.time,

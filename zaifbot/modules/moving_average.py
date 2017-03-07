@@ -1,5 +1,5 @@
 from zaifapi import ZaifPublicApi
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
+from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, PUBLIC_API_RETRY_SLEEP_TIME
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import numpy as np
@@ -65,7 +65,11 @@ class TradeLogsSetUp:
     def _get_ohlc_data_from_server(self, end_time):
         public_api = ZaifPublicApi()
         api_params = {'period': self._period, 'count': LIMIT_COUNT, 'to_epoch_time': end_time + 1}
-        api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
+        try:
+            api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
+        except Exception:
+            time.sleep(PUBLIC_API_RETRY_SLEEP_TIME)
+            api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
         required_count = self._count + self._length
         if required_count <= LIMIT_COUNT:
             return api_record
@@ -73,8 +77,13 @@ class TradeLogsSetUp:
         second_end_time = end_time - (LIMIT_COUNT * PERIOD_SECS[self._period]) + 1
         second_api_params =\
             {'period': self._period, 'count': count, 'to_epoch_time': second_end_time}
-        second_api_record =\
-            public_api.everything('ohlc_data', self._currency_pair, second_api_params)
+        try:
+            second_api_record =\
+                public_api.everything('ohlc_data', self._currency_pair, second_api_params)
+        except Exception:
+            time.sleep(PUBLIC_API_RETRY_SLEEP_TIME)
+            second_api_record =\
+                public_api.everything('ohlc_data', self._currency_pair, second_api_params)
         api_record = second_api_record + api_record
         return api_record
 

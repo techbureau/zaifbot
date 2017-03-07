@@ -28,8 +28,8 @@ def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma
     moving_average = MovingAverageSetUp(currency_pair, period, count, length)
     ma_result = moving_average.execute(ma_start_time, tl_start_time, end_time)
     if ma_result is False:
-        return {'success': 0, 'error': 'failed to set up trade log'}
-    return _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time)
+        return {'success': 0, 'error': 'failed to set up moving average'}
+    return _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time, count)
 
 
 def get_end_time(to_epoch_time, period):
@@ -40,10 +40,12 @@ def get_end_time(to_epoch_time, period):
     return end_time
 
 
-def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time):
+def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time, count):
     return_datas = []
     moving_average = MovingAverageDao(currency_pair, period, length)
     ma_result = moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
+    if len(ma_result) < count:
+        return {'success': 0, 'error': 'moving average data is missing'}
     for i in ma_result:
         if sma_ema == 'sma' and i.MovingAverages:
             moving_average = i.MovingAverages.sma
