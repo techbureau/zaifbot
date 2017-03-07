@@ -25,10 +25,10 @@ class BollingerBandsSetUp:
                 standard_deviation = self._get_standard_deviation(nums)
                 bollinger_bands_model_data.add(self._get_bollinger_bands_model_dataset
                                                    (sma_records['return']['sma'][i]['time_stamp'],
-                                                    sma_records['return']['sma'][i]['close'],
+                                                    sma_records['return']['sma'][i]['moving_average'],
                                                     standard_deviation,
                                                     sma_records['return']['sma'][i]['closed']))
-        if len(bollinger_bands_model_data) == 0:
+        if len(sma_records) == 0:
             return False
         return self._bollinger_bands.create_data(bollinger_bands_model_data)
 
@@ -55,16 +55,16 @@ class BollingerBandsSetUp:
             nums.append(sma_records[i - j]['close'] - sma_records[i]['moving_average'])
         return nums
 
-    def _get_bollinger_bands_model_dataset(self, time, close, standard_deviation, closed):
+    def _get_bollinger_bands_model_dataset(self, time, sma, standard_deviation, closed):
         return BollingerBands(
             time=time,
             currency_pair=self._currency_pair,
             period=self._period,
             length=self._length,
-            sd1p=close + standard_deviation,
-            sd2p=close + (standard_deviation * 2),
-            sd3p=close + (standard_deviation * 3),
-            sd1n=close - standard_deviation,
-            sd2n=close - (standard_deviation * 2),
-            sd3n=close - (standard_deviation * 3),
+            sd1p=sma + standard_deviation,
+            sd2p=sma + (standard_deviation * 2),
+            sd3p=sma + (standard_deviation * 3),
+            sd1n=sma - standard_deviation,
+            sd2n=sma - (standard_deviation * 2),
+            sd3n=sma - (standard_deviation * 3),
             closed=closed)

@@ -27,7 +27,6 @@ class TradeLogsSetUp:
         if len(target_epoch_times) == 0:
             return True
         api_records = self._get_ohlc_data_from_server(end_time)
-        print(api_records)
         target_trade_logs_record =\
             list(filter(lambda x: x['time'] in target_epoch_times, api_records))
         trade_logs_model_data = self._set_trade_logs_model_data(target_trade_logs_record)
