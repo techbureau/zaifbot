@@ -1,8 +1,9 @@
 from zaifapi import ZaifPublicApi
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, PUBLIC_API_RETRY_SLEEP_TIME
+from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import numpy as np
+from time import time
 
 
 def get_need_epoch_times(start_time, end_time, period):
@@ -27,6 +28,8 @@ class TradeLogsSetUp:
         if len(target_epoch_times) == 0:
             return True
         api_records = self._get_ohlc_data_from_server(end_time)
+        if len(api_records) == 0:
+            return False
         target_trade_logs_record =\
             list(filter(lambda x: x['time'] in target_epoch_times, api_records))
         trade_logs_model_data = self._set_trade_logs_model_data(target_trade_logs_record)
@@ -68,8 +71,7 @@ class TradeLogsSetUp:
         try:
             api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
         except Exception:
-            time.sleep(PUBLIC_API_RETRY_SLEEP_TIME)
-            api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
+            api_record = []
         required_count = self._count + self._length
         if required_count <= LIMIT_COUNT:
             return api_record
@@ -81,9 +83,7 @@ class TradeLogsSetUp:
             second_api_record =\
                 public_api.everything('ohlc_data', self._currency_pair, second_api_params)
         except Exception:
-            time.sleep(PUBLIC_API_RETRY_SLEEP_TIME)
-            second_api_record =\
-                public_api.everything('ohlc_data', self._currency_pair, second_api_params)
+            second_api_record = []
         api_record = second_api_record + api_record
         return api_record
 

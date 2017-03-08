@@ -5,6 +5,7 @@ from zaifbot.modules.processes.buy import get_auto_trade_dataset
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
 from zaifbot.modules.dao.auto_trade import AutoTradeDao
+from zaifbot.bot_common.bot_const import BUY, SELL
 
 
 class SellByPrice(ProcessBase):
@@ -23,20 +24,19 @@ class SellByPrice(ProcessBase):
 
 
 class SellByBollingerBands(ProcessBase):
-    def __init__(self, length, to_currency_amount, active=True, continue_=False, start_time=None):
+    def __init__(self, length, to_currency_amount, buy_sell_flag=SELL, continue_=False, start_time=None):
         super().__init__()
         self._length = length
         self._continue = continue_
-        self._sell_active = active
+        self._buy_sell_flag = buy_sell_flag
         self._to_currency_amount = to_currency_amount
         self._start_time = start_time
-        if continue_ and active:
+        self._auto_trade = AutoTradeDao(self._start_time)
+        if continue_ and buy_sell_flag == SELL:
             self._auto_trade_record = []
-            self._auto_trade = AutoTradeDao(self._start_time)
             auto_trade_dataset = get_auto_trade_dataset(
                 self._start_time,
-                self._sell_active,
-                False,
+                self._buy_sell_flag,
                 self._to_currency_amount,
                 0.0
             )
@@ -58,8 +58,8 @@ class SellByBollingerBands(ProcessBase):
             return False
         if self._continue:
             self._auto_trade_record = self._auto_trade.get_record(self._start_time)
-            self._sell_active = self._auto_trade_record[0].sell_active
-        if self._sell_active \
+            self._sell_active = self._auto_trade_record[0].buy_sell_flag
+        if self._buy_sell_flag == SELL\
                 and self._last_price >= self._bollinger_bands['return']['bollinger_bands'][0]['sd2p']:
             print('\nsell')
             print('current price:' + str(self._last_price))
@@ -72,8 +72,7 @@ class SellByBollingerBands(ProcessBase):
         if self._continue:
             auto_trade_dataset = get_auto_trade_dataset(
                 self._start_time,
-                False,
-                True,
+                BUY,
                 0.0,
                 0.0
             )

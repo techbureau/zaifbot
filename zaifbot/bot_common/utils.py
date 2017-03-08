@@ -1,7 +1,7 @@
 import json
 import threading
 from websocket import create_connection
-from zaifapi.impl import ZaifPublicApi
+from zaifapi.impl import ZaifPublicApi, ZaifPrivateApi
 from zaifbot.bot_common.config import load_config
 
 
@@ -45,3 +45,15 @@ class _ZaifWebSocket:
 def get_current_last_price():
     api = _ZaifWebSocket()
     return api.last_price
+
+
+class ZaifOrder:
+    def __init__(self):
+        self._config = load_config()
+        self._private_api = ZaifPrivateApi(self._config.api_keys.key, self._config.api_keys.secret)
+
+    def get_active_orders(self):
+        return self._private_api.active_orders(currency_pair=self._config.system.currency_pair)
+
+    def trade(self, action, price, amount):
+        return self._private_api.trade(self._config.system.currency_pair, action, price, amount)

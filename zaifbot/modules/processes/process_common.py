@@ -13,7 +13,6 @@ class ProcessBase(Process, metaclass = ABCMeta):
     def run(self):
         while True:
             sleep(PERIOD_SECS[self.config.system.sleep_time])
-            #sleep(5)
             if self.is_started() is False:
                 continue
             stop_process_flg = self.execute()

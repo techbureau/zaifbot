@@ -5,14 +5,14 @@ from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
 from zaifbot.modules.dao.auto_trade import AutoTradeDao
 from zaifbot.models.auto_trade import AutoTrade
+from zaifbot.bot_common.bot_const import BUY, SELL
 
 
 def get_auto_trade_dataset(
-        start_time, sell_active, buy_active, to_currency_amount, from_currency_amount):
+        start_time, buy_sell_flag, to_currency_amount, from_currency_amount):
     return AutoTrade(
         start_time=start_time,
-        sell_active=sell_active,
-        buy_active=buy_active,
+        buy_sell_flag=buy_sell_flag,
         to_currency_amount=to_currency_amount,
         from_currency_amount=from_currency_amount
     )
@@ -34,20 +34,20 @@ class BuyByPrice(ProcessBase):
 
 
 class BuyByBollingerBands(ProcessBase):
-    def __init__(self, length, from_currency_amount, active=True, continue_=False, start_time=None):
+    def __init__(
+            self, length, from_currency_amount, buy_sell_flag=BUY, continue_=False, start_time=None):
         super().__init__()
         self._length = length
         self._continue = continue_
-        self._buy_active = active
+        self._buy_sell_flag = buy_sell_flag
         self._from_currency_amount = from_currency_amount
         self._start_time = start_time
-        if continue_ and active:
+        self._auto_trade = AutoTradeDao(self._start_time)
+        if continue_ and buy_sell_flag == BUY:
             self._auto_trade_record = []
-            self._auto_trade = AutoTradeDao(self._start_time)
             auto_trade_dataset = get_auto_trade_dataset(
                 self._start_time,
-                False,
-                self._buy_active,
+                self._buy_sell_flag,
                 0.0,
                 self._from_currency_amount
             )
@@ -69,8 +69,8 @@ class BuyByBollingerBands(ProcessBase):
             return False
         if self._continue:
             self._auto_trade_record = self._auto_trade.get_record(self._start_time)
-            self._buy_active = self._auto_trade_record[0].buy_active
-        if self._buy_active\
+            self._buy_sell_flag = self._auto_trade_record[0].buy_sell_flag
+        if self._buy_sell_flag == BUY\
                 and self._last_price <= self._bollinger_bands['return']['bollinger_bands'][0]['sd2n']:
             print('\nbuy')
             print('current price:' + str(self._last_price))
@@ -83,8 +83,7 @@ class BuyByBollingerBands(ProcessBase):
         if self._continue:
             auto_trade_dataset = get_auto_trade_dataset(
                 self._start_time,
-                True,
-                False,
+                SELL,
                 0.0,
                 0.0
             )
