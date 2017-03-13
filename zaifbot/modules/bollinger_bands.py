@@ -19,6 +19,8 @@ class BollingerBandsSetUp:
         if len(target_epoch_times) == 0:
             return True
         sma_records = get_sma(self._currency_pair, self._period, self._count, end_time, self._length)
+        if sma_records['sucess'] == 0:
+            return False
         for i in range(self._length, len(sma_records['return']['sma'])):
             if sma_records['return']['sma'][i]['time_stamp'] in target_epoch_times:
                 nums = self._get_nums(sma_records['return']['sma'], i)
