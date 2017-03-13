@@ -6,3 +6,4 @@ UTC_JP_DIFF = 32400
 CLOSED = 1
 BUY = 0
 SELL = 1
+MIN_CUR_AMOUNT = {'btc_jpy': 0.0001, 'mona_jpy': 1.0, 'mona_btc': 1.0}

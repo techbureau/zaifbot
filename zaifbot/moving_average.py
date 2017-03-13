@@ -53,5 +53,5 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
             moving_average = i.MovingAverages.ema
         else:
             moving_average = 0.0
-        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average, 'close':i.TradeLogs.close, 'closed':i.TradeLogs.closed})
+        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average, 'close':i.TradeLogs.close, 'closed':bool(i.TradeLogs.closed)})
     return {'success': 1, 'return': {sma_ema: return_datas}}

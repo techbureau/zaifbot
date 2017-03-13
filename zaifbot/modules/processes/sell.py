@@ -59,13 +59,14 @@ class SellByBollingerBands(ProcessBase):
         if self._continue:
             self._auto_trade_record = self._auto_trade.get_record(self._start_time)
             self._sell_active = self._auto_trade_record[0].buy_sell_flag
-        if self._buy_sell_flag == SELL\
-                and self._last_price >= self._bollinger_bands['return']['bollinger_bands'][0]['sd2p']:
             print('\nsell')
             print('current price:' + str(self._last_price))
             print('bollinger band sd2p:' + str(self._bollinger_bands['return']['bollinger_bands'][0]['sd2p']))
+        if self._buy_sell_flag == SELL\
+                and self._last_price >= self._bollinger_bands['return']['bollinger_bands'][0]['sd2p']:
+            print('sell!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             return True
-        return False
+        return True
 
     def execute(self):
         # implement trade order here

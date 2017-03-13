@@ -56,4 +56,7 @@ class ZaifOrder:
         return self._private_api.active_orders(currency_pair=self._config.system.currency_pair)
 
     def trade(self, action, price, amount):
-        return self._private_api.trade(self._config.system.currency_pair, action, price, amount)
+        return self._private_api.trade(currency_pair=self._config.system.currency_pair, action=action, price=price, amount=amount)
+
+    def cancel_order(order_id):
+        self._private_api.cancel_order(order_id)

@@ -1,11 +1,11 @@
 from abc import abstractmethod
-from zaifbot.bot_common.utils import get_current_last_price
+from zaifbot.bot_common.utils import get_current_last_price, ZaifOrder
 from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
 from zaifbot.modules.dao.auto_trade import AutoTradeDao
 from zaifbot.models.auto_trade import AutoTrade
-from zaifbot.bot_common.bot_const import BUY, SELL
+from zaifbot.bot_common.bot_const import BUY, SELL, MIN_CUR_AMOUNT
 
 
 def get_auto_trade_dataset(
@@ -68,26 +68,70 @@ class BuyByBollingerBands(ProcessBase):
         if self._bollinger_bands['success'] == 0:
             return False
         if self._continue:
-            self._auto_trade_record = self._auto_trade.get_record(self._start_time)
-            self._buy_sell_flag = self._auto_trade_record[0].buy_sell_flag
+            auto_trade_record = self._auto_trade.get_record(self._start_time)
+            self._buy_sell_flag = auto_trade_record[0].buy_sell_flag
+            self._from_currency_amount = auto_trade_record[0].from_currency_amount
+            self._to_currency_amount = auto_trade_record[0].to_currency_amount
         if self._buy_sell_flag == BUY\
                 and self._last_price <= self._bollinger_bands['return']['bollinger_bands'][0]['sd2n']:
             print('\nbuy')
             print('current price:' + str(self._last_price))
             print('_bollinger band sd2n:' + str(self._bollinger_bands['return']['bollinger_bands'][0]['sd2n']))
             return True
-        return False
+        return True  #dbg
 
     def execute(self):
-        # implement trade order here
+        from_currency_amount_after_trade = self._from_currency_amount
+        to_currency_amount_after_trade = self._to_currency_amount
+        zaif_order = ZaifOrder()
+        active_orders = zaif_order.get_active_orders()
+        if len(active_orders) == 0:
+            return False
+        sorted_active_orders = self._sort_active_orders(active_orders)
+        for k, v in items(sorted_active_orders):
+            amount = self._get_amount(k, v, from_currency_amount_after_trade)
+            #trade_result = self._check_trade_result(zaif_order.trade('ask', k, amount))
+            if trade_result['success']:
+                from_currency_amount_after_trade -= k * amount
+                to_currency_amount_after_trade += amount
+            elif trade_result['order_id']:
+                zaif_order.cancel_order(trade_result['order_id'])
+            if from_currency_amount_after_trade <=\
+                    self._last_price * MIN_CUR_AMOUNT[self.config.system.currency_pair]:
+                break
         if self._continue:
             auto_trade_dataset = get_auto_trade_dataset(
                 self._start_time,
                 SELL,
-                0.0,
-                0.0
+                to_currency_amount_after_trade,
+                from_currency_amount_after_trade
             )
             self._auto_trade.create_data(auto_trade_dataset)
             return False
         else:
             return True
+
+    def _sort_active_orders(self, active_orders):
+        unsorted_active_orders = {}
+        for i in active_orders:
+            if i['action'] == 'bid' and i['currency_pair'] == self.config.system.currency_pair:
+                unsorted_active_orders[i['price']] = i['amount']
+        sorted_active_orders = sorted(unsorted_active_orders)
+        print(unsorted_active_orders)
+        print(sorted_active_orders)
+        return sorted_active_orders
+
+    def _get_amount(self, price, amount, from_currency_amount_after_trade):
+        if (price * amount) >= from_currency_amount_after_trade:
+            amount = from_currency_amount_after_trade / price
+            amount = amount - (amount % MIN_CUR_AMOUNT[self.config.system.currency_pair])
+            return amount
+        else:
+            amount = amount
+
+    def _check_trade_result(self, trade_result):
+        if len(trade_result) == 0:
+            return {'success': False, 'order_id': None}
+        if trade_result['return']['received'] > 0:
+            return {'success': True, 'order_id': None}
+        return {'success': False, 'order_id': trade_result['return']['order_id']}
