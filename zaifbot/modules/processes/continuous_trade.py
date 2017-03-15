@@ -33,8 +33,14 @@ class ContinuousTrade(ProcessBase):
         if target_price['success'] is False:
             return False
         if self._trade_status == BUY and self._last_price <= target_price['price']:
+            print('--- buy ---')
+            print('current_price:' + str(self._last_price))
+            print('target_price:' + str(target_price['price']))
             return True
         elif self._trade_status == SELL and self._last_price >= target_price['price']:
+            print('--- sell ---')
+            print('current_price:' + str(self._last_price))
+            print('target_price:' + str(target_price['price']))
             return True
         return False
 
@@ -45,6 +51,7 @@ class ContinuousTrade(ProcessBase):
             return False
         sorted_active_orders = self._sort_active_orders(active_orders)
         self._process_trade(zaif_order, sorted_active_orders)
+        return False
 
     def _get_target_price(self):
         if self._trade_status == BUY:
