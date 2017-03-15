@@ -2,8 +2,7 @@ from zaifbot.bot_common.utils import get_current_last_price, ZaifOrder
 from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
-from zaifbot.bot_common.bot_const import BUY, SELL, MIN_TO_CUR_AMOUNT, TRADE_ACTION
-from operator import itemgetter
+from zaifbot.bot_common.bot_const import BUY, SELL, MIN_AMOUNT_STEP, TRADE_ACTION, MIN_PRICE_STEP
 
 
 class ContinuousTrade(ProcessBase):
@@ -25,7 +24,7 @@ class ContinuousTrade(ProcessBase):
         return 'continuous_trade'
 
     def is_started(self):
-        self._last_price = get_current_last_price()
+        self._last_price = self._round_last_price(get_current_last_price())
         target_price = self._get_target_price()
         if target_price['success'] is False:
             return False
@@ -37,11 +36,14 @@ class ContinuousTrade(ProcessBase):
 
     def execute(self):
         zaif_order = ZaifOrder()
-        active_orders = zaif_order.get_active_orders()
-        if len(active_orders) == 0:
-            return False
-        sorted_active_orders = self._sort_active_orders(active_orders)
-        self._process_trade(zaif_order, sorted_active_orders)
+        amount = self._get_amount()
+        trade_result = zaif_order.trade(TRADE_ACTION[self._trade_status], self._last_price, amount)
+        if trade_result['success']:
+            self._update_currency_amounts(self._last_price, trade_result['return']['received'])
+        elif trade_result['return']['order_id']:
+            zaif_order.cancel_order(trade_result['return']['order_id'])
+        if self._check_trade_finish:
+            self._update_auto_trade_status()
         return False
 
     def _get_target_price(self):
@@ -65,68 +67,31 @@ class ContinuousTrade(ProcessBase):
             return {'success': True,
                     'price': self._last_bought_price * float(self._sell_type)}
 
-    def _sort_active_orders(self, active_orders):
-        sorted_active_orders = []
-        for k, v in active_orders.items():
-            if v['action'] == 'ask' and v['currency_pair'] == self.config.system.currency_pair\
-                    and self._trade_status  == BUY:
-                sorted_active_orders.append({'price': v['price'], 'amount': v['amount']})
-            elif v['action'] == 'bid' and v['currency_pair'] == self.config.system.currency_pair\
-                    and self._trade_status == SELL and v['price'] >= self._last_bought_price:
-                sorted_active_orders.append({'price': v['price'], 'amount': v['amount']})
+    def _get_amount(self):
         if self._trade_status == BUY:
-            sorted_active_orders.sort(key=itemgetter('price'))
-        else:
-            sorted_active_orders.sort(key=itemgetter('price'), reverse=True)
-        return sorted_active_orders
-
-    def _process_trade(self, zaif_order, sorted_active_orders):
-        failed_orders = []
-        trade_finish = False
-        for i in sorted_active_orders:
-            amount = self._get_amount(i['price'], i['amount'])
-            trade_result = zaif_order.trade(TRADE_ACTION[self._trade_status], i['price'], amount)
-            if trade_result['success']:
-                self._update_currency_amounts(i['price'], trade_result['return']['received'])
-            elif trade_result['return']['order_id']:
-                failed_orders.append(trade_result['return']['order_id'])
-            if self._check_trade_finish:
-                trade_finish = True
-                break
-        self._cancel_failed_orders(failed_orders, zaif_order)
-        if trade_finish:
-            self._update_auto_trade_status()
-
-    def _get_amount(self, price, amount):
-        if (price * amount) >= self._from_currency_amount and self._trade_status == BUY:
-            amount = self._from_currency_amount / price
-            amount = amount - (amount % MIN_TO_CUR_AMOUNT[self.config.system.currency_pair])
+            amount = self._from_currency_amount / self._last_price
+            amount = amount - (amount % MIN_AMOUNT_STEP[self.config.system.currency_pair])
             return amount
-        elif amount >= self._to_currency_amount and self._trade_status == SELL:
-            amount = self._to_currency_amount
-            amount = amount - (amount % MIN_TO_CUR_AMOUNT[self.config.system.currency_pair])
-        else:
-            amount = amount
+        amount = self._to_currency_amount
+        amount = amount - (amount % MIN_AMOUNT_STEP[self.config.system.currency_pair])
+        return amount
 
     def _update_currency_amounts(self, price, amount):
         if self._trade_status == BUY:
             self._from_currency_amount -= price * amount
             self._to_currency_amount += amount
             self._last_bought_price = self._last_price
-        self._from_currency_amount += price * amount
-        self._to_currency_amount -= amount
-
-    def _cancel_failed_orders(self, failed_orders, zaif_order):
-        for i in failed_orders:
-            zaif_order.cancel_order(i)
+        else:
+            self._from_currency_amount += price * amount
+            self._to_currency_amount -= amount
 
     def _check_trade_finish(self):
         if (self._trade_status == BUY and
                 self._from_currency_amount <=
-                self._last_price * MIN_TO_CUR_AMOUNT[self.config.system.currency_pair]) or\
+                self._last_price * MIN_AMOUNT_STEP[self.config.system.currency_pair]) or\
                 (self._trade_status == SELL and
                     self._to_currency_amount <=
-                    MIN_TO_CUR_AMOUNT[self.config.system.currency_pair]):
+                    MIN_AMOUNT_STEP[self.config.system.currency_pair]):
             return True
         return False
 
@@ -135,3 +100,11 @@ class ContinuousTrade(ProcessBase):
             self._trade_status = SELL
         else:
             self._trade_status = BUY
+
+    def _round_last_price(self, last_price):
+        if self._trade_status == BUY:
+            return last_price + (
+                (last_price + MIN_PRICE_STEP[self.config.system.currency_pair])
+                % MIN_PRICE_STEP[self.config.system.currency_pair])
+        else:
+            return last_price - (last_price % MIN_PRICE_STEP[self.config.system.currency_pair])

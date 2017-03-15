@@ -3,6 +3,7 @@ import threading
 from websocket import create_connection
 from zaifapi.impl import ZaifPublicApi, ZaifPrivateApi
 from zaifbot.bot_common.config import load_config
+from zaifbot.bot_common.save_order_log import save_order_log
 
 
 class _ZaifWebSocket:
@@ -54,7 +55,8 @@ class ZaifOrder:
 
     def get_active_orders(self):
         try:
-            return self._private_api.active_orders(currency_pair=self._config.system.currency_pair)
+            return self._private_api.active_orders(currency_pair=self._config.system.currency_pair,
+                                                   is_token_both=True)
         except:
             return {}
 
@@ -64,6 +66,7 @@ class ZaifOrder:
                                                    action=action,
                                                    price=price,
                                                    amount=amount)
+            save_order_log(trade_result)
             if trade_result['received'] > 0.0:
                 return {'success': 1, 'return': trade_result}
             return {'success': 0, 'return': trade_result}
@@ -71,4 +74,8 @@ class ZaifOrder:
             return {'success': 0, 'return': {'order_id': None}}
 
     def cancel_order(self, order_id):
-        return self._private_api.cancel_order(order_id=order_id)
+        try:
+            cancel_result = self._private_api.cancel_order(order_id=order_id)
+            save_order_log(cancel_result)
+        except:
+            return False
