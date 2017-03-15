@@ -1,6 +1,6 @@
-from .buy import BuyByPrice, BuyByBollingerBands
-from .sell import SellByPrice, SellByBollingerBands
+from .buy import BuyByPrice
+from .sell import SellByPrice
 from .custom import Custom
 from .continuous_trade import ContinuousTrade
 
-__all__ = ['BuyByBollingerBands','BuyByPrice', 'SellByBollingerBands', 'SellByPrice', 'Custom', 'ContinuousTrade']
+__all__ = ['BuyByPrice', 'SellByPrice', 'Custom', 'ContinuousTrade']

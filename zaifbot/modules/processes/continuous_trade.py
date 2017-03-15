@@ -1,10 +1,7 @@
-from abc import abstractmethod
 from zaifbot.bot_common.utils import get_current_last_price, ZaifOrder
 from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
-from time import time, sleep
-from zaifbot.modules.dao.auto_trade import AutoTradeDao
-from zaifbot.models.auto_trade import AutoTrade
+from time import time
 from zaifbot.bot_common.bot_const import BUY, SELL, MIN_TO_CUR_AMOUNT, TRADE_ACTION
 from operator import itemgetter
 
@@ -33,14 +30,8 @@ class ContinuousTrade(ProcessBase):
         if target_price['success'] is False:
             return False
         if self._trade_status == BUY and self._last_price <= target_price['price']:
-            print('--- buy ---')
-            print('current_price:' + str(self._last_price))
-            print('target_price:' + str(target_price['price']))
             return True
         elif self._trade_status == SELL and self._last_price >= target_price['price']:
-            print('--- sell ---')
-            print('current_price:' + str(self._last_price))
-            print('target_price:' + str(target_price['price']))
             return True
         return False
 
@@ -90,8 +81,6 @@ class ContinuousTrade(ProcessBase):
         return sorted_active_orders
 
     def _process_trade(self, zaif_order, sorted_active_orders):
-        from_currency_amount_after_trade = self._from_currency_amount
-        to_currency_amount_after_trade = self._to_currency_amount
         failed_orders = []
         trade_finish = False
         for i in sorted_active_orders:
