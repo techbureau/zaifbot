@@ -53,10 +53,22 @@ class ZaifOrder:
         self._private_api = ZaifPrivateApi(self._config.api_keys.key, self._config.api_keys.secret)
 
     def get_active_orders(self):
-        return self._private_api.active_orders(currency_pair=self._config.system.currency_pair)
+        try:
+            return self._private_api.active_orders(currency_pair=self._config.system.currency_pair)
+        except:
+            return {}
 
     def trade(self, action, price, amount):
-        return self._private_api.trade(currency_pair=self._config.system.currency_pair, action=action, price=price, amount=amount)
+        try:
+            trade_result = self._private_api.trade(currency_pair=self._config.system.currency_pair,
+                                                   action=action,
+                                                   price=price,
+                                                   amount=amount)
+            if trade_result['received'] > 0.0:
+                return {'success': 1, 'return': trade_result}
+            return {'success': 0, 'return': trade_result}
+        except:
+            return {'success': 0, 'return': {'order_id': None}}
 
-    def cancel_order(order_id):
-        self._private_api.cancel_order(order_id)
+    def cancel_order(self, order_id):
+        return self._private_api.cancel_order(order_id=order_id)
