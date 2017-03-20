@@ -2,7 +2,7 @@ from zaifbot.bot_common.utils import get_current_last_price, ZaifOrder
 from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
-from zaifbot.bot_common.bot_const import BUY, SELL, MIN_AMOUNT_STEP, TRADE_ACTION, MIN_PRICE_STEP
+from zaifbot.bot_common.bot_const import BUY, SELL, MIN_AMOUNT_STEP, TRADE_ACTION, MIN_PRICE_STEP, STOP_LOSS
 
 
 class ContinuousTrade(ProcessBase):
@@ -25,6 +25,8 @@ class ContinuousTrade(ProcessBase):
 
     def is_started(self):
         self._last_price = self._round_last_price(get_current_last_price())
+        if self._check_stop_loss():
+            return True
         target_price = self._get_target_price()
         if target_price['success'] is False:
             return False
@@ -35,6 +37,8 @@ class ContinuousTrade(ProcessBase):
         return False
 
     def execute(self):
+        if self._trade_status == STOP_LOSS:
+            return True
         zaif_order = ZaifOrder()
         amount = self._get_amount()
         trade_result = zaif_order.trade(TRADE_ACTION[self._trade_status], self._last_price, amount)
@@ -108,3 +112,13 @@ class ContinuousTrade(ProcessBase):
                 % MIN_PRICE_STEP[self.config.system.currency_pair])
         else:
             return last_price - (last_price % MIN_PRICE_STEP[self.config.system.currency_pair])
+
+    def _check_stop_loss(self):
+        if self._trade_status == SELL:
+            bollinger_bands = get_bollinger_bands(self.config.system.currency_pair,
+                                                  self.config.system.sleep_time, 1,
+                                                  int(time()), self._length)
+            if bollinger_bands['return']['bollinger_bands'][0]['sd3n'] > self._last_price:
+                self._trade_status = STOP_LOSS
+                return True
+        return False

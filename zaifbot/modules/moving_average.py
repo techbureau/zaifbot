@@ -3,7 +3,6 @@ from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import numpy as np
-from time import time
 
 
 def get_need_epoch_times(start_time, end_time, period):
