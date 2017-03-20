@@ -29,7 +29,8 @@ def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma
     ma_result = moving_average.execute(ma_start_time, tl_start_time, end_time)
     if ma_result is False:
         return {'success': 0, 'error': 'failed to set up moving average'}
-    return _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time, count)
+    return _create_return_dict(sma_ema, currency_pair, period,
+                               length, end_time, tl_start_time, count)
 
 
 def get_end_time(to_epoch_time, period):
@@ -53,5 +54,6 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
             moving_average = i.MovingAverages.ema
         else:
             moving_average = 0.0
-        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average, 'close':i.TradeLogs.close, 'closed':bool(i.TradeLogs.closed)})
+        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average,
+                             'close': i.TradeLogs.close, 'closed': bool(i.TradeLogs.closed)})
     return {'success': 1, 'return': {sma_ema: return_datas}}

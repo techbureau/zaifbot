@@ -31,7 +31,7 @@ class _ZaifWebSocket:
                 result = self._ws.recv()
                 json_obj = json.loads(result)
                 return json_obj['last_price']['price']
-            except:
+            except Exception:
                 self._ws = self._get_connection()
         api = ZaifPublicApi()
         return api.last_price(self._config.system.currency_pair)['last_price']
@@ -57,7 +57,7 @@ class ZaifOrder:
         try:
             return self._private_api.active_orders(currency_pair=self._config.system.currency_pair,
                                                    is_token_both=True)
-        except:
+        except Exception:
             return {}
 
     def trade(self, action, price, amount):
@@ -70,12 +70,12 @@ class ZaifOrder:
             if trade_result['received'] > 0.0:
                 return {'success': 1, 'return': trade_result}
             return {'success': 0, 'return': trade_result}
-        except:
+        except Exception:
             return {'success': 0, 'return': {'order_id': None}}
 
     def cancel_order(self, order_id):
         try:
             cancel_result = self._private_api.cancel_order(order_id=order_id)
             save_order_log(cancel_result)
-        except:
+        except Exception:
             return False

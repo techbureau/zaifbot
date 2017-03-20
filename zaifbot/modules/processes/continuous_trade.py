@@ -2,7 +2,7 @@ from zaifbot.bot_common.utils import get_current_last_price, ZaifOrder
 from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
-from zaifbot.bot_common.bot_const import BUY, SELL, MIN_AMOUNT_STEP, TRADE_ACTION, MIN_PRICE_STEP, STOP_LOSS
+from zaifbot.bot_common.bot_const import *
 
 
 class ContinuousTrade(ProcessBase):
