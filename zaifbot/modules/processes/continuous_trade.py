@@ -24,7 +24,7 @@ class ContinuousTrade(ProcessBase):
         return 'continuous_trade'
 
     def is_started(self):
-        self._last_price = self._round_last_price(get_current_last_price())
+        self._last_price = int(self._round_last_price(get_current_last_price()))
         if self._check_stop_loss():
             return True
         target_price = self._get_target_price()
