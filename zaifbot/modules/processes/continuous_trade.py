@@ -46,7 +46,7 @@ class ContinuousTrade(ProcessBase):
             self._update_currency_amounts(self._last_price, trade_result['return']['received'])
         elif trade_result['return']['order_id']:
             zaif_order.cancel_order(trade_result['return']['order_id'])
-        if self._check_trade_finish:
+        if self._check_trade_finish():
             self._update_auto_trade_status()
         return False
 

@@ -1,5 +1,6 @@
 from zaifapi import ZaifPublicApi
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
+from zaifbot.bot_common.logger import logger
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import numpy as np
@@ -69,7 +70,8 @@ class TradeLogsSetUp:
         api_params = {'period': self._period, 'count': LIMIT_COUNT, 'to_epoch_time': end_time + 1}
         try:
             api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
-        except Exception:
+        except Exception as e:
+            logger.error(e)
             api_record = []
         required_count = self._count + self._length
         if required_count <= LIMIT_COUNT:
@@ -81,7 +83,8 @@ class TradeLogsSetUp:
         try:
             second_api_record =\
                 public_api.everything('ohlc_data', self._currency_pair, second_api_params)
-        except Exception:
+        except Exception as e:
+            logger.error(e)
             second_api_record = []
         api_record = second_api_record + api_record
         return api_record
