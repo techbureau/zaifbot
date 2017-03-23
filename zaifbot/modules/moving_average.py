@@ -1,5 +1,6 @@
 from zaifapi import ZaifPublicApi
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
+from zaifbot.bot_common.logger import logger
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import numpy as np
@@ -27,6 +28,8 @@ class TradeLogsSetUp:
         if len(target_epoch_times) == 0:
             return True
         api_records = self._get_ohlc_data_from_server(end_time)
+        if len(api_records) == 0:
+            return False
         target_trade_logs_record =\
             list(filter(lambda x: x['time'] in target_epoch_times, api_records))
         trade_logs_model_data = self._set_trade_logs_model_data(target_trade_logs_record)
@@ -65,7 +68,11 @@ class TradeLogsSetUp:
     def _get_ohlc_data_from_server(self, end_time):
         public_api = ZaifPublicApi()
         api_params = {'period': self._period, 'count': LIMIT_COUNT, 'to_epoch_time': end_time + 1}
-        api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
+        try:
+            api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
+        except Exception as e:
+            logger.error(e)
+            api_record = []
         required_count = self._count + self._length
         if required_count <= LIMIT_COUNT:
             return api_record
@@ -73,8 +80,12 @@ class TradeLogsSetUp:
         second_end_time = end_time - (LIMIT_COUNT * PERIOD_SECS[self._period]) + 1
         second_api_params =\
             {'period': self._period, 'count': count, 'to_epoch_time': second_end_time}
-        second_api_record =\
-            public_api.everything('ohlc_data', self._currency_pair, second_api_params)
+        try:
+            second_api_record =\
+                public_api.everything('ohlc_data', self._currency_pair, second_api_params)
+        except Exception as e:
+            logger.error(e)
+            second_api_record = []
         api_record = second_api_record + api_record
         return api_record
 

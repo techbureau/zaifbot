@@ -18,21 +18,25 @@ class BollingerBandsSetUp:
         target_epoch_times = self._get_target_epoch_times(start_time, end_time)
         if len(target_epoch_times) == 0:
             return True
-        sma_records = get_sma(self._currency_pair, self._period, self._count, end_time, self._length)
+        sma_records = get_sma(self._currency_pair, self._period,
+                              self._count, end_time, self._length)
+        if sma_records['success'] == 0:
+            return False
         for i in range(self._length, len(sma_records['return']['sma'])):
             if sma_records['return']['sma'][i]['time_stamp'] in target_epoch_times:
                 nums = self._get_nums(sma_records['return']['sma'], i)
                 standard_deviation = self._get_standard_deviation(nums)
                 bollinger_bands_model_data.add(self._get_bollinger_bands_model_dataset
-                                                   (sma_records['return']['sma'][i]['time_stamp'],
-                                                    sma_records['return']['sma'][i]['close'],
-                                                    standard_deviation,
-                                                    sma_records['return']['sma'][i]['closed']))
+                                               (sma_records['return']['sma'][i]['time_stamp'],
+                                                sma_records['return']['sma'][i]['moving_average'],
+                                                standard_deviation,
+                                                sma_records['return']['sma'][i]['closed']))
         return self._bollinger_bands.create_data(bollinger_bands_model_data)
 
     def _get_target_epoch_times(self, start_time, end_time):
         bollinger_bands_record = self._bollinger_bands.get_records(end_time, start_time, True)
-        return self._check_missing_records(bollinger_bands_record, start_time, end_time, self._period)
+        return self._check_missing_records(bollinger_bands_record, start_time,
+                                           end_time, self._period)
 
     @staticmethod
     def _check_missing_records(bollinger_bands_record, start_time, end_time, period):
@@ -53,16 +57,16 @@ class BollingerBandsSetUp:
             nums.append(sma_records[i - j]['close'] - sma_records[i]['moving_average'])
         return nums
 
-    def _get_bollinger_bands_model_dataset(self, time, close, standard_deviation, closed):
+    def _get_bollinger_bands_model_dataset(self, time, sma, standard_deviation, closed):
         return BollingerBands(
             time=time,
             currency_pair=self._currency_pair,
             period=self._period,
             length=self._length,
-            sd1p=close + standard_deviation,
-            sd2p=close + (standard_deviation * 2),
-            sd3p=close + (standard_deviation * 3),
-            sd1n=close - standard_deviation,
-            sd2n=close - (standard_deviation * 2),
-            sd3n=close - (standard_deviation * 3),
+            sd1p=sma + standard_deviation,
+            sd2p=sma + (standard_deviation * 2),
+            sd3p=sma + (standard_deviation * 3),
+            sd1n=sma - standard_deviation,
+            sd2n=sma - (standard_deviation * 2),
+            sd3n=sma - (standard_deviation * 3),
             closed=closed)

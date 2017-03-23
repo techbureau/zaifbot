@@ -1,5 +1,6 @@
-from .buy import Buy
-from .sell import Sell
+from .buy import BuyByPrice
+from .sell import SellByPrice
 from .custom import Custom
+from .continuous_trade import ContinuousTrade
 
-__all__ = ['Buy', 'Sell', 'Custom']
+__all__ = ['BuyByPrice', 'SellByPrice', 'Custom', 'ContinuousTrade']

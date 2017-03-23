@@ -3,9 +3,9 @@ from zaifbot.bot_common.utils import get_current_last_price
 from zaifbot.modules.processes.process_common import ProcessBase
 
 
-class Buy(ProcessBase):
+class BuyByPrice(ProcessBase):
     def get_name(self):
-        return 'buy'
+        return 'buy_by_price'
 
     def is_started(self):
         last_price = get_current_last_price()
