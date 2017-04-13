@@ -2,7 +2,6 @@ import threading
 from zaifbot.bot_common.config.property import ApiKeys, Event, System
 
 
-
 def load_config():
     return _Config()
 
