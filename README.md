@@ -20,5 +20,5 @@ zaifに対して自動的に取引を行うbot用のライブラリになりま�
 
 その他、詳細は[wiki][1]をご覧ください
 
-  [1]: https://github.com/Akira-Taniguchi/zaifbot/wiki
+  [1]: https://github.com/techbureau/zaifbot/wiki
 
