@@ -1,18 +1,12 @@
 import threading
-from zaifapi.impl import ZaifPublicApi
-from zaifbot.bot_common.config.config_object import *
 from zaifbot.bot_common.config.property import ApiKeys, Event, System
 
 
 
 def load_config():
-    return _ConfigLoader()
+    return _Config()
 
-def _read_config():
-    return Config(SystemValue(), ApiKeysValue(), EventValue())
-
-
-class _ConfigLoader:
+class _Config:
     _instance = None
     _lock = threading.Lock()
 
@@ -23,10 +17,9 @@ class _ConfigLoader:
         return cls._instance
 
     def __init__(self):
-        config_json = _read_config()
-        self._api_keys = ApiKeys(config_json)
-        self._system = System(config_json)
-        self._event = Event(config_json)
+        self._api_keys = ApiKeys()
+        self._system = System()
+        self._event = Event()
 
     @property
     def api_keys(self):

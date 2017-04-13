@@ -1,6 +1,6 @@
 class ApiKeys:
-    def __init__(self, config_json):
-        self._api_keys = config_json.api_keys
+    def __init__(self, api_keys={'key': 'key', 'secret': 'secret'}):
+        self._api_keys = api_keys
 
     @property
     def key(self):
@@ -12,25 +12,25 @@ class ApiKeys:
 
 
 class System:
-    def __init__(self, config_json):
-        self._system = config_json.system
-        self._socket = _Socket(config_json)
+    def __init__(self):
+        self._system = {'sleep_time': '1m', 'currency_pair': 'btc_jpy', 'api_domain': "api.zaif.jp", 'retry_count': 5}
+        self._socket = _Socket()
 
     @property
     def sleep_time(self):
-        return self._system.sleep_time
+        return self._system['sleep_time']
 
     @property
     def currency_pair(self):
-        return self._system.currency_pair
+        return self._system['currency_pair']
 
     @property
     def api_domain(self):
-        return self._system.api_domain
+        return self._system['api_domain']
 
     @property
     def retry_count(self):
-        return self._system.retry_count
+        return self._system['retry_count']
 
     @property
     def socket(self):
@@ -38,9 +38,9 @@ class System:
 
 
 class Event:
-    def __init__(self, config_json):
-        self._buy = _Buy(config_json)
-        self._sell = _Sell(config_json)
+    def __init__(self):
+        self._buy = _Buy()
+        self._sell = _Sell()
 
     @property
     def buy(self):
@@ -52,8 +52,8 @@ class Event:
 
 
 class _Buy:
-    def __init__(self, config_json):
-        self._buy = config_json.event.buy
+    def __init__(self):
+        self._buy = {'target_value': 100000}
 
     @property
     def target_value(self):
@@ -61,8 +61,8 @@ class _Buy:
 
 
 class _Sell:
-    def __init__(self, config_json):
-        self._sell = config_json.event.buy
+    def __init__(self):
+        self._sell = {'target_value': 110000}
 
     @property
     def target_value(self):
@@ -70,8 +70,8 @@ class _Sell:
 
 
 class _Socket:
-    def __init__(self, config_json):
-        self._socket = config_json.system.socket
+    def __init__(self):
+        self._socket = {'port': 8888}
 
     @property
     def port(self):
