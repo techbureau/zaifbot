@@ -1,6 +1,6 @@
 class ApiKeys:
     def __init__(self, config_json):
-        self._api_keys = config_json['api_keys']
+        self._api_keys = config_json.api_keys
 
     @property
     def key(self):
@@ -13,24 +13,24 @@ class ApiKeys:
 
 class System:
     def __init__(self, config_json):
-        self._system = config_json['system']
+        self._system = config_json.system
         self._socket = _Socket(config_json)
 
     @property
     def sleep_time(self):
-        return self._system['sleep_time']
+        return self._system.sleep_time
 
     @property
     def currency_pair(self):
-        return self._system['currency_pair']
+        return self._system.currency_pair
 
     @property
     def api_domain(self):
-        return self._system['api_domain']
+        return self._system.api_domain
 
     @property
     def retry_count(self):
-        return self._system['retry_count']
+        return self._system.retry_count
 
     @property
     def socket(self):
@@ -53,7 +53,7 @@ class Event:
 
 class _Buy:
     def __init__(self, config_json):
-        self._buy = config_json['event']['buy']
+        self._buy = config_json.event.buy
 
     @property
     def target_value(self):
@@ -62,7 +62,7 @@ class _Buy:
 
 class _Sell:
     def __init__(self, config_json):
-        self._sell = config_json['event']['sell']
+        self._sell = config_json.event.buy
 
     @property
     def target_value(self):
@@ -71,7 +71,7 @@ class _Sell:
 
 class _Socket:
     def __init__(self, config_json):
-        self._socket = config_json['system']['socket']
+        self._socket = config_json.system.socket
 
     @property
     def port(self):

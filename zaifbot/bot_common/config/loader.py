@@ -2,6 +2,7 @@ import json
 import sys
 import threading
 from zaifapi.impl import ZaifPublicApi
+from zaifbot.bot_common.config.config_object import *
 from zaifbot.bot_common.config.property import ApiKeys, Event, System
 
 
@@ -16,14 +17,7 @@ def _get_current_last_price(currency_pairs):
 
 
 def _read_config():
-    def get_config_path():
-        args = sys.argv
-        if len(args) <= 1:
-            return './config.json'
-        return args[1]
-
-    with open(get_config_path()) as c_file:
-        return json.load(c_file)
+    return Config(SystemValue(), ApiKeysValue(), EventValue())
 
 
 class _ConfigLoader:

@@ -5,22 +5,25 @@ class Config:
         self.event = event
 
 
-class System:
+class SystemValue:
     def __init__(self):
-        self.sleep_time = 1
+        self.sleep_time = "1m"
         self.api_domain = "api.zaif.jp"
         self.currency_pair = "btc_jpy"
         self.retry_count = 5
-        self.socket.port = 8888
+        self.socket = {}
+        self.socket['port'] = 8888
 
 
-class ApiKeys:
+class ApiKeysValue:
     def __init__(self):
         self.key = "api_key"
         self.secret = "secret"
 
 
-class Event:
+class EventValue:
     def __init__(self):
-        self.buy.target_value = 110000
-        self.sell.target_value = 110000
+        self.buy = {}
+        self.sell = {}
+        self.buy['target_value'] = 110000
+        self.sell['target_value'] = 110000
