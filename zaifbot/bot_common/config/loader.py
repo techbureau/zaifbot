@@ -1,5 +1,3 @@
-import json
-import sys
 import threading
 from zaifapi.impl import ZaifPublicApi
 from zaifbot.bot_common.config.config_object import *
