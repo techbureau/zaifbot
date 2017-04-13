@@ -1,2 +1,1 @@
-include config.json
 include zaifbot/bot_common/logging.conf
