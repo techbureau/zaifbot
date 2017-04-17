@@ -51,9 +51,9 @@ def get_current_last_price():
 
 
 class ZaifOrder:
-    def __init__(self):
+    def __init__(self, api_key, api_secret):
         self._config = load_config()
-        self._private_api = ZaifPrivateApi(self._config.api_keys.key, self._config.api_keys.secret)
+        self._private_api = ZaifPrivateApi(api_key, api_secret)
 
     def get_active_orders(self):
         try:

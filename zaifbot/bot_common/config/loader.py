@@ -16,12 +16,7 @@ class _Config:
         return cls._instance
 
     def __init__(self):
-        self._api_keys = ApiKeys()
         self._system = System()
-
-    @property
-    def api_keys(self):
-        return self._api_keys
 
     @property
     def system(self):
