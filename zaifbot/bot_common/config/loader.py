@@ -1,5 +1,5 @@
 import threading
-from zaifbot.bot_common.config.property import ApiKeys, Event, System
+from zaifbot.bot_common.config.property import ApiKeys, System
 
 
 def load_config():
@@ -18,7 +18,6 @@ class _Config:
     def __init__(self):
         self._api_keys = ApiKeys()
         self._system = System()
-        self._event = Event()
 
     @property
     def api_keys(self):
@@ -27,7 +26,3 @@ class _Config:
     @property
     def system(self):
         return self._system
-
-    @property
-    def event(self):
-        return self._event
