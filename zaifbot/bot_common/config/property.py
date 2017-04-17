@@ -35,44 +35,6 @@ class System:
     def socket(self):
         return self._socket
 
-class Event:
-    def __init__(self):
-        self._buy = _Buy()
-        self._sell = _Sell()
-
-    @property
-    def buy(self):
-        return self._buy
-
-    @property
-    def sell(self):
-        return self._sell
-
-
-class _Buy:
-    def __init__(self):
-        self._buy = {'target_value': 100000}
-
-    @property
-    def target_value(self):
-        return self._buy['target_value']
-
-    @target_value.setter
-    def target_value(self, value):
-        self._buy['target_value'] = value
-
-class _Sell:
-    def __init__(self):
-        self._sell = {'target_value': 110000}
-
-    @property
-    def target_value(self):
-        return self._sell['target_value']
-
-    @target_value.setter
-    def target_value(self, value):
-        self._buy['target_value'] = value
-
 class _Socket:
     def __init__(self):
         self._socket = {'port': 8888}
