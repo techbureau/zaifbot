@@ -1,7 +1,6 @@
 class System:
     def __init__(self, sleep_time='1m', currency_pair='btc_jpy', api_domain='api.zaif.jp', retry_count=5):
         self._system = {'sleep_time': sleep_time, 'currency_pair': currency_pair, 'api_domain': api_domain, 'retry_count': retry_count}
-        self._socket = _Socket()
 
     @property
     def sleep_time(self):
@@ -30,15 +29,3 @@ class System:
     @retry_count.setter
     def retry_count(self, count):
         self._system['retry_count'] = count
-
-    @property
-    def socket(self):
-        return self._socket
-
-class _Socket:
-    def __init__(self):
-        self._socket = {'port': 8888}
-
-    @property
-    def port(self):
-        return self._socket['port']
