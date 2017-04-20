@@ -1,57 +1,20 @@
-import json
-import threading
-from websocket import create_connection
-from zaifapi.impl import ZaifPublicApi, ZaifPrivateApi
+from time import time
+from zaifapi.impl import ZaifPrivateApi
 from zaifbot.bot_common.config import load_config
+from zaifbot.bot_common.api import ZaifLastPrice
 from zaifbot.bot_common.save_trade_log import save_trade_log
 from zaifbot.bot_common.logger import logger
-from time import time
 
 
-class _ZaifWebSocket:
-    _WEB_SOCKET_API_URI = 'ws://api.zaif.jp:8888/stream?currency_pair={}'
-    _instance = None
-    _lock = threading.Lock()
-    _ws = None
-    _config = None
-
-    def __new__(cls):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super().__new__(cls)
-                cls._config = load_config()
-                cls._ws = cls._get_connection()
-        return cls._instance
-
-    def __del__(self):
-        self._ws.close()
-
-    @property
-    def last_price(self):
-        for count in range(5):  # retry_countは参照がここだけのため消去。別のブランチで、今の実装自体が変更されると思うので数字べた書きでおいておきます。
-            try:
-                result = self._ws.recv()
-                json_obj = json.loads(result)
-                return json_obj['last_price']['price']
-            except Exception:
-                self._ws = self._get_connection()
-        api = ZaifPublicApi()
-        return api.last_price(self._config.system.currency_pair)['last_price']
-
-    @classmethod
-    def _get_connection(cls):
-        return create_connection(cls._WEB_SOCKET_API_URI.format(cls._config.system.currency_pair))
-
-
-def get_current_last_price():
-    api = _ZaifWebSocket()
-    return api.last_price
+def get_current_last_price(currency_pair):
+    api = ZaifLastPrice()
+    return api.last_price(currency_pair)
 
 
 class ZaifOrder:
-    def __init__(self, api_key, api_secret):
+    def __init__(self):
         self._config = load_config()
-        self._private_api = ZaifPrivateApi(api_key, api_secret)
+        self._private_api = ZaifPrivateApi(self._config.api_keys.key, self._config.api_keys.secret)
 
     def get_active_orders(self):
         try:
