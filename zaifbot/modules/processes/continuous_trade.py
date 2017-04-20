@@ -20,8 +20,8 @@ class ContinuousTrade(ProcessBase):
     def is_started(self, currency_pair):
         self._last_price = int(self._round_last_price(currency_pair))
         zaif_order = ZaifOrder()
-        if len(zaif_order.get_active_orders()):
-            last_trade_history = zaif_order.get_last_trade_history()
+        if len(zaif_order.get_active_orders(currency_pair)):
+            last_trade_history = zaif_order.get_last_trade_history(currency_pair)
             last_trade_values = list(last_trade_history.values())[0]
             if self._check_stop_loss(last_trade_values):
                 zaif_order.trade('ask', self._last_price, last_trade_values['amount'])
