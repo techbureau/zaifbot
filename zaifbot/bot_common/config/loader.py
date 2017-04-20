@@ -1,5 +1,5 @@
 import threading
-from zaifbot.bot_common.config.property import ApiKeys, System
+from zaifbot.bot_common.config.property import System
 
 
 def load_config():

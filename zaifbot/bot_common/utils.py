@@ -28,7 +28,7 @@ class _ZaifWebSocket:
 
     @property
     def last_price(self):
-        for count in range(self._config.system.retry_count):
+        for count in range(5):  #retry_countは、参照しているのがここだけのため消去しました。for文で繰り返す実装も変更したい
             try:
                 result = self._ws.recv()
                 json_obj = json.loads(result)

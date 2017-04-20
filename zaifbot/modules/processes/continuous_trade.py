@@ -46,7 +46,7 @@ class ContinuousTrade(ProcessBase):
 
     def _get_target_price(self):
         bollinger_bands = get_bollinger_bands(self.config.system.currency_pair,
-                                              self.config.system.sleep_time, 1,
+                                              self.sleep_time, 1,
                                               int(time()), self._length)
         if bollinger_bands['success'] == 0:
             return {'success': False}
