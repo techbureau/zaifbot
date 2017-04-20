@@ -18,7 +18,7 @@ class ContinuousTrade(ProcessBase):
         return 'continuous_trade'
 
     def is_started(self):
-        self._last_price = int(self._round_last_price(get_current_last_price()))
+        self._last_price = int(self._round_last_price(get_current_last_price('btc_jpy')))
         zaif_order = ZaifOrder()
         if len(zaif_order.get_active_orders()):
             last_trade_history = zaif_order.get_last_trade_history()
