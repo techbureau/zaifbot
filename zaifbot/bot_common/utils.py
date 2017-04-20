@@ -66,3 +66,6 @@ class ZaifOrder:
                                                    count=1)
         except Exception as e:
             return e
+
+if __name__ == '__main__':
+    print(get_current_last_price('btc_jpy'))
