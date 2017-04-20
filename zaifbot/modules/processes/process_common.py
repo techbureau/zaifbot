@@ -24,7 +24,7 @@ class ProcessBase(Process, metaclass = ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def is_started(self):
+    def is_started(self, currency_pair):
         raise NotImplementedError
 
     @abstractmethod
