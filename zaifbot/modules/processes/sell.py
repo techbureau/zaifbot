@@ -10,8 +10,8 @@ class SellByPrice(ProcessBase):
     def get_name(self):
         return 'sell_by_price'
 
-    def is_started(self):
-        last_price = get_current_last_price()
+    def is_started(self, currency_pair):
+        last_price = get_current_last_price(currency_pair)
         if last_price >= self._target_value:
             return True
         return False
