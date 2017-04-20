@@ -1,4 +1,3 @@
-from zaifbot.bot_common.config import load_config
 
 
 class ZaifBot:

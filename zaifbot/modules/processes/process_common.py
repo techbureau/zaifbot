@@ -1,14 +1,12 @@
 from abc import ABCMeta, abstractmethod
 from time import sleep
 from multiprocessing import Process
-from zaifbot.bot_common.config import load_config
 from zaifbot.bot_common.bot_const import PERIOD_SECS
 
 
 class ProcessBase(Process, metaclass=ABCMeta):
     def __init__(self, sleep_time='1m'):
         super().__init__(name=self.get_name())
-        self.config = load_config()
         self._sleep_time = sleep_time
 
     def run(self):
