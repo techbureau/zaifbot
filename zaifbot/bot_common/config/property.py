@@ -1,6 +1,6 @@
 class System:
-    def __init__(self, sleep_time='1m', currency_pair='btc_jpy', api_domain='api.zaif.jp', retry_count=5):
-        self._system = {'sleep_time': sleep_time, 'currency_pair': currency_pair, 'api_domain': api_domain, 'retry_count': retry_count}
+    def __init__(self, sleep_time='1m', currency_pair='btc_jpy', retry_count=5):
+        self._system = {'sleep_time': sleep_time, 'currency_pair': currency_pair, 'retry_count': retry_count}
 
     @property
     def sleep_time(self):
@@ -17,10 +17,6 @@ class System:
     @currency_pair.setter
     def currency_pair(self, pair):
         self._system['currency_pair'] = pair
-
-    @property
-    def api_domain(self):
-        return self._system['api_domain']
 
     @property
     def retry_count(self):
