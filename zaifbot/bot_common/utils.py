@@ -9,7 +9,7 @@ from time import time
 
 
 class _ZaifWebSocket:
-    _WEB_SOCKET_API_URI = 'ws://{}:{}/stream?currency_pair={}'
+    _WEB_SOCKET_API_URI = 'ws://api.zaif.jp:8888/stream?currency_pair={}'
     _instance = None
     _lock = threading.Lock()
     _ws = None
@@ -28,7 +28,7 @@ class _ZaifWebSocket:
 
     @property
     def last_price(self):
-        for count in range(5):  #retry_countは、参照しているのがここだけのため消去しました。for文で繰り返す実装も変更したい
+        for count in range(5):  # retry_countは参照がここだけのため消去。別のブランチで、今の実装自体が変更されると思うので数字べた書きでおいておきます。
             try:
                 result = self._ws.recv()
                 json_obj = json.loads(result)
@@ -40,9 +40,7 @@ class _ZaifWebSocket:
 
     @classmethod
     def _get_connection(cls):
-        return create_connection(cls._WEB_SOCKET_API_URI.format(cls._config.system.api_domain,
-                                                                cls._config.system.socket.port,
-                                                                cls._config.system.currency_pair))
+        return create_connection(cls._WEB_SOCKET_API_URI.format(cls._config.system.currency_pair))
 
 
 def get_current_last_price():

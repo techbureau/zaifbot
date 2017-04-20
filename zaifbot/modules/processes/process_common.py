@@ -9,11 +9,11 @@ class ProcessBase(Process, metaclass=ABCMeta):
     def __init__(self, sleep_time='1m'):
         super().__init__(name=self.get_name())
         self.config = load_config()
-        self.sleep_time = sleep_time
+        self._sleep_time = sleep_time
 
     def run(self):
         while True:
-            sleep(PERIOD_SECS[self.sleep_time])
+            sleep(PERIOD_SECS[self._sleep_time])
             if self.is_started() is False:
                 continue
             stop_process_flg = self.execute()
