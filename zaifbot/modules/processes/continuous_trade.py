@@ -3,12 +3,14 @@ from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
 from zaifbot.bot_common.bot_const import *
-from zaifbot.bot_common.trade_history import TradeHistory
+from zaifbot.bot_common.save_trade_log import TradeHistory
 
 
 class ContinuousTrade(ProcessBase):
-    def __init__(self, currency_pair, from_currency_amount, limit_diff=10, stop_loss_limit=50, length=20, sleep_time=60):
+    def __init__(self, currency_pair, from_currency_amount, api_key, api_secret, limit_diff=10, stop_loss_limit=50, length=20, sleep_time='1m'):
         super().__init__()
+        self._api_key = api_key
+        self._api_secret = api_secret
         self._length = length
         self._stop_loss = False
         self._stop_loss_limit = stop_loss_limit
@@ -31,7 +33,7 @@ class ContinuousTrade(ProcessBase):
     def is_started(self):
         self._last_price =\
             int(self._round_last_price(get_current_last_price(self._currency_pair)))
-        zaif_order = ZaifOrder()
+        zaif_order = ZaifOrder(self._api_key, self._api_secret)
         if len(zaif_order.get_active_orders(self._currency_pair)):
             last_trade_history = zaif_order.get_last_trade_history(self._currency_pair)
             last_trade_values = list(last_trade_history.values())[0]
@@ -50,7 +52,7 @@ class ContinuousTrade(ProcessBase):
         if self._stop_loss:
             print('stop loss!')
             return True
-        zaif_order = ZaifOrder()
+        zaif_order = ZaifOrder(self._api_key, self._api_secret)
         amount = self._get_amount(self._currency_pair)
         limit = self._last_price + self._limit_diff
         zaif_order.trade(self._currency_pair, 'bid', self._last_price, amount, limit)

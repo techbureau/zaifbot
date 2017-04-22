@@ -1,7 +1,6 @@
 from time import time
 from zaifapi.impl import ZaifPrivateApi
 from zaifbot.bot_common.api import ZaifLastPrice
-from zaifbot.bot_common.save_trade_log import save_trade_log
 from zaifbot.bot_common.logger import logger
 
 
@@ -29,27 +28,11 @@ class ZaifOrder:
                                         price=price,
                                         amount=amount,
                                         limit=limit)
-                trade_log = {
-                    'time': time(),
-                    'action': action,
-                    'currency_pair': currency_pair,
-                    'price': price,
-                    'amount': amount,
-                    'limit': limit
-                    }
             else:
                 self._private_api.trade(currency_pair=currency_pair,
                                         action=action,
                                         price=price,
                                         amount=amount)
-                trade_log = {
-                    'time': time(),
-                    'action': action,
-                    'currency_pair': currency_pair,
-                    'price': price,
-                    'amount': amount
-                    }
-            save_trade_log(trade_log)
         except Exception as e:
             logger.error(e)
 
