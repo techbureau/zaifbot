@@ -3,45 +3,66 @@ from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
 from zaifbot.bot_common.bot_const import *
+from zaifbot.bot_common.trade_history import TradeHistory
 
 
 class ContinuousTrade(ProcessBase):
-    def __init__(self, from_currency_amount, limit_diff=10, stop_loss_limit=50, length=20):
+    def __init__(self, currency_pair, from_currency_amount, limit_diff=10, stop_loss_limit=50, length=20, sleep_time=60):
         super().__init__()
         self._length = length
         self._stop_loss = False
         self._stop_loss_limit = stop_loss_limit
         self._limit_diff = limit_diff
         self._from_currency_amount = from_currency_amount
+        self._currency_pair = currency_pair
+        self._sleep_time = sleep_time
+        self._trade_history = TradeHistory()
+        initial_log = {
+            'currency_pair': self._currency_pair,
+            'from_currency_amount': from_currency_amount,
+            'loop period': self._sleep_time,
+            'stop_loss_limit': stop_loss_limit
+        }
+        self._trade_history.save_trade_log(initial_log)
 
     def get_name(self):
         return 'continuous_trade'
 
-    def is_started(self, currency_pair):
-        self._last_price = int(self._round_last_price(currency_pair))
+    def is_started(self):
+        self._last_price =\
+            int(self._round_last_price(get_current_last_price(self._currency_pair)))
         zaif_order = ZaifOrder()
-        if len(zaif_order.get_active_orders(currency_pair)):
-            last_trade_history = zaif_order.get_last_trade_history(currency_pair)
+        if len(zaif_order.get_active_orders(self._currency_pair)):
+            last_trade_history = zaif_order.get_last_trade_history(self._currency_pair)
             last_trade_values = list(last_trade_history.values())[0]
             if self._check_stop_loss(last_trade_values):
                 zaif_order.trade('ask', self._last_price, last_trade_values['amount'])
                 return True
             return False
-        target_price = self._get_target_price(currency_pair)
+        target_price = self._get_target_price(self._currency_pair)
         if target_price['success'] is False:
             return False
         if self._last_price <= target_price['price']:
             return True
         return False
 
-    def execute(self, currency_pair):
+    def execute(self):
         if self._stop_loss:
             print('stop loss!')
             return True
         zaif_order = ZaifOrder()
-        amount = self._get_amount(currency_pair)
+        amount = self._get_amount(self._currency_pair)
         limit = self._last_price + self._limit_diff
-        zaif_order.trade(currency_pair, 'bid', self._last_price, amount, limit)
+        zaif_order.trade(self._currency_pair, 'bid', self._last_price, amount, limit)
+        trade_log = {
+            'time': int(time()),
+            'action': 'bid',
+            'currency_pair': self._currency_pair,
+            'price': self._last_price,
+            'amount': amount,
+            'limit': limit}
+        self._trade_history.save_trade_log(trade_log)
+
         return False
 
     def _get_target_price(self, currency_pair):
@@ -58,8 +79,7 @@ class ContinuousTrade(ProcessBase):
         amount = amount - (amount % MIN_AMOUNT_STEP[currency_pair])
         return amount
 
-    def _round_last_price(self, currency_pair):
-        last_price = get_current_last_price(currency_pair)
+    def _round_last_price(self, last_price):
         return last_price + (
             (last_price + MIN_PRICE_STEP[currency_pair])
             % MIN_PRICE_STEP[currency_pair])
