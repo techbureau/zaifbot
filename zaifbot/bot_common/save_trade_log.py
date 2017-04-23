@@ -1,5 +1,6 @@
 from json import dumps
 
+
 def save_trade_log(filename, time, action, price, amount, limit=None):
     trade_log = {
         'time': time,

@@ -7,7 +7,8 @@ from zaifbot.bot_common.save_trade_log import save_trade_log
 
 
 class ContinuousTrade(ProcessBase):
-    def __init__(self, currency_pair, from_currency_amount, api_key, api_secret, limit_diff=100, stop_loss_limit=50, length=20, sleep_time='1m'):
+    def __init__(self, currency_pair, from_currency_amount, api_key, api_secret,
+                 limit_diff=100, stop_loss_limit=50, length=20, sleep_time='1m'):
         super().__init__()
         self._api_key = api_key
         self._api_secret = api_secret
@@ -18,7 +19,10 @@ class ContinuousTrade(ProcessBase):
         self._from_currency_amount = from_currency_amount
         self._currency_pair = currency_pair
         self._sleep_time = sleep_time
-        self.trade_log_name = "./trade_history_{0}_{1}_{2}_{3}_{4}.log".format(int(time()), self._currency_pair, self._from_currency_amount, self._sleep_time, stop_loss_limit)
+        self.trade_log_name =\
+            "./trade_history_{0}_{1}_{2}_{3}_{4}.log".format(int(time()), self._currency_pair,
+                                                             self._from_currency_amount,
+                                                             self._sleep_time, stop_loss_limit)
 
     def get_name(self):
         return 'continuous_trade'
