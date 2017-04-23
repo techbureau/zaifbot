@@ -3,11 +3,11 @@ from zaifbot.modules.processes.process_common import ProcessBase
 from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
 from zaifbot.bot_common.bot_const import *
-from zaifbot.bot_common.save_trade_log import TradeHistory
+from zaifbot.bot_common.save_trade_log import save_trade_log
 
 
 class ContinuousTrade(ProcessBase):
-    def __init__(self, currency_pair, from_currency_amount, api_key, api_secret, limit_diff=10, stop_loss_limit=50, length=20, sleep_time='1m'):
+    def __init__(self, currency_pair, from_currency_amount, api_key, api_secret, limit_diff=100, stop_loss_limit=50, length=20, sleep_time='1m'):
         super().__init__()
         self._api_key = api_key
         self._api_secret = api_secret
@@ -18,21 +18,15 @@ class ContinuousTrade(ProcessBase):
         self._from_currency_amount = from_currency_amount
         self._currency_pair = currency_pair
         self._sleep_time = sleep_time
-        self._trade_history = TradeHistory()
-        initial_log = {
-            'currency_pair': self._currency_pair,
-            'from_currency_amount': from_currency_amount,
-            'loop period': self._sleep_time,
-            'stop_loss_limit': stop_loss_limit
-        }
-        self._trade_history.save_trade_log(initial_log)
+        self.trade_log_name = "./trade_history_{0}_{1}_{2}_{3}_{4}.log".format(int(time()), self._currency_pair, self._from_currency_amount, self._sleep_time, stop_loss_limit)
 
     def get_name(self):
         return 'continuous_trade'
 
     def is_started(self):
+        current_last_price = get_current_last_price(self._currency_pair)
         self._last_price =\
-            int(self._round_last_price(get_current_last_price(self._currency_pair)))
+            int(self._round_last_price(current_last_price['last_price'], self._currency_pair))
         zaif_order = ZaifOrder(self._api_key, self._api_secret)
         if len(zaif_order.get_active_orders(self._currency_pair)):
             last_trade_history = zaif_order.get_last_trade_history(self._currency_pair)
@@ -56,14 +50,7 @@ class ContinuousTrade(ProcessBase):
         amount = self._get_amount(self._currency_pair)
         limit = self._last_price + self._limit_diff
         zaif_order.trade(self._currency_pair, 'bid', self._last_price, amount, limit)
-        trade_log = {
-            'time': int(time()),
-            'action': 'bid',
-            'currency_pair': self._currency_pair,
-            'price': self._last_price,
-            'amount': amount,
-            'limit': limit}
-        self._trade_history.save_trade_log(trade_log)
+        save_trade_log(self.trade_log_name, int(time()), 'bid', self._last_price, amount, limit)
 
         return False
 
@@ -81,7 +68,7 @@ class ContinuousTrade(ProcessBase):
         amount = amount - (amount % MIN_AMOUNT_STEP[currency_pair])
         return amount
 
-    def _round_last_price(self, last_price):
+    def _round_last_price(self, last_price, currency_pair):
         return last_price + (
             (last_price + MIN_PRICE_STEP[currency_pair])
             % MIN_PRICE_STEP[currency_pair])
