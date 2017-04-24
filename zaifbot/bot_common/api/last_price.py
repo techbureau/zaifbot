@@ -4,29 +4,7 @@ from threading import Thread, Event, Lock
 from zaifapi.impl import ZaifPublicApi, ZaifPublicStreamApi
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
-
-
-class _ZaifCurrencyPairs:
-    _instance = None
-    _lock = Lock()
-    _threads = {}
-    _stop_events = {}
-    _last_prices = {}
-    _currency_pairs = None
-
-    def __new__(cls):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super().__new__(cls)
-                api = ZaifPublicApi()
-                cls._currency_pairs = api.currency_pairs('all')
-        return cls._instance
-
-    def __getitem__(self, currency_pair):
-        record = list(filter(lambda x: x['currency_pair'] == currency_pair, self._currency_pairs))
-        if record:
-            return record[0]
-        return None
+from .cache import ZaifCurrencyPairs
 
 
 class ZaifLastPrice:
@@ -69,7 +47,7 @@ class ZaifLastPrice:
             return {'timestamp': jst_time_str, 'last_price': last_price}
 
         def is_token():
-            currency_pairs = _ZaifCurrencyPairs()
+            currency_pairs = ZaifCurrencyPairs()
             currency_pair_rec = currency_pairs[currency_pair]
             if currency_pair_rec:
                 return currency_pair_rec['is_token']

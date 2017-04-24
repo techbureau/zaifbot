@@ -1,6 +1,5 @@
-from time import time
 from zaifapi.impl import ZaifPrivateApi
-from zaifbot.bot_common.api import ZaifLastPrice
+from zaifbot.bot_common.api.last_price import ZaifLastPrice
 from zaifbot.bot_common.logger import logger
 
 
