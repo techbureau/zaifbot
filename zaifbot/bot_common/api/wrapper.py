@@ -1,6 +1,7 @@
 import traceback
 from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifPrivateApi, ZaifPublicApi
+from zaifbot.bot_common.save_trade_log import save_trade_log
 
 
 def with_retry(func):
@@ -14,12 +15,10 @@ def with_retry(func):
         return _wrapper
 
 
-class NeoZaifPrivateApi(ZaifPrivateApi):
+class BotPrivateApi(ZaifPrivateApi):
 
     def __init__(self, key, secret, nonce=None):
-        self._key = key
-        self._secret = secret
-        super().__init__(nonce)
+        super().__init__(key, secret, nonce)
 
     @with_retry
     def active_orders(self, **kwargs):
@@ -66,7 +65,7 @@ class NeoZaifPrivateApi(ZaifPrivateApi):
         return super().withdraw_history(**kwargs)
 
 
-class NeoZaifPublicApi(ZaifPublicApi):
+class BotPublicApi(ZaifPublicApi):
 
     @with_retry
     def last_price(self, currency_pair):
