@@ -3,18 +3,14 @@ from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifPrivateApi, ZaifPublicApi
 
 
-def with_retry(func, exception=None):
+def with_retry(func):
     def _wrapper(*args, **kwargs):
         for i in range(5):
             try:
-                func(*args, **kwargs)
+                return func(*args, **kwargs)
             except Exception as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-                if exception:
-                    exception()
-            else:
-                break
         return _wrapper
 
 
