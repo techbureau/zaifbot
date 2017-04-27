@@ -17,7 +17,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License'
     ],
-    install_requires=['zaifapi==1.5.0', 'numpy==1.12.0', 'SQLAlchemy==1.1.5', 'websocket-client==0.40.0'],
+    install_requires=['zaifapi==1.5.1', 'numpy==1.12.0', 'SQLAlchemy==1.1.5', 'websocket-client==0.40.0'],
     entry_points="""\
       [console_scripts]
       update_assignee_id = zaifbot:main

@@ -1,22 +1,34 @@
 import traceback
+import time
 from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifPrivateApi, ZaifPublicApi
 from zaifbot.bot_common.save_trade_log import save_trade_log
 
 
 def with_retry(func):
-    def _wrapper(*args, **kwargs):
+    def _wrapper(self, *args, **kwargs):
         for i in range(5):
             try:
-                return func(*args, **kwargs)
+                return func(self, *args, **kwargs)
+            except ZaifApiError as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                break
+            except ZaifApiNonceError as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                self._nonce += 1
+                continue
             except Exception as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-        return _wrapper
+                time.sleep(5)
+                continue
+    return _wrapper
 
 
+# todo: 取引履歴を自動でつける機能を入れる
 class BotPrivateApi(ZaifPrivateApi):
-
     def __init__(self, key, secret, nonce=None):
         super().__init__(key, secret, nonce)
 
