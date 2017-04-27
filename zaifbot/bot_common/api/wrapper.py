@@ -17,7 +17,7 @@ def with_retry(func):
             except ZaifApiNonceError as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-                self._nonce += 1
+                # nonceをupdateする処理を入れる
                 continue
             except Exception as e:
                 logger.error(e)
@@ -27,8 +27,8 @@ def with_retry(func):
     return _wrapper
 
 
-# todo: 取引履歴を自動でつける機能を入れる
 class BotPrivateApi(ZaifPrivateApi):
+    # 初期化時にnonceに関する処理を入れたい
     def __init__(self, key, secret, nonce=None):
         super().__init__(key, secret, nonce)
 
