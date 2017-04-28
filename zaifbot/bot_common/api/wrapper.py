@@ -26,7 +26,7 @@ def with_retry(func):
     return _wrapper
 
 
-class BotPrivateApi(ZaifTradeApi):
+class BotTradeApi(ZaifTradeApi):
     def __init__(self, key, secret, nonce=None):
         super().__init__(key, secret, nonce)
 
