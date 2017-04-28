@@ -1,4 +1,4 @@
-from zaifapi import ZaifPublicApi
+from zaifbot.bot_common.api.wrapper import BotPublicApi
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
 from zaifbot.bot_common.logger import logger
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
@@ -66,7 +66,7 @@ class TradeLogsSetUp:
         return trade_logs_model_data
 
     def _get_ohlc_data_from_server(self, end_time):
-        public_api = ZaifPublicApi()
+        public_api = BotPublicApi()
         api_params = {'period': self._period, 'count': LIMIT_COUNT, 'to_epoch_time': end_time + 1}
         try:
             api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
