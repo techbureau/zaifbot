@@ -1,12 +1,16 @@
 import traceback
 import time
+import random
 from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
+
+RETRY_COUNT = 5
+WAIT_SECOND = 5
 
 
 def with_retry(func):
     def _wrapper(self, *args, **kwargs):
-        for i in range(5):
+        for i in range(RETRY_COUNT):
             try:
                 return func(self, *args, **kwargs)
             except ZaifApiError as e:
@@ -16,12 +20,13 @@ def with_retry(func):
             except ZaifApiNonceError as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-                time.sleep(1)
+                a = random.uniform(0.5, 1.0)
+                time.sleep(a)
                 continue
             except Exception as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-                time.sleep(5)
+                time.sleep(WAIT_SECOND)
                 continue
     return _wrapper
 
