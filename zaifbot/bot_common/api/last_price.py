@@ -1,7 +1,8 @@
 import traceback
 from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
-from zaifapi.impl import ZaifPublicApi, ZaifPublicStreamApi
+from zaifapi.impl import ZaifPublicStreamApi
+from zaifbot.bot_common.api.wrapper import BotPublicApi
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
 from .cache import ZaifCurrencyPairs
@@ -40,7 +41,7 @@ class ZaifLastPrice:
 
     def last_price(self, currency_pair):
         def get_token_last_price():
-            api = ZaifPublicApi()
+            api = BotPublicApi()
             last_price = api.last_price(currency_pair)['last_price']
             jst_time = datetime.utcnow() + timedelta(hours=9)
             jst_time_str = jst_time.strftime('%Y-%m-%d %H:%M:%S.%f')

@@ -1,4 +1,4 @@
-from zaifapi.impl import ZaifPrivateApi
+from zaifbot.bot_common.api.wrapper import BotTradeApi
 from zaifbot.bot_common.api.last_price import ZaifLastPrice
 from zaifbot.bot_common.logger import logger
 
@@ -10,7 +10,7 @@ def get_current_last_price(currency_pair):
 
 class ZaifOrder:
     def __init__(self, api_key, api_secret):
-        self._private_api = ZaifPrivateApi(api_key, api_secret)
+        self._private_api = BotTradeApi(api_key, api_secret)
 
     def get_active_orders(self, currency_pair):
         try:

@@ -2,7 +2,7 @@ import time
 import traceback
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
-from zaifapi.impl import ZaifPrivateApi
+from zaifbot.bot_common.api.wrapper import BotTradeApi
 from zaifbot.bot_common.utils import get_current_last_price, logger
 from zaifbot.bot_common.errors import ZaifBotError
 from .cache import ZaifCurrencyPairs
@@ -10,7 +10,7 @@ from .cache import ZaifCurrencyPairs
 
 class CancelOrder(metaclass=ABCMeta):
     def __init__(self, key, secret, order_id, currency_pair):
-        self._private_api = ZaifPrivateApi(key, secret)
+        self._private_api = BotTradeApi(key, secret)
         self._order_id = order_id
         self._is_token = self._is_token(currency_pair)
 
