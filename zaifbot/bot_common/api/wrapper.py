@@ -1,8 +1,7 @@
 import traceback
 import time
 from zaifbot.bot_common.logger import logger
-from zaifapi.impl import ZaifPrivateApi, ZaifPublicApi
-from zaifbot.bot_common.save_trade_log import save_trade_log
+from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 
 
 def with_retry(func):
@@ -13,11 +12,11 @@ def with_retry(func):
             except ZaifApiError as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-                break
+                raise
             except ZaifApiNonceError as e:
                 logger.error(e)
                 logger.error(traceback.format_exc())
-                # nonceをupdateする処理を入れる
+                time.sleep(1)
                 continue
             except Exception as e:
                 logger.error(e)
@@ -27,8 +26,7 @@ def with_retry(func):
     return _wrapper
 
 
-class BotPrivateApi(ZaifPrivateApi):
-    # 初期化時にnonceに関する処理を入れたい
+class BotPrivateApi(ZaifTradeApi):
     def __init__(self, key, secret, nonce=None):
         super().__init__(key, secret, nonce)
 
