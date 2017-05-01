@@ -1,7 +1,6 @@
 import time
 from threading import Thread, Event
 from datetime import datetime
-from zaifbot.bot_common.logger import logger
 from abc import ABCMeta, abstractmethod
 from zaifbot.bot_common.api.wrapper import BotTradeApi
 from zaifbot.bot_common.utils import get_current_last_price
@@ -31,10 +30,10 @@ class AutoCancelClient:
             active_cancel_orders.append(auto_cancel_order.get_info())
         return active_cancel_orders
 
-    def take_back_cancel(self, cancel_id):
+    def stop_cancel(self, cancel_id):
         for cancel_order in self._auto_cancels_orders:
             if cancel_id == id(cancel_order):
-                cancel_order._stop_event = True
+                cancel_order.stop()
                 return
             
 
@@ -53,10 +52,12 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         self._start_time = time.time()
         self._start_price = get_current_last_price(self._currency_pair)['last_price']
         while self._stop_event.is_set() is False:
-            #active_orders = self._private_api.active_orders(currency_pair=self._currency_pair)
-            #self._start_price = active_orders[str(self._order_id)]['price']
+            active_orders = self._private_api.active_orders(currency_pair=self._currency_pair)
+            if str(self._order_id) not in active_orders:
+                self._stop()
+                continue
             if self.is_able_to_cancel():
-                self.try_cancel()
+                self.execute()
             else:
                 time.sleep(1)
 
@@ -69,8 +70,11 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def try_cancel(self):
+    def execute(self):
         raise NotImplementedError
+
+    def stop(self):
+        self._stop_event.set()
 
     @staticmethod
     def _is_token(currency_pair):
@@ -80,9 +84,6 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
             return record['is_token']
         raise ZaifBotError('illegal currency_pair:{}'.format(currency_pair))
 
-    def _stop(self):
-        self._stop_event.set()
-
 
 class _AutoCancelByTime(_AutoCancelOrder):
     def __init__(self, key, secret, order_id, currency_pair, wait_sec):
@@ -90,10 +91,10 @@ class _AutoCancelByTime(_AutoCancelOrder):
         self._wait_sec = wait_sec
         self._type = 'by_time'
 
-    def try_cancel(self):
+    def execute(self):
         self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
         print('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
-        self._stop()
+        self.stop()
 
     def get_info(self):
         item = {
@@ -110,10 +111,9 @@ class _AutoCancelByTime(_AutoCancelOrder):
         return item
 
     def is_able_to_cancel(self):
-        active_orders = self._private_api.active_orders(currency_pair=self._currency_pair)
-        if str(self._order_id) not in active_orders:
+        if time.time() - self._start_time < self._wait_sec:
             return False
-        return True if time.time() - self._start_time >= self._wait_sec else False
+        return True
 
 
 class _AutoCancelByPrice(_AutoCancelOrder):
@@ -139,20 +139,13 @@ class _AutoCancelByPrice(_AutoCancelOrder):
         }
         return item
 
-    def try_cancel(self):
+    def execute(self):
         self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
         print('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
-        self._stop()
+        self.stop()
 
     def is_able_to_cancel(self):
-        active_orders = self._private_api.active_orders(currency_pair=self._currency_pair)
-        #self._start_price = active_orders[str(self._order_id)]['price']
-        if str(self._order_id) not in active_orders:
-            return False
         last_price = get_current_last_price(self._currency_pair)['last_price']
-        logger.error(last_price)
-        logger.error(self._start_price)
-        if abs(self._start_price - last_price) > self._target_margin:
-            return True
-        else:
+        if abs(self._start_price - last_price) < self._target_margin:
             return False
+        return True
