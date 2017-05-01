@@ -1,5 +1,6 @@
 import time
 from threading import Thread, Event
+from threading import Lock
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from zaifbot.bot_common.api.wrapper import BotTradeApi
@@ -32,7 +33,8 @@ class AutoCancelClient:
 
     def stop_cancel(self, order_id, currency_pair):
         for cancel in self._auto_cancels_orders:
-            if order_id == cancel.order_id() and currency_pair == cancel.currency_pair():
+            # TODO: これだと、同じ注文に対する複数のキャンセルを区別できない
+            if order_id == cancel.order_id and currency_pair == cancel.currency_pair:
                 cancel.stop()
                 print('cancel stopped: {{ order_id: {} }}'.format(order_id))
             return
@@ -43,7 +45,8 @@ _SLEEP_TIME = 1
 
 class _AutoCancelOrder(Thread, metaclass=ABCMeta):
     def __init__(self, key, secret, order_id, currency_pair):
-        super().__init__()
+        super().__init__(daemon=True)
+        self.lock = Lock()
         self._private_api = BotTradeApi(key, secret)
         self._order_id = order_id
         self._currency_pair = currency_pair
@@ -78,7 +81,8 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         raise NotImplementedError
 
     def stop(self):
-        self._stop_event.set()
+        with self.lock:
+            self._stop_event.set()
 
     @staticmethod
     def _is_token(currency_pair):
@@ -88,9 +92,11 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
             return record['is_token']
         raise ZaifBotError('illegal currency_pair:{}'.format(currency_pair))
 
+    @property
     def order_id(self):
         return self._order_id
 
+    @property
     def currency_pair(self):
         return self._currency_pair
 
@@ -102,9 +108,10 @@ class _AutoCancelByTime(_AutoCancelOrder):
         self._type = 'by_time'
 
     def execute(self):
-        self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
-        print('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
-        self.stop()
+        with self.lock:
+            self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
+            print('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
+            self.stop()
 
     def get_info(self):
         item = {
@@ -148,9 +155,10 @@ class _AutoCancelByPrice(_AutoCancelOrder):
         return item
 
     def execute(self):
-        self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
-        print('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
-        self.stop()
+        with self.lock:
+            self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
+            print('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
+            self.stop()
 
     def is_able_to_cancel(self):
         last_price = get_current_last_price(self._currency_pair)['last_price']
