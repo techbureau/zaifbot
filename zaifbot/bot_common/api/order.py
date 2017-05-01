@@ -35,7 +35,10 @@ class AutoCancelClient:
             if cancel_id == id(cancel_order):
                 cancel_order.stop()
                 return
+
             
+_SLEEP_TIME = 1
+
 
 class _AutoCancelOrder(Thread, metaclass=ABCMeta):
     def __init__(self, key, secret, order_id, currency_pair):
@@ -59,7 +62,7 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
             if self.is_able_to_cancel():
                 self.execute()
             else:
-                time.sleep(1)
+                time.sleep(_SLEEP_TIME)
 
     @abstractmethod
     def get_info(self):
