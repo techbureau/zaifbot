@@ -30,13 +30,14 @@ class AutoCancelClient:
             active_cancel_orders.append(auto_cancel_order.get_info())
         return active_cancel_orders
 
-    def stop_cancel(self, cancel_id):
-        for cancel_order in self._auto_cancels_orders:
-            if cancel_id == id(cancel_order):
-                cancel_order.stop()
-                return
+    def stop_cancel(self, order_id, currency_pair):
+        for cancel in self._auto_cancels_orders:
+            if order_id == cancel.order_id() and currency_pair == cancel.currency_pair():
+                cancel.stop()
+                print('cancel stopped: {{ order_id: {} }}'.format(order_id))
+            return
 
-            
+
 _SLEEP_TIME = 1
 
 
@@ -57,7 +58,7 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         while self._stop_event.is_set() is False:
             active_orders = self._private_api.active_orders(currency_pair=self._currency_pair)
             if str(self._order_id) not in active_orders:
-                self._stop()
+                self.stop()
                 continue
             if self.is_able_to_cancel():
                 self.execute()
@@ -87,6 +88,12 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
             return record['is_token']
         raise ZaifBotError('illegal currency_pair:{}'.format(currency_pair))
 
+    def order_id(self):
+        return self._order_id
+
+    def currency_pair(self):
+        return self._currency_pair
+
 
 class _AutoCancelByTime(_AutoCancelOrder):
     def __init__(self, key, secret, order_id, currency_pair, wait_sec):
@@ -101,7 +108,6 @@ class _AutoCancelByTime(_AutoCancelOrder):
 
     def get_info(self):
         item = {
-            'id': id(self),
             'cancel_type': self._type,
             'order_id': self._order_id,
             'currency_pair': self._currency_pair,
@@ -129,7 +135,6 @@ class _AutoCancelByPrice(_AutoCancelOrder):
     def get_info(self):
         last_price = get_current_last_price(self._currency_pair)['last_price']
         item = {
-            'id': id(self),
             'cancel_type': self._type,
             'order_id': self._order_id,
             'currency_pair': self._currency_pair,
