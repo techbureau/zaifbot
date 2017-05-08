@@ -1,6 +1,5 @@
 import time
 from threading import Thread, Event
-from threading import Lock
 from datetime import datetime
 from uuid import uuid4
 from abc import ABCMeta, abstractmethod
@@ -19,28 +18,38 @@ class AutoCancelClient:
         auto_cancel = _AutoCancelByTime(self._trade_api, order_id, currency_pair, wait_sec)
         auto_cancel.start()
         self._auto_cancel_orders[auto_cancel.id] = auto_cancel
+        return auto_cancel.get_info()
 
     def cancel_by_price(self, order_id, currency_pair, target_margin):
         auto_cancel = _AutoCancelByPrice(self._trade_api, order_id, currency_pair, target_margin)
         auto_cancel.start()
         self._auto_cancel_orders[auto_cancel.id] = auto_cancel
+        return auto_cancel.get_info()
 
     def get_active_cancel_orders(self):
+        self._remove_dead_threads()
         active_cancel_orders = []
-        for auto_cancel_order in self._auto_cancel_orders:
+        for auto_cancel_order in self._auto_cancel_orders.values():
             active_cancel_orders.append(auto_cancel_order.get_info())
         return active_cancel_orders
 
     def stop_cancel(self, cancel_id):
-        try:
-            cancel = self._auto_cancel_orders[cancel_id]
-        except KeyError as e:
-            logger.error(e)
+        self._remove_dead_threads()
+        cancel_order = self._auto_cancel_orders.get(cancel_id, None)
+        if cancel_order is None:
+            logger.warn('couldn\'t find cancel_id you gave : {}'.format(cancel_id))
             return
-        cancel.stop()
-        cancel.join()
-        logger.info('cancel stopped: {{ {} }}'.format(cancel.get_info()))
-        return cancel.get_info()
+        else:
+            cancel_order.stop()
+            cancel_order.join()
+            logger.info('cancel stopped: {{ {} }}'.format(cancel_order.get_info()))
+            self._auto_cancel_orders.pop(cancel_id)
+        return cancel_order.get_info()
+
+    def _remove_dead_threads(self):
+        for k, v in self._auto_cancel_orders.items():
+            if v.is_alive() is False:
+                self._auto_cancel_orders.pop(k)
 
 
 _SLEEP_TIME = 1
@@ -49,19 +58,16 @@ _SLEEP_TIME = 1
 class _AutoCancelOrder(Thread, metaclass=ABCMeta):
     def __init__(self, trade_api, order_id, currency_pair):
         super().__init__(daemon=True)
-        self.lock = Lock()
         self._private_api = trade_api
-        self._id = uuid4().int
+        self._id = str(uuid4())[:8]
         self._order_id = order_id
         self._currency_pair = currency_pair
         self._is_token = self._is_token(currency_pair)
         self._stop_event = Event()
         self._start_time = None
-        self._start_price = None
 
     def run(self):
         self._start_time = time.time()
-        self._start_price = get_current_last_price(self._currency_pair)['last_price']
         while self._stop_event.is_set() is False:
             active_orders = self._private_api.active_orders(currency_pair=self._currency_pair)
             if str(self._order_id) not in active_orders:
@@ -72,17 +78,22 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
             else:
                 time.sleep(_SLEEP_TIME)
 
-    @abstractmethod
     def get_info(self):
-        raise NotImplementedError
+        info = {
+            'id': self.id,
+            'cancel_type': self.get_type(),
+            'order_id': self._order_id,
+            'currency_pair': self._currency_pair,
+            'is_token': self._is_token,
+            'current_price': get_current_last_price(self._currency_pair)['last_price'],
+            'auto_cancel_started': self._start_time,
+        }
+        return info
 
-    @abstractmethod
-    def need_cancel_now(self):
-        raise NotImplementedError
-
-    @abstractmethod
     def execute(self):
-        raise NotImplementedError
+        self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
+        logger.info('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
+        self.stop()
 
     def stop(self):
         self._stop_event.set()
@@ -97,39 +108,35 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
 
     @property
     def id(self):
-        return self.id
+        return self._id
+
+    @abstractmethod
+    def get_type(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def need_cancel_now(self):
+        raise NotImplementedError
 
 
 class _AutoCancelByTime(_AutoCancelOrder):
     def __init__(self, trade_api, order_id, currency_pair, wait_sec):
         super().__init__(trade_api, order_id, currency_pair)
         self._wait_sec = wait_sec
-        self._type = 'by_time'
-
-    def execute(self):
-        with self.lock:
-            self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
-            logger.info('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
-            self.stop()
 
     def get_info(self):
-        item = {
-            'id': self._id,
-            'cancel_type': self._type,
-            'order_id': self._order_id,
-            'currency_pair': self._currency_pair,
-            'is_token': self._is_token,
-            'current_price': get_current_last_price(self._currency_pair)['last_price'],
-            'auto_cancel_started': self._start_time,
-            'wait_sec': self._wait_sec,
-            'rest_time': self._wait_sec - (time.time() - self._start_time)
-        }
-        return item
+        info = super().get_info()
+        info['wait_sec'] = self._wait_sec
+        info['rest_time'] = self._wait_sec - (time.time() - self._start_time)
+        return info
 
     def need_cancel_now(self):
         if time.time() - self._start_time < self._wait_sec:
             return False
         return True
+
+    def get_type(self):
+        return 'by_time'
 
 
 class _AutoCancelByPrice(_AutoCancelOrder):
@@ -137,32 +144,24 @@ class _AutoCancelByPrice(_AutoCancelOrder):
         super().__init__(trade_api, order_id, currency_pair)
         self._target_margin = target_margin
         self._currency_pair = currency_pair
-        self._type = 'by_price'
+        self._start_price = None
 
     def get_info(self):
-        last_price = get_current_last_price(self._currency_pair)['last_price']
-        item = {
-            'id': self._id,
-            'cancel_type': self._type,
-            'order_id': self._order_id,
-            'currency_pair': self._currency_pair,
-            'is_token': self._is_token,
-            'current_price': last_price,
-            'auto_cancel_started': self._start_time,
-            'start_price': self._start_price,
-            'target_margin': self._target_margin,
-            'current_margin': abs(last_price - self._start_price),
-        }
-        return item
+        info = super().get_info()
+        info['start_price'] = self._start_price
+        info['target_margin'] = self._target_margin
+        info['current_margin'] = abs(info['current_price'] - self._start_price)
+        return info
 
-    def execute(self):
-        with self.lock:
-            self._private_api.cancel_order(order_id=self._order_id, is_token=self._is_token)
-            logger.info('order canceled \n {{order_id: {0}, timestamp: {1}}}'.format(self._order_id, datetime.now()))
-            self.stop()
+    def run(self):
+        self._start_price = get_current_last_price(self._currency_pair)['last_price']
+        super().run()
 
     def need_cancel_now(self):
         last_price = get_current_last_price(self._currency_pair)['last_price']
         if abs(self._start_price - last_price) < self._target_margin:
             return False
         return True
+
+    def get_type(self):
+        return 'by_price'
