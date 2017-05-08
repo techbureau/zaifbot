@@ -32,12 +32,11 @@ class ZaifLastPrice:
             self._stop_events[currency_pair] = stop_event
         if currency_pair not in self._threads:
             create_stream_thread()
-        target_thread = self._threads[currency_pair]
-        if target_thread.is_error_happened:
+        if self._threads[currency_pair].is_error_happened:
             create_stream_thread()
-        if target_thread.is_alive() is False:
+        if self._threads[currency_pair].is_alive() is False:
             raise ZaifBotError('thread is dead')
-        return target_thread
+        return self._threads[currency_pair]
 
     def last_price(self, currency_pair):
         def get_token_last_price():
