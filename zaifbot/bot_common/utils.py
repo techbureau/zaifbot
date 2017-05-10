@@ -1,5 +1,4 @@
 from zaifbot.modules.api.wrapper import BotTradeApi
-
 from zaifbot.bot_common.logger import logger
 from zaifbot.modules.api.last_price import ZaifLastPrice
 

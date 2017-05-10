@@ -1,5 +1,4 @@
 from threading import Lock
-
 from zaifbot.modules.api.wrapper import BotPublicApi
 
 

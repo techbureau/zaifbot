@@ -1,9 +1,7 @@
 import traceback
 from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
-
 from zaifapi.impl import ZaifPublicStreamApi
-
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
 from zaifbot.modules.api.wrapper import BotPublicApi
