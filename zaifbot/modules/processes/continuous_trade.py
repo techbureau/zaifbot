@@ -1,9 +1,9 @@
-from zaifbot.bot_common.utils import get_current_last_price, ZaifOrder
-from zaifbot.modules.processes.process_common import ProcessBase
-from zaifbot.bollinger_bands import get_bollinger_bands
 from time import time
+from zaifbot.bollinger_bands import get_bollinger_bands
 from zaifbot.bot_common.bot_const import *
 from zaifbot.bot_common.save_trade_log import save_trade_log
+from zaifbot.modules.processes.process_common import ProcessBase
+from zaifbot.modules.utils import get_current_last_price, ZaifOrder
 
 
 class ContinuousTrade(ProcessBase):

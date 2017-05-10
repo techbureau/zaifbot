@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from zaifbot.bot_common.utils import get_current_last_price
 from zaifbot.modules.processes.process_common import ProcessBase
+from zaifbot.modules.utils import get_current_last_price
 
 
 class BuyByPrice(ProcessBase):
