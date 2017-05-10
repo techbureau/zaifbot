@@ -1,5 +1,6 @@
 from threading import Lock
-from zaifbot.bot_common.api.wrapper import BotPublicApi
+
+from zaifbot.modules.api.wrapper import BotPublicApi
 
 
 class ZaifCurrencyPairs:
