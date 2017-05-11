@@ -6,7 +6,6 @@ from zaifbot.models import moving_average, bollinger_bands
 class DaoBase(metaclass=ABCMeta):
     def __init__(self):
         self.model = self.get_model()
-        Base.metadata.create_all(bind=engine, tables=[self.model.__table__])
 
     @classmethod
     def get_session(cls):
