@@ -1,12 +1,24 @@
 from zaifbot.modules.api.wrapper import BotTradeApi
 from zaifbot.bot_common.logger import logger
 from zaifbot.modules.api.last_price import ZaifLastPrice
+from zaifbot.modules.api.cache import ZaifCurrencyPairs
 
 
 def get_current_last_price(currency_pair):
     api = ZaifLastPrice()
     return api.last_price(currency_pair)
 
+
+def get_bid_amount(from_currency_amount, last_price, currency_pair):
+    currency_pair_info = _get_currency_pair_info(currency_pair)
+    amount = from_currency_amount / last_price
+    amount = amount - (amount % currency_pair_info['item_unit_step'])
+    return amount
+
+
+def _get_currency_pair_info(currency_pair):
+    currency_pair_infos = ZaifCurrencyPairs()
+    return currency_pair_infos[currency_pair]
 
 class ZaifOrder:
     def __init__(self, api_key, api_secret):
