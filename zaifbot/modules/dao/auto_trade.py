@@ -1,4 +1,5 @@
 from zaifbot.modules.dao import DaoBase
+# todo: AutoTradeが存在しない
 from zaifbot.models.auto_trade import AutoTrade
 from sqlalchemy import exc
 
