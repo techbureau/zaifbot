@@ -1,9 +1,9 @@
-from zaifbot.bot_common.api.wrapper import BotPublicApi
+import numpy as np
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
 from zaifbot.bot_common.logger import logger
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
+from zaifbot.modules.api.wrapper import BotPublicApi
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
-import numpy as np
 
 
 def get_need_epoch_times(start_time, end_time, period):

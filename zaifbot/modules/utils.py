@@ -1,6 +1,6 @@
-from zaifbot.bot_common.api.wrapper import BotTradeApi
-from zaifbot.bot_common.api.last_price import ZaifLastPrice
+from zaifbot.modules.api.wrapper import BotTradeApi
 from zaifbot.bot_common.logger import logger
+from zaifbot.modules.api.last_price import ZaifLastPrice
 
 
 def get_current_last_price(currency_pair):
