@@ -9,7 +9,8 @@ def get_current_last_price(currency_pair):
     return api.last_price(currency_pair)
 
 
-def get_bid_amount(from_currency_amount, last_price, currency_pair):
+def get_bid_amount(currency_pair, from_currency_amount=None, last_price=None):
+    last_price = get_current_last_price(currency_pair)['last_price'] if last_price is None else last_price
     currency_pair_info = _get_currency_pair_info(currency_pair)
     amount = from_currency_amount / last_price
     amount = amount - (amount % currency_pair_info['item_unit_step'])
