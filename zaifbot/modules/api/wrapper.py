@@ -105,7 +105,9 @@ class BotPublicApi(ZaifPublicApi):
     @_with_retry
     def last_price(self, currency_pair):
         last_price = super().last_price(currency_pair)
-        return _price_adjustment(currency_pair, last_price)
+        last_price['last_price'] = _price_adjustment(currency_pair,
+                                                     last_price['last_price'])
+        return last_price
 
     @_with_retry
     def ticker(self, currency_pair):
@@ -132,7 +134,7 @@ class BotPublicApi(ZaifPublicApi):
         return super().everything(func_name, currency_pair, params)
 
 
-# TODO: いずれ消す
+# TODO: いずれ消したメソッド
 def _price_adjustment(currency_pair, price):
     if currency_pair == 'btc_jpy':
         return int(price)
