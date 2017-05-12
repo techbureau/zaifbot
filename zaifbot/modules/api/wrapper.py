@@ -4,7 +4,7 @@ import random
 from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
-from zaifbot.modules.utils import get_round_price
+from zaifbot.modules.utils import get_round_price, get_round_amount
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
@@ -93,6 +93,7 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def withdraw(self, **kwargs):
+        kwargs['amount'] = get_round_amount(kwargs['currency'] + '_jpy', kwargs['amount'])
         return super().withdraw(**kwargs)
 
     @_with_retry
