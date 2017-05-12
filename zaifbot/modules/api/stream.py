@@ -56,15 +56,15 @@ class ZaifLastPrice:
             return get_token_last_price()
         receive = self._get_target_thread(currency_pair).last_receive
         return {'timestamp': receive['timestamp'],
-                'last_price': _price_adjustment(currency_pair, receive['last_price']['price'])}
+                'last_price': _btc_price_adjustment(currency_pair, receive['last_price']['price'])}
 
     def close_all_socket(self):
         [event.set() for event in self._stop_events.values()]
         [thread.join() for thread in self._threads.values()]
 
 
-# TODO: いずれ消すメソッド
-def _price_adjustment(currency_pair, price):
+# TODO: すぐに消したいメソッド
+def _btc_price_adjustment(currency_pair, price):
     if currency_pair == 'btc_jpy':
         return int(price)
     else:

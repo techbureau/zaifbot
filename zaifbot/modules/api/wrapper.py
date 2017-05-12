@@ -70,7 +70,7 @@ class BotTradeApi(ZaifTradeApi):
         price = get_round_price(kwargs['currency_pair'],
                                 kwargs['price'],
                                 is_buy=True)
-        kwargs['price'] = price
+        kwargs['price'] = _btc_price_adjustment(kwargs['currency_pair'], price)
         kwargs['action'] = 'bid'
         return super().trade(**kwargs)
 
@@ -79,8 +79,8 @@ class BotTradeApi(ZaifTradeApi):
         price = get_round_price(kwargs['currency_pair'],
                                 kwargs['price'],
                                 is_buy=False)
-        kwargs['price'] = price
-        kwargs['action'] = 'asc'
+        kwargs['price'] = _btc_price_adjustment(kwargs['currency_pair'], price)
+        kwargs['action'] = 'ask'
         return super().trade(**kwargs)
 
     @_with_retry
@@ -105,8 +105,8 @@ class BotPublicApi(ZaifPublicApi):
     @_with_retry
     def last_price(self, currency_pair):
         last_price = super().last_price(currency_pair)
-        last_price['last_price'] = _price_adjustment(currency_pair,
-                                                     last_price['last_price'])
+        last_price['last_price'] = _btc_price_adjustment(currency_pair,
+                                                         last_price['last_price'])
         return last_price
 
     @_with_retry
@@ -134,8 +134,8 @@ class BotPublicApi(ZaifPublicApi):
         return super().everything(func_name, currency_pair, params)
 
 
-# TODO: いずれ消したメソッド
-def _price_adjustment(currency_pair, price):
+# TODO: 速攻で消したいメソッド
+def _btc_price_adjustment(currency_pair, price):
     if currency_pair == 'btc_jpy':
         return int(price)
     else:
