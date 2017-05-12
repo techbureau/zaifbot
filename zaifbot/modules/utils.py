@@ -1,4 +1,4 @@
-from zaifbot.modules.api.last_price import ZaifLastPrice
+from zaifbot.modules.api.stream import ZaifLastPrice
 from zaifbot.modules.api.cache import ZaifCurrencyPairs
 
 
