@@ -1,5 +1,5 @@
 from threading import Lock
-from zaifbot.modules.api.wrapper import BotPublicApi
+from zaifapi.impl import ZaifPublicApi
 
 
 class ZaifCurrencyPairs:
@@ -14,7 +14,7 @@ class ZaifCurrencyPairs:
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
-                api = BotPublicApi()
+                api = ZaifPublicApi()
                 cls._currency_pairs = api.currency_pairs('all')
         return cls._instance
 
