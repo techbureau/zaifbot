@@ -93,6 +93,7 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def withdraw(self, **kwargs):
+        # TODO: _jpy直書きは若干微妙
         kwargs['amount'] = get_round_amount(kwargs['currency'] + '_jpy', kwargs['amount'])
         return super().withdraw(**kwargs)
 

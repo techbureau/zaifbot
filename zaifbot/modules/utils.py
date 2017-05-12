@@ -16,14 +16,14 @@ def get_round_price(currency_pair, price, *, is_buy):
         return price - (price % currency_pair_info['aux_unit_step'])
 
 
-def get_round_amount(currency_pair, amount):
-    currency_pair_info = _get_currency_pair_info(currency_pair)
-    return amount - (amount % currency_pair_info['item_unit_step'])
-
-
 def get_buyable_amount(currency_pair, amount, price):
     buyable_amount = amount / price
     return get_round_amount(currency_pair, buyable_amount)
+
+
+def get_round_amount(currency_pair, amount):
+    currency_pair_info = _get_currency_pair_info(currency_pair)
+    return amount - (amount % currency_pair_info['item_unit_step'])
 
 
 def _get_currency_pair_info(currency_pair):
