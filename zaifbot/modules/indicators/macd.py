@@ -19,7 +19,7 @@ def get_macd(currency_pair, period='1d', count=5, short=12, long=26, signal=9, t
     # macd = 短期EMA－長期EMA
     df['macd'] = df['short_ema'] - df['long_ema']
     df['unixtime'] = pd.to_datetime(df['time_stamp'].astype(int), unit='s')
-    print(df)
+
     # signalはmacdのEMA
     df['signal'] = df['macd'].ewm(span=signal).mean()
     df['macd2'] = df['macd'] - df['signal']
