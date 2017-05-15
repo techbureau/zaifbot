@@ -4,7 +4,7 @@ from threading import Thread, Event, Lock
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
-from zaifapi.impl import ZaifPublicApi
+from zaifbot.modules.api.wrapper import BotPublicApi
 from .cache import ZaifCurrencyPairs
 
 
@@ -40,7 +40,7 @@ class ZaifLastPrice:
 
     def last_price(self, currency_pair):
         def get_token_last_price():
-            api = ZaifPublicApi()
+            api = BotPublicApi()
             last_price = api.last_price(currency_pair)['last_price']
             jst_time = datetime.utcnow() + timedelta(hours=9)
             jst_time_str = jst_time.strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -56,19 +56,11 @@ class ZaifLastPrice:
             return get_token_last_price()
         receive = self._get_target_thread(currency_pair).last_receive
         return {'timestamp': receive['timestamp'],
-                'last_price': _btc_price_adjustment(currency_pair, receive['last_price']['price'])}
+                'last_price': receive['last_price']['price']}
 
     def close_all_socket(self):
         [event.set() for event in self._stop_events.values()]
         [thread.join() for thread in self._threads.values()]
-
-
-# TODO: すぐに消したいメソッド
-def _btc_price_adjustment(currency_pair, price):
-    if currency_pair == 'btc_jpy':
-        return int(price)
-    else:
-        return price
 
 
 class _StreamThread(Thread):

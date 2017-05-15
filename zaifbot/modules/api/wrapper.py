@@ -4,7 +4,6 @@ import random
 from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
-from zaifbot.modules.utils import get_round_price, get_round_amount
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
@@ -66,24 +65,6 @@ class BotTradeApi(ZaifTradeApi):
         return super().get_personal_info()
 
     @_with_retry
-    def buy(self, **kwargs):
-        price = get_round_price(kwargs['currency_pair'],
-                                kwargs['price'],
-                                is_buy=True)
-        kwargs['price'] = _btc_price_adjustment(kwargs['currency_pair'], price)
-        kwargs['action'] = 'bid'
-        return super().trade(**kwargs)
-
-    @_with_retry
-    def sell(self, **kwargs):
-        price = get_round_price(kwargs['currency_pair'],
-                                kwargs['price'],
-                                is_buy=False)
-        kwargs['price'] = _btc_price_adjustment(kwargs['currency_pair'], price)
-        kwargs['action'] = 'ask'
-        return super().trade(**kwargs)
-
-    @_with_retry
     def trade(self, **kwargs):
         return super().trade(**kwargs)
 
@@ -93,8 +74,6 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def withdraw(self, **kwargs):
-        # TODO: _jpy直書きは若干微妙
-        kwargs['amount'] = get_round_amount(kwargs['currency'] + '_jpy', kwargs['amount'])
         return super().withdraw(**kwargs)
 
     @_with_retry
@@ -106,10 +85,7 @@ class BotPublicApi(ZaifPublicApi):
 
     @_with_retry
     def last_price(self, currency_pair):
-        last_price = super().last_price(currency_pair)
-        last_price['last_price'] = _btc_price_adjustment(currency_pair,
-                                                         last_price['last_price'])
-        return last_price
+        return super().last_price(currency_pair)
 
     @_with_retry
     def ticker(self, currency_pair):
@@ -134,11 +110,3 @@ class BotPublicApi(ZaifPublicApi):
     @_with_retry
     def everything(self, func_name, currency_pair, params):
         return super().everything(func_name, currency_pair, params)
-
-
-# TODO: 速攻で消したいメソッド
-def _btc_price_adjustment(currency_pair, price):
-    if currency_pair == 'btc_jpy':
-        return int(price)
-    else:
-        return price
