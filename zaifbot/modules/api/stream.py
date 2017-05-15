@@ -55,8 +55,7 @@ class ZaifLastPrice:
         if is_token():
             return get_token_last_price()
         receive = self._get_target_thread(currency_pair).last_receive
-        return {'timestamp': receive['timestamp'],
-                'last_price': receive['last_price']['price']}
+        return {'timestamp': receive['timestamp'], 'last_price': receive['last_price']['price']}
 
     def close_all_socket(self):
         [event.set() for event in self._stop_events.values()]
