@@ -25,7 +25,7 @@ def _get_rsi(df, count, length):
         a_i, b_i = generator.send(diff)
         rsi = _rsi_formula(a_i, b_i)
         results.append(_create_dict(t_i, rsi))
-    return results
+    return {'success': 1, 'return': {'rsis': results}}
 
 
 def _calc_first_a_and_b(close):
@@ -40,8 +40,8 @@ def _generate_next_a_and_b(a, b, length):
     a, b,  = a, b
     while True:
         diff = yield a, b
-        a = max(_next_rsi_formula(a, diff, length), a)
-        b = min(_next_rsi_formula(b, diff, length), b)
+        a = _next_rsi_formula(a, max(diff, 0), length)
+        b = _next_rsi_formula(b, min(diff, 0) * (-1), length)
 
 
 def _rsi_formula(a, b):
@@ -54,8 +54,3 @@ def _next_rsi_formula(before, diff, length):
 
 def _create_dict(t, rsi):
     return {'timestamp': t, 'rsi': rsi}
-
-
-if __name__ == '__main__':
-    info = get_rsi('btc_jpy')
-    print(info)
