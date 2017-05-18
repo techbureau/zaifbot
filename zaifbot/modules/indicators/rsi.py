@@ -11,6 +11,29 @@ def get_rsi(currency_pair, period='1d', count=5, length=14, to_epoch_time=int(ti
 
 
 def _get_rsi(price_infos, count, length):
+    def _calc_first_a_and_b(close):
+        decreased_sum, increased_sum, length = 0, 0, len(close)
+        for i in range(1, length):
+            decreased_sum += abs(min(close.ix[i] - close.ix[i - 1], 0))
+            increased_sum += max(close.ix[i] - close.ix[i - 1], 0)
+        return increased_sum / length, decreased_sum / length
+
+    def _generate_next_ab(a, b, length):
+        a, b, = a, b
+        while True:
+            diff = yield a, b
+            a = _calc_next_ab(a, max(diff, 0), length)
+            b = _calc_next_ab(b, abs(min(diff, 0)), length)
+
+    def _rsi_formula(a, b):
+        return a / (a + b) * 100
+
+    def _calc_next_ab(before, diff, length):
+        return (before * (length - 1) + diff) / length
+
+    def _create_dict(t, rsi):
+        return {'timestamp': t, 'rsi': rsi}
+
     results = []
     closes = price_infos['close']
     times = price_infos['time']
@@ -31,30 +54,3 @@ def _get_rsi(price_infos, count, length):
         results.append(_create_dict(t_i, rsi))
     return {'success': 1, 'return': {'RSIs': results}}
 
-
-def _calc_first_a_and_b(close):
-    decreased_sum, increased_sum, length = 0, 0, len(close)
-    for i in range(1, length):
-        decreased_sum += abs(min(close.ix[i] - close.ix[i - 1], 0))
-        increased_sum += max(close.ix[i] - close.ix[i - 1], 0)
-    return increased_sum / length, decreased_sum / length
-
-
-def _generate_next_ab(a, b, length):
-    a, b,  = a, b
-    while True:
-        diff = yield a, b
-        a = _calc_next_ab(a, max(diff, 0), length)
-        b = _calc_next_ab(b, abs(min(diff, 0)), length)
-
-
-def _rsi_formula(a, b):
-    return a / (a + b) * 100
-
-
-def _calc_next_ab(before, diff, length):
-    return (before * (length - 1) + diff) / length
-
-
-def _create_dict(t, rsi):
-    return {'timestamp': t, 'rsi': rsi}
