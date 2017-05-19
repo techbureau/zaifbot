@@ -1,12 +1,12 @@
 import time
-from pandas import DataFrame
+import pandas as pd
 from zaifbot.modules.api.wrapper import BotPublicApi
 
 
 def get_rsi(currency_pair, period='1d', count=5, length=14, to_epoch_time=int(time.time())):
     public_api = BotPublicApi()
     second_api_params = {'period': period, 'count': count + length, 'to_epoch_time': to_epoch_time}
-    price_infos = DataFrame(public_api.everything('ohlc_data', currency_pair, second_api_params))
+    price_infos = pd.DataFrame(public_api.everything('ohlc_data', currency_pair, second_api_params))
     return _get_rsi(price_infos[['close', 'time']], count, length)
 
 
