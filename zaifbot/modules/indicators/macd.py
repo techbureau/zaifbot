@@ -26,5 +26,3 @@ def get_macd(currency_pair, period='1d', count=5, short=12, long=26, signal=9, t
 
     return {'success': 1, 'return': {'macds': df.to_dict(orient='records')}}
 
-if __name__ == '__main__':
-    print(get_macd('btc_jpy'))
