@@ -6,18 +6,21 @@ from zaifbot.modules.api.wrapper import BotPublicApi
 
 def get_adm(currency_pair, period='1d', count=5, length=14, to_epoch_time=int(time.time())):
     public_api = BotPublicApi()
-    second_api_params = {'period': period, 'count': count + 2 * length - 1, 'to_epoch_time': to_epoch_time}
+    second_api_params = {'period': period, 'count': count + 2 * length - 2, 'to_epoch_time': to_epoch_time}
     price_infos = DataFrame(public_api.everything('ohlc_data', currency_pair, second_api_params))
     return _get_adm(price_infos[['high', 'low', 'time', 'close']].copy(), length, count)
 
 
 def _get_adm(df, length, count):
+    def _create_dict(df, count):
+        adxs = df.ix[len(df) - count:, ['time', 'ADX']].to_dict(orient='records')
+        return {'success': 1, 'return': {'adxs': adxs}}
+
     df = pd.concat([df, _get_dm(df)], axis=1)
     df['TR'] = _get_tr(df)
     df = _get_di(df, length, count)
-    df['ADX'] = (abs(df['+DI'] - df['-DI']) / df['+DI'] - df['-DI']).rolling(window=length).mean()
-    print(df)
-    return df
+    df['ADX'] = (abs(df['+DI'] - df['-DI']) / df['+DI'] + df['-DI']).rolling(window=length).mean()
+    return _create_dict(df, count)
 
 
 def _get_dm(df):
@@ -50,11 +53,7 @@ def _get_tr(df):
 
 # TODO: ロジック改善できそうな気がする
 def _get_di(df, length, count):
-    for i in range(count + length):
+    for i in range(count + length -1):
         df.ix[i + length - 1, '+DI'] = (df.ix[i:i + length - 1, '+DM'].sum() / df.ix[i:i + length - 1, 'TR'].sum()) * 100
         df.ix[i + length - 1, '-DI'] = (df.ix[i:i + length - 1, '-DM'].sum() / df.ix[i:i + length - 1, 'TR'].sum()) * 100
     return df.fillna(0)
-
-
-if __name__ == '__main__':
-    get_adm('btc_jpy')
