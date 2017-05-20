@@ -6,12 +6,18 @@ class _SlackNotifier:
         self._slack_client = SlackClient(slack_token)
 
     def send_message(self, channel_id, message, username):
-        return self._slack_client.api_call(
-            "chat.postMessage",
-            channel=channel_id,
-            text=message,
-            username=username
-        )
+        try:
+            return self._slack_client.api_call(
+                "chat.postMessage",
+                channel=channel_id,
+                text=message,
+                username=username
+            )
+        except Exception as e:
+            return {
+                'ok': False,
+                'error': e
+            }
 
 
 def send_slack_message(slack_token, channel_id, message, username):
