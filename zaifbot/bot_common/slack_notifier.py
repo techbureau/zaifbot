@@ -1,7 +1,7 @@
 from slackclient import SlackClient
 
 
-class SlackNotifier(object):
+class _SlackNotifier():
     def __init__(self, slack_token):
         self._slack_client = SlackClient(slack_token)
 
@@ -15,5 +15,5 @@ class SlackNotifier(object):
 
 
 def send_slack_message(slack_token, channel_id, message, username):
-    slack_notifier = SlackNotifier(slack_token)
+    slack_notifier = _SlackNotifier(slack_token)
     return slack_notifier.send_message(channel_id, message, username)
