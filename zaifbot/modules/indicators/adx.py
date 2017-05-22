@@ -42,8 +42,7 @@ def _get_dm(df):
 
 def _get_tr(df):
     """引数にはhigh, low, closeをカラム名に持つDataFrameをとる"""
-    new_row = list()
-    new_row.append(0)
+    new_row = [0]
     for i in range(1, len(df)):
         tdy_high_minus_ystday_high = df.ix[i, 'high'] - df.ix[i, 'low']
         tdy_high_minus_ystday_close = df.ix[i, 'high'] - df.ix[i - 1, 'close']
