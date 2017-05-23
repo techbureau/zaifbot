@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='zaifbot',
-    version='0.0.0.dev5',
+    version='0.0.1',
     description='Zaif Bot Library',
     long_description='https://pypi.python.org/pypi/zaifbot',
     url='https://github.com/Akira-Taniguchi/zaifbot',
