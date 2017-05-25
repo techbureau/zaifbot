@@ -3,7 +3,9 @@ import pandas as pd
 from zaifbot.moving_average import get_ema
 
 
-def get_macd(currency_pair, period='1d', count=5, short=12, long=26, signal=9, to_epoch_time=int(time.time())):
+def get_macd(currency_pair, period='1d', count=5, short=12, long=26, signal=9, to_epoch_time=None):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
+    print(to_epoch_time)
     # 短期、長期のEMAを取得
     short_ema = get_ema(currency_pair, period, count, to_epoch_time, short)
     long_ema = get_ema(currency_pair, period, count, to_epoch_time, long)
