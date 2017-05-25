@@ -23,10 +23,10 @@ class _SlackNotifier:
                     'success': 0,
                     'error': api_response['error']
                 }
-        except Exception:
+        except Exception as e:
             response = {
                 'success': 0,
-                'error': 'Unexpected error'
+                'error': str(e)
             }
         return response
 
