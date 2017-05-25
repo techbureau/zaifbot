@@ -47,7 +47,7 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
     return_datas = []
     moving_average = MovingAverageDao(currency_pair, period, length)
     ma_result = moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
-    if len(ma_result) < count:
+    if len(ma_result) == 0:
         return {'success': 0, 'error': 'moving average data is missing'}
     for i in ma_result:
         if sma_ema == 'sma' and i.MovingAverages:
