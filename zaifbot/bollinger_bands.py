@@ -22,7 +22,7 @@ def _create_return_dict(currency_pair, period, length, end_time, start_time, cou
     return_datas = []
     bollinger_bands = BollingerBandsDao(currency_pair, period, length)
     bollinger_bands_result = bollinger_bands.get_records(end_time, start_time, False)
-    if len(bollinger_bands_result) < count:
+    if len(bollinger_bands_result) < 1:
         return {'success': 0, 'error': 'bollinger bands data is missing'}
     for i in bollinger_bands_result:
         return_datas.append({
