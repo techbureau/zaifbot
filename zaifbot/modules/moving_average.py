@@ -35,6 +35,8 @@ class TradeLogsSetUp:
         target_trade_logs_record = api_records.join(target_epoch_times, on='time', how='inner')
         target_trade_logs_record['currency_pair'] = self._currency_pair
         target_trade_logs_record['period'] = self._period
+        target_trade_logs_record = \
+            target_trade_logs_record.drop(['high', 'open', 'volume', 'average', 'low', 'close'], axis=1)
         return self._trade_logs.create_data(target_trade_logs_record)
 
     def _get_target_epoch_times(self, start_time, end_time):

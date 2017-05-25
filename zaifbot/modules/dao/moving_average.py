@@ -22,9 +22,7 @@ class TradeLogsDao(DaoBase):
         session = self.get_session()
         try:
             for index, record in trade_logs.iterrows():
-                print(record.to_dict())
-                exit()
-                session.merge(TradeLogs(record.to_dict()))
+                session.merge(TradeLogs(**record.to_dict()))
             session.commit()
             session.close()
             return True
