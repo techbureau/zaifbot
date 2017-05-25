@@ -4,6 +4,7 @@ from zaifbot.bot_common.logger import logger
 from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.api.wrapper import BotPublicApi
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
+import pandas as pd
 
 
 def get_need_epoch_times(start_time, end_time, period):
@@ -24,16 +25,17 @@ class TradeLogsSetUp:
         self._trade_logs = TradeLogsDao(self._currency_pair, self._period)
 
     def execute(self, start_time, end_time):
-        target_epoch_times = self._get_target_epoch_times(start_time, end_time)
-        if len(target_epoch_times) == 0:
+        target_epoch_times = pd.DataFrame(index=self._get_target_epoch_times(start_time, end_time))
+        if len(target_epoch_times.index) == 0:
             return True
-        api_records = self._get_ohlc_data_from_server(end_time)
-        if len(api_records) == 0:
+        api_records = pd.DataFrame(self._get_ohlc_data_from_server(end_time))
+
+        if api_records.empty:
             return False
-        target_trade_logs_record =\
-            list(filter(lambda x: x['time'] in target_epoch_times, api_records))
-        trade_logs_model_data = self._set_trade_logs_model_data(target_trade_logs_record)
-        return self._trade_logs.create_data(trade_logs_model_data)
+        target_trade_logs_record = api_records.join(target_epoch_times, on='time', how='inner')
+        target_trade_logs_record['currency_pair'] = self._currency_pair
+        target_trade_logs_record['period'] = self._period
+        return self._trade_logs.create_data(target_trade_logs_record)
 
     def _get_target_epoch_times(self, start_time, end_time):
         trade_logs_record = self._trade_logs.get_records(end_time, start_time, True)

@@ -21,12 +21,13 @@ class TradeLogsDao(DaoBase):
     def create_data(self, trade_logs):
         session = self.get_session()
         try:
-            for record in trade_logs:
-                session.merge(record)
+            for index, record in trade_logs.iterrows():
+                session.merge(TradeLogs(record.to_dict()))
             session.commit()
             session.close()
             return True
-        except exc.SQLAlchemyError:
+        except exc.SQLAlchemyError as e:
+            print(e)
             session.rollback()
             session.close()
         return False
