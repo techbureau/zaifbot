@@ -5,12 +5,14 @@ from zaifbot.modules.dao.moving_average import MovingAverageDao
 
 
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
-            to_epoch_time=int(time.time()), length=LIMIT_LENGTH):
+            to_epoch_time=None, length=LIMIT_LENGTH):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'sma')
 
 
 def get_ema(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
-            to_epoch_time=int(time.time()), length=LIMIT_LENGTH):
+            to_epoch_time=None, length=LIMIT_LENGTH):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'ema')
 
 

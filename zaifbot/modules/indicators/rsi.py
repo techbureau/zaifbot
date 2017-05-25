@@ -3,7 +3,8 @@ from pandas import DataFrame
 from zaifbot.modules.api.wrapper import BotPublicApi
 
 
-def get_rsi(currency_pair, period='1d', count=5, length=14, to_epoch_time=int(time.time())):
+def get_rsi(currency_pair, period='1d', count=5, length=14, to_epoch_time=None):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     public_api = BotPublicApi()
     second_api_params = {'period': period, 'count': count + length + 1, 'to_epoch_time': to_epoch_time}
     price_infos = DataFrame(public_api.everything('ohlc_data', currency_pair, second_api_params))
