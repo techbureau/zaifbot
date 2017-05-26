@@ -1,3 +1,4 @@
+from zaifbot.bot_common.slack_notifier import SlackNotifier
 from zaifbot.modules.api.stream import ZaifLastPrice
 from zaifbot.modules.api.cache import ZaifCurrencyPairs
 
@@ -29,3 +30,8 @@ def get_round_amount(currency_pair, amount):
 def _get_currency_pair_info(currency_pair):
     currency_pair_infos = ZaifCurrencyPairs()
     return currency_pair_infos[currency_pair]
+
+
+def send_slack_message(slack_token, channel_id, message, username):
+    slack_notifier = SlackNotifier(slack_token)
+    return slack_notifier.send_message(channel_id, message, username)
