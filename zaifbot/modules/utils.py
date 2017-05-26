@@ -1,5 +1,14 @@
+import time
 from zaifbot.modules.api.stream import ZaifLastPrice
 from zaifbot.modules.api.cache import ZaifCurrencyPairs
+from zaifbot.modules.api.wrapper import BotPublicApi
+
+
+def get_price_info(currency_pair, period='1d', count=5, to_epoch_time=None):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
+    public_api = BotPublicApi()
+    second_api_params = {'period': period, 'count': count, 'to_epoch_time': to_epoch_time}
+    return public_api.everything('ohlc_data', currency_pair, second_api_params)
 
 
 def get_current_last_price(currency_pair):
