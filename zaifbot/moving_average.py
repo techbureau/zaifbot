@@ -47,15 +47,16 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
     return_datas = []
     moving_average = MovingAverageDao(currency_pair, period, length)
     ma_result = moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
-    if len(ma_result) == 0:
+    ma_result_length = len(ma_result)
+    if ma_result_length == 0:
         return {'success': 0, 'error': 'moving average data is missing'}
-    for i in ma_result:
-        if sma_ema == 'sma' and i.MovingAverages:
-            moving_average = i.MovingAverages.sma
-        elif sma_ema == 'ema' and i.MovingAverages:
-            moving_average = i.MovingAverages.ema
+    for i in range(ma_result_length - count, ma_result_length):
+        if sma_ema == 'sma' and ma_result[i].MovingAverages:
+            moving_average = ma_result[i].MovingAverages.sma
+        elif sma_ema == 'ema' and ma_result[i].MovingAverages:
+            moving_average = ma_result[i].MovingAverages.ema
         else:
             moving_average = 0.0
-        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average,
-                             'close': i.TradeLogs.close, 'closed': bool(i.TradeLogs.closed)})
+        return_datas.append({'time_stamp': ma_result[i].TradeLogs.time, 'moving_average': moving_average,
+                             'close': ma_result[i].TradeLogs.close, 'closed': bool(ma_result[i].TradeLogs.closed)})
     return {'success': 1, 'return': {sma_ema: return_datas}}
