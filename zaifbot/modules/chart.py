@@ -7,7 +7,6 @@ from zaifbot.modules.utils import get_price_info
 from zaifbot.moving_average import get_ema, get_sma
 from zaifbot.bollinger_bands import get_bollinger_bands
 
-
 INCREASE = '#5959F3'
 DECREASE = '#F03030'
 SMA = '#8CAD90'
@@ -35,7 +34,7 @@ def draw_candle_chart(currency_pair, period='1d', count=20, to_epoch_time=None, 
     if bands:
         bands = [bands] if isinstance(bands, tuple) else bands
         for band in bands:
-          fig['data'].extend(_band_lines(currency_pair, period, count, to_epoch_time, length=band[0], colors=band[1]))
+            fig['data'].extend(_band_lines(currency_pair, period, count, to_epoch_time, length=band[0], colors=band[1]))
 
     iplot(fig)
 
@@ -51,9 +50,15 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
     increasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.time,
                                     direction='increasing', marker=Marker(color=INCREASE), line=Line(color=INCREASE))
     fig = decreasing
+
+    start = pd.to_datetime(df['time'].head(1).values[0])
+    end = pd.to_datetime(df['time'].tail(1).values[0])
     fig['data'].extend(increasing['data'])
     fig['layout'].update({
-        'xaxis': { 'showgrid': True }
+        'title': '{} ({} ~ {})'.format(currency_pair, start, end),
+        'titlefont': {'size': 18},
+        'xaxis': {'showgrid': True},
+        'yaxis': {'title': 'price'}
     })
     return fig
 
