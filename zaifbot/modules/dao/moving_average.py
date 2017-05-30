@@ -86,22 +86,6 @@ class MovingAverageDao(DaoBase):
         session.close()
         return result
 
-    def get_trade_logs_moving_average(self, end_time, start_time):
-        session = self.get_session()
-        result = session.query(TradeLogs, self.model)\
-            .outerjoin(self.model, and_(
-                TradeLogs.time == self.model.time,
-                TradeLogs.currency_pair == self.model.currency_pair,
-                TradeLogs.period == self.model.period,
-                self.model.length == self._length))\
-            .filter(and_(TradeLogs.time <= end_time,
-                         TradeLogs.time > start_time,
-                         TradeLogs.currency_pair == self._currency_pair,
-                         TradeLogs.period == self._period)
-                    ).order_by(TradeLogs.time).all()
-        session.close()
-        return result
-
     def create_data(self, moving_average):
         session = self.get_session()
         for record in moving_average:
