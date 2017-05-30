@@ -6,7 +6,8 @@ from zaifbot.modules.dao.bollinger_bands import BollingerBandsDao
 
 
 def get_bollinger_bands(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
-                        to_epoch_time=int(time.time()), length=LIMIT_LENGTH):
+                        to_epoch_time=None, length=LIMIT_LENGTH):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     count = min(count, LIMIT_COUNT)
     length = min(length, LIMIT_LENGTH)
     end_time = get_end_time(to_epoch_time, period)
@@ -22,7 +23,7 @@ def _create_return_dict(currency_pair, period, length, end_time, start_time, cou
     return_datas = []
     bollinger_bands = BollingerBandsDao(currency_pair, period, length)
     bollinger_bands_result = bollinger_bands.get_records(end_time, start_time, False)
-    if len(bollinger_bands_result) < 1:
+    if len(bollinger_bands_result) == 0:
         return {'success': 0, 'error': 'bollinger bands data is missing'}
     for i in bollinger_bands_result:
         return_datas.append({

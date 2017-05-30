@@ -4,9 +4,10 @@ from pandas import DataFrame, Series
 from zaifbot.modules.api.wrapper import BotPublicApi
 
 
-def get_adx(currency_pair, period='1d', count=5, length=14, to_epoch_time=int(time.time())):
+def get_adx(currency_pair, period='1d', count=5, length=14, to_epoch_time=None):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     public_api = BotPublicApi()
-    second_api_params = {'period': period, 'count': count + 2 * length - 2, 'to_epoch_time': to_epoch_time}
+    second_api_params = {'period': period, 'count': count + 2 * length - 1, 'to_epoch_time': to_epoch_time}
     price_infos = DataFrame(public_api.everything('ohlc_data', currency_pair, second_api_params))
     return _get_adx(price_infos[['high', 'low', 'time', 'close']].copy(), length, count)
 
@@ -20,7 +21,7 @@ def _get_adx(df, length, count):
     df['TR'] = _get_tr(df)
     df = _get_di(df, length, count)
     df['DX'] = abs(df['+DI'] - df['-DI']) / (df['+DI'] + df['-DI']) * 100
-    df['ADX'] = (df['DX']).rolling(window=length).mean()
+    df = _calc_adx(df, length, count)
     return _create_dict(df, count)
 
 
@@ -45,14 +46,35 @@ def _get_tr(df):
     new_row = [0]
     for i in range(1, len(df)):
         tdy_high_minus_ystday_high = df.ix[i, 'high'] - df.ix[i, 'low']
-        tdy_high_minus_ystday_close = df.ix[i, 'high'] - df.ix[i - 1, 'close']
-        ystday_close_minus_tdy_low = df.ix[i - 1, 'close'] - df.ix[i, 'low']
+        tdy_high_minus_ystday_close = abs(df.ix[i, 'high'] - df.ix[i - 1, 'close'])
+        ystday_close_minus_tdy_low = abs(df.ix[i - 1, 'close'] - df.ix[i, 'low'])
         new_row.append(max(tdy_high_minus_ystday_high, tdy_high_minus_ystday_close, ystday_close_minus_tdy_low))
     return new_row
 
 
 def _get_di(df, length, count):
-    for i in range(count + length -1):
-        df.ix[i + length - 1, '+DI'] = (df.ix[i:i + length - 1, '+DM'].sum() / df.ix[i:i + length - 1, 'TR'].sum()) * 100
-        df.ix[i + length - 1, '-DI'] = (df.ix[i:i + length - 1, '-DM'].sum() / df.ix[i:i + length - 1, 'TR'].sum()) * 100
+    # 最初のDI
+    df.ix[length, '+DM14'] = df.ix[1:length, '+DM'].sum()
+    df.ix[length, '-DM14'] = df.ix[1:length, '-DM'].sum()
+    df.ix[length, 'TR14'] = df.ix[1:length, 'TR'].sum()
+
+    df.ix[length, '+DI'] = df.ix[length, '+DM14'] / df.ix[length, 'TR14'] * 100
+    df.ix[length, '-DI'] = df.ix[length, '-DM14'] / df.ix[length, 'TR14'] * 100
+
+    # 2つ目以降のDI
+    for i in range(length + 1, count + length * 2 - 1):
+        df.ix[i, '+DM14'] = df.ix[i - 1, '+DM14'] * (length - 1) / length + df.ix[i, '+DM']
+        df.ix[i, '-DM14'] = df.ix[i - 1, '-DM14'] * (length - 1) / length + df.ix[i, '-DM']
+        df.ix[i, 'TR14'] = df.ix[i - 1, 'TR14'] * (length - 1) / length + df.ix[i, 'TR']
+
+        df.ix[i, '+DI'] = df.ix[i, '+DM14'] / df.ix[i, 'TR14'] * 100
+        df.ix[i, '-DI'] = df.ix[i, '-DM14'] / df.ix[i, 'TR14'] * 100
+    return df.fillna(0)
+
+
+def _calc_adx(df, length, count):
+    # 1本目のadx
+    df.ix[len(df) - count, 'ADX'] = df.ix[length:len(df) - count, 'DX'].sum()
+    for i in range(len(df) - count + 1, len(df)):
+        df.ix[i, 'ADX'] = (df.ix[i - 1, 'ADX'] * (length - 1) + df.ix[i, 'DX']) / 14
     return df.fillna(0)

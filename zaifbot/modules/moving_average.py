@@ -5,6 +5,7 @@ from zaifbot.models.moving_average import TradeLogs, MovingAverages
 from zaifbot.modules.api.wrapper import BotPublicApi
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
 import pandas as pd
+from zaifbot.models import get_connection_string
 
 
 def get_need_epoch_times(start_time, end_time, period):
@@ -35,8 +36,6 @@ class TradeLogsSetUp:
         target_trade_logs_record = api_records.join(target_epoch_times, on='time', how='inner')
         target_trade_logs_record['currency_pair'] = self._currency_pair
         target_trade_logs_record['period'] = self._period
-        target_trade_logs_record = \
-            target_trade_logs_record.drop(['high', 'open', 'volume', 'average', 'low', 'close'], axis=1)
         return self._trade_logs.create_data(target_trade_logs_record)
 
     def _get_target_epoch_times(self, start_time, end_time):
@@ -52,22 +51,6 @@ class TradeLogsSetUp:
                 target_epoch_times.add(need_epoch_time)
         return target_epoch_times
 
-    def _set_trade_logs_model_data(self, target_trade_logs_record):
-        trade_logs_model_data = []
-        for trade_logs in target_trade_logs_record:
-            trade_logs_model_data.append(TradeLogs(
-                time=trade_logs['time'],
-                currency_pair=self._currency_pair,
-                period=self._period,
-                open=trade_logs['open'],
-                high=trade_logs['high'],
-                low=trade_logs['low'],
-                close=trade_logs['close'],
-                average=trade_logs['average'],
-                volume=trade_logs['volume'],
-                closed=int(trade_logs['closed'])
-            ))
-        return trade_logs_model_data
 
     def _get_ohlc_data_from_server(self, end_time):
         public_api = BotPublicApi()
@@ -101,6 +84,7 @@ class MovingAverageSetUp:
         self._count = count
         self._length = length
         self._moving_average = MovingAverageDao(self._currency_pair, self._period, self._length)
+        self._trade_logs = TradeLogsDao(self._currency_pair, self._period)
 
     def execute(self, ma_start_time, tl_start_time, end_time):
         moving_average_model_data = set()
@@ -108,7 +92,7 @@ class MovingAverageSetUp:
         if len(target_epoch_times) == 0:
             return True
         trade_logs_moving_average =\
-            self._moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
+            self._get_trade_logs_moving_average(end_time, tl_start_time)
         for i in self._get_moving_average(trade_logs_moving_average, target_epoch_times):
             moving_average_model_data.add(self._get_moving_average_model_dataset(i['time'],
                                                                                  i['sma'],
@@ -144,6 +128,19 @@ class MovingAverageSetUp:
                                   'ema': ema,
                                   'closed': trade_logs_moving_average[i].TradeLogs.closed}
                 yield moving_average
+
+    def _get_trade_logs_moving_average(self, end_time, start_time):
+        moving_average = \
+            [i.__dict__ for i in self._moving_average.get_records(end_time, start_time, False)]
+        trade_logs = \
+            [j.__dict__ for j in self._trade_logs.get_records(end_time, start_time, False)]
+        trade_logs_df = \
+            pd.DataFrame(trade_logs, columns=['time', 'currency_pair', 'period', 'close', 'closed'])
+        moving_average_df = \
+            pd.DataFrame(moving_average, columns=['time', 'sma', 'ema', 'length'])
+        trade_logs_moving_average = \
+            trade_logs_df.merge(moving_average_df, left_on='time', right_on='time', how='outer')
+        return trade_logs_moving_average.to_dict()
 
     def _get_nums(self, trade_logs_moving_average, i):
         nums = []

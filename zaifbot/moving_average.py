@@ -6,11 +6,13 @@ from zaifbot.modules.dao.moving_average import MovingAverageDao
 
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
             to_epoch_time=None, length=LIMIT_LENGTH):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'sma')
 
 
 def get_ema(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
             to_epoch_time=None, length=LIMIT_LENGTH):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'ema')
 
 
@@ -47,7 +49,7 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
     return_datas = []
     moving_average = MovingAverageDao(currency_pair, period, length)
     ma_result = moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
-    if len(ma_result) < 1:
+    if len(ma_result) == 0:
         return {'success': 0, 'error': 'moving average data is missing'}
     for i in ma_result:
         if sma_ema == 'sma' and i.MovingAverages:

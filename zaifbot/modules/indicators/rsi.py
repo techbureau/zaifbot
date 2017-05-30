@@ -3,9 +3,10 @@ from pandas import DataFrame
 from zaifbot.modules.api.wrapper import BotPublicApi
 
 
-def get_rsi(currency_pair, period='1d', count=5, length=14, to_epoch_time=int(time.time())):
+def get_rsi(currency_pair, period='1d', count=5, length=14, to_epoch_time=None):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     public_api = BotPublicApi()
-    second_api_params = {'period': period, 'count': count + length, 'to_epoch_time': to_epoch_time}
+    second_api_params = {'period': period, 'count': count + length + 1, 'to_epoch_time': to_epoch_time}
     price_infos = DataFrame(public_api.everything('ohlc_data', currency_pair, second_api_params))
     return _get_rsi(price_infos[['close', 'time']], count, length)
 
@@ -16,7 +17,7 @@ def _get_rsi(price_infos, count, length):
         for i in range(1, length):
             decreased_sum += abs(min(close.ix[i] - close.ix[i - 1], 0))
             increased_sum += max(close.ix[i] - close.ix[i - 1], 0)
-        return increased_sum / length, decreased_sum / length
+        return increased_sum / (length - 1), decreased_sum / (length - 1)
 
     def _generate_next_ab(a, b, length):
         a, b, = a, b
@@ -38,17 +39,16 @@ def _get_rsi(price_infos, count, length):
     closes = price_infos['close']
     times = price_infos['time']
 
-    # 1本目のRSIの計算
-    a_1, b_1 = _calc_first_a_and_b(closes.ix[:length])
-    t_1 = times.ix[length]
-    results.append(_create_dict(t_1, _rsi_formula(a_1, b_1)))
+    # 0個目のa, bの計算
+    a_0, b_0 = _calc_first_a_and_b(closes.ix[:length])
 
-    # 2本目以降のRSIの計算
-    generator = _generate_next_ab(a_1, b_1, length)
+    # 1本目以降のRSIの計算
+    generator = _generate_next_ab(a_0, b_0, length)
     next(generator)
-    for i in range(count - 1):
-        diff = closes.ix[length + i + 1] - closes.ix[length + i]
-        t_i = times.ix[length + i + 1]
+
+    for i in range(1, count + 1):
+        diff = closes.ix[length + i] - closes.ix[length + i - 1]
+        t_i = times.ix[length + i]
         a_i, b_i = generator.send(diff)
         rsi = _rsi_formula(a_i, b_i)
         results.append(_create_dict(t_i, rsi))
