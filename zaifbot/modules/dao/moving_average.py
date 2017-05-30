@@ -105,7 +105,7 @@ class MovingAverageDao(DaoBase):
     def create_data(self, moving_average):
         session = self.get_session()
         for record in moving_average:
-            session.merge(record)
+            session.merge(MovingAverages(**record))
         try:
             session.commit()
             session.close()

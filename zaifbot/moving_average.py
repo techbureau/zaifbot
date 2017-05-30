@@ -1,7 +1,8 @@
 import time
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
 from zaifbot.modules.moving_average import TradeLogsSetUp, MovingAverageSetUp
-from zaifbot.modules.dao.moving_average import MovingAverageDao
+from zaifbot.modules.dao.moving_average import MovingAverageDao, TradeLogsDao
+import pandas as pd
 
 
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
@@ -47,17 +48,21 @@ def get_end_time(to_epoch_time, period):
 
 def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time, count):
     return_datas = []
-    moving_average = MovingAverageDao(currency_pair, period, length)
-    ma_result = moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
-    if len(ma_result) == 0:
+    moving_average_dao = MovingAverageDao(currency_pair, period, length)
+    trade_logs_dao = TradeLogsDao(currency_pair, period)
+    moving_average = \
+        [i.__dict__ for i in moving_average_dao.get_records(end_time, tl_start_time, False)]
+    trade_logs = \
+        [i.__dict__ for i in trade_logs_dao.get_records(end_time, tl_start_time, False)]
+    moving_average_df = \
+        pd.DataFrame(moving_average, columns=['time', sma_ema])
+    trade_logs_df = \
+        pd.DataFrame(trade_logs, columns=['time', 'close', 'closed'])
+    ma_result = \
+        trade_logs_df.merge(moving_average_df, left_on='time', right_on='time', how='inner')
+    ma_result.rename(columns={'time': 'time_stamp', sma_ema: 'moving_average'}, inplace=True)
+    ma_result_length = len(ma_result.index)
+    if ma_result_length == 0:
         return {'success': 0, 'error': 'moving average data is missing'}
-    for i in ma_result:
-        if sma_ema == 'sma' and i.MovingAverages:
-            moving_average = i.MovingAverages.sma
-        elif sma_ema == 'ema' and i.MovingAverages:
-            moving_average = i.MovingAverages.ema
-        else:
-            moving_average = 0.0
-        return_datas.append({'time_stamp': i.TradeLogs.time, 'moving_average': moving_average,
-                             'close': i.TradeLogs.close, 'closed': bool(i.TradeLogs.closed)})
+    return_datas = ma_result[ma_result_length - length:].to_dict(orient='records')
     return {'success': 1, 'return': {sma_ema: return_datas}}
