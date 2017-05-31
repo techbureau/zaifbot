@@ -64,5 +64,5 @@ def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_sta
     ma_result_length = len(ma_result.index)
     if ma_result_length == 0:
         return {'success': 0, 'error': 'moving average data is missing'}
-    return_datas = ma_result[ma_result_length - length:].to_dict(orient='records')
+    return_datas = ma_result[ma_result_length - count:].to_dict(orient='records')
     return {'success': 1, 'return': {sma_ema: return_datas}}
