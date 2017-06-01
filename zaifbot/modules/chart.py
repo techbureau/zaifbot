@@ -1,11 +1,14 @@
 import pandas as pd
 from pandas import DataFrame
+import pytz
+from tzlocal import get_localzone
 from plotly.offline import init_notebook_mode, iplot
 from plotly.figure_factory import create_candlestick
 from plotly.graph_objs import Scatter, Line, Marker
 from zaifbot.modules.utils import get_price_info
 from zaifbot.moving_average import get_ema, get_sma
 from zaifbot.bollinger_bands import get_bollinger_bands
+
 
 INCREASE = '#5959F3'
 DECREASE = '#F03030'
@@ -43,16 +46,21 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
     df = DataFrame(get_price_info(currency_pair, period, count, to_epoch_time))
     df = df[['open', 'high', 'low', 'close', 'volume', 'time']]
     df['time'] = pd.to_datetime(df['time'], unit='s')
+    df = df.set_index('time')
+
+    # see https://github.com/plotly/plotly.py/issues/209
+    df.index = df.index.tz_localize(pytz.utc).tz_convert(get_localzone()).tz_localize(None)
     init_notebook_mode(connected=True)
-    decreasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.time,
+    decreasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.index,
                                     direction='decreasing', marker=Marker(color=DECREASE), line=Line(color=DECREASE))
 
-    increasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.time,
+    increasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.index,
                                     direction='increasing', marker=Marker(color=INCREASE), line=Line(color=INCREASE))
     fig = decreasing
 
-    start = pd.to_datetime(df['time'].head(1).values[0])
-    end = pd.to_datetime(df['time'].tail(1).values[0])
+    start = df.index[0]
+    end = df.index[-1]
+
     fig['data'].extend(increasing['data'])
     fig['layout'].update({
         'title': '{} ({} ~ {})'.format(currency_pair, start, end),
@@ -67,7 +75,9 @@ def _sma_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=2
     sma = DataFrame(get_sma(currency_pair, period, count, to_epoch_time, length)['return']['sma'])
     sma = sma[sma['moving_average'] != 0]
     sma['time_stamp'] = pd.to_datetime(sma['time_stamp'], unit='s')
-    sma_line = Scatter(x=sma['time_stamp'], y=sma['moving_average'],
+    sma = sma.set_index('time_stamp')
+    sma.index = sma.index.tz_localize(pytz.utc).tz_convert(get_localzone()).tz_localize(None)
+    sma_line = Scatter(x=sma.index, y=sma['moving_average'],
                        name='sma{}'.format(length), line=Line(color=color))
     return sma_line
 
@@ -76,7 +86,9 @@ def _ema_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=2
     ema = DataFrame(get_ema(currency_pair, period,count, to_epoch_time, length)['return']['ema'])
     ema = ema[ema['moving_average'] != 0]
     ema['time_stamp'] = pd.to_datetime(ema['time_stamp'], unit='s')
-    ema_line = Scatter(x=ema['time_stamp'], y=ema['moving_average'],
+    ema = ema.set_index('time_stamp')
+    ema.index = ema.index.tz_localize(pytz.utc).tz_convert(get_localzone()).tz_localize(None)
+    ema_line = Scatter(x=ema.index, y=ema['moving_average'],
                        name='ema{}'.format(length), line=Line(color=color))
     return ema_line
 
@@ -85,6 +97,8 @@ def _band_lines(currency_pair, period='1d', count=20, to_epoch_time=None, length
     bands = get_bollinger_bands(currency_pair, period, count, to_epoch_time, length)['return']['bollinger_bands']
     bands = DataFrame(bands)
     bands['time_stamp'] = pd.to_datetime(bands['time_stamp'], unit='s')
+    bands = bands.set_index('time_stamp')
+    bands.index = bands.index.tz_localize(pytz.utc).tz_convert(get_localzone()).tz_localize(None)
 
     if colors is None:
         colors = list()
@@ -93,13 +107,13 @@ def _band_lines(currency_pair, period='1d', count=20, to_epoch_time=None, length
         colors.append(SIGMA3)
 
     l = list()
-    l.append(Scatter(x=bands['time_stamp'], y=bands['sd1p'], name='+1σ({})'.format(length), line=Line(color=colors[0])))
-    l.append(Scatter(x=bands['time_stamp'], y=bands['sd1n'], name='-1σ({})'.format(length), line=Line(color=colors[0])))
-    l.append(Scatter(x=bands['time_stamp'], y=bands['sd2p'], name='+2σ({})'.format(length), line=Line(color=colors[1])))
-    l.append(Scatter(x=bands['time_stamp'], y=bands['sd2n'], name='-2σ({})'.format(length), line=Line(color=colors[1])))
-    l.append(Scatter(x=bands['time_stamp'], y=bands['sd3p'], name='+3σ({})'.format(length), line=Line(color=colors[2])))
-    l.append(Scatter(x=bands['time_stamp'], y=bands['sd3n'], name='-3σ({})'.format(length), line=Line(color=colors[2])))
-    l.append(_sma_line(currency_pair, period, count, to_epoch_time, length=25))
+    l.append(Scatter(x=bands.index, y=bands['sd1p'], name='+1σ({})'.format(length), line=Line(color=colors[0])))
+    l.append(Scatter(x=bands.index, y=bands['sd1n'], name='-1σ({})'.format(length), line=Line(color=colors[0])))
+    l.append(Scatter(x=bands.index, y=bands['sd2p'], name='+2σ({})'.format(length), line=Line(color=colors[1])))
+    l.append(Scatter(x=bands.index, y=bands['sd2n'], name='-2σ({})'.format(length), line=Line(color=colors[1])))
+    l.append(Scatter(x=bands.index, y=bands['sd3p'], name='+3σ({})'.format(length), line=Line(color=colors[2])))
+    l.append(Scatter(x=bands.index, y=bands['sd3n'], name='-3σ({})'.format(length), line=Line(color=colors[2])))
+    l.append(_sma_line(currency_pair, period, count, to_epoch_time, length=length))
 
     return l
 

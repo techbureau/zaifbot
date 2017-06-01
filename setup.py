@@ -26,7 +26,8 @@ setup(
         'SQLAlchemy==1.1.5',
         'websocket-client==0.40.0',
         'slackclient==1.0.5',
-        'plotly==2.0.8'
+        'plotly==2.0.8',
+        'pytz==2017.2'
     ],
     entry_points="""\
       [console_scripts]
