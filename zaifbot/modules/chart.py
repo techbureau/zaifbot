@@ -9,7 +9,6 @@ from zaifbot.modules.utils import get_price_info
 from zaifbot.moving_average import get_ema, get_sma
 from zaifbot.bollinger_bands import get_bollinger_bands
 
-
 INCREASE = '#5959F3'
 DECREASE = '#F03030'
 SMA = '#8CAD90'

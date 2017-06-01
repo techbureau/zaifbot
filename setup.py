@@ -21,7 +21,6 @@ setup(
         'zaifapi==1.5.2',
         'numpy==1.12.0',
         'pandas==0.20.1',
-        'matplotlib==2.0.2',
         'reportlab==3.4.0',
         'SQLAlchemy==1.1.5',
         'websocket-client==0.40.0',
