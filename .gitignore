@@ -89,6 +89,3 @@ ENV/
 .ropeproject
 
 .idea/
-
-# db
-.db
