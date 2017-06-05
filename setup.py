@@ -26,7 +26,8 @@ setup(
         'websocket-client==0.40.0',
         'slackclient==1.0.5',
         'plotly==2.0.8',
-        'pytz==2017.2'
+        'pytz==2017.2',
+        'TA-Lib==0.4.10'
     ],
     entry_points="""\
       [console_scripts]
