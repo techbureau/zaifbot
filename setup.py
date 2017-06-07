@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='zaifbot',
-    version='0.0.3',
+    version='0.0.4',
     description='Zaif Bot Library',
     long_description='https://pypi.python.org/pypi/zaifbot',
     url='https://github.com/Akira-Taniguchi/zaifbot',
@@ -21,12 +21,13 @@ setup(
         'zaifapi==1.5.2',
         'numpy==1.12.0',
         'pandas==0.20.1',
-        'matplotlib==2.0.2',
         'reportlab==3.4.0',
         'SQLAlchemy==1.1.5',
         'websocket-client==0.40.0',
         'slackclient==1.0.5',
-        'plotly==2.0.8'
+        'plotly==2.0.8',
+        'pytz==2017.2',
+        'TA-Lib==0.4.10'
     ],
     entry_points="""\
       [console_scripts]
