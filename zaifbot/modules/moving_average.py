@@ -1,9 +1,9 @@
-import numpy as np
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
 from zaifbot.bot_common.logger import logger
-from zaifbot.models.moving_average import TradeLogs, MovingAverages
+from zaifbot.models.moving_average import MovingAverages
 from zaifbot.modules.api.wrapper import BotPublicApi
 from zaifbot.modules.dao.moving_average import TradeLogsDao, MovingAverageDao
+import pandas as pd
 
 
 def get_need_epoch_times(start_time, end_time, period):
@@ -15,6 +15,12 @@ def get_need_epoch_times(start_time, end_time, period):
             break
 
 
+def check_missing_records(exist_epoch_times, start_time, end_time, period):
+    need_epoch_times = \
+        set([x for x in get_need_epoch_times(start_time, end_time, period)])
+    return need_epoch_times.difference(exist_epoch_times)
+
+
 class TradeLogsSetUp:
     def __init__(self, currency_pair, period, count, length):
         self._currency_pair = currency_pair
@@ -24,46 +30,22 @@ class TradeLogsSetUp:
         self._trade_logs = TradeLogsDao(self._currency_pair, self._period)
 
     def execute(self, start_time, end_time):
-        target_epoch_times = self._get_target_epoch_times(start_time, end_time)
-        if len(target_epoch_times) == 0:
+        target_epoch_times = pd.DataFrame(index=self._get_target_epoch_times(start_time, end_time))
+        if len(target_epoch_times.index) == 0:
             return True
-        api_records = self._get_ohlc_data_from_server(end_time)
-        if len(api_records) == 0:
+        api_records = pd.DataFrame(self._get_ohlc_data_from_server(end_time))
+
+        if api_records.empty:
             return False
-        target_trade_logs_record =\
-            list(filter(lambda x: x['time'] in target_epoch_times, api_records))
-        trade_logs_model_data = self._set_trade_logs_model_data(target_trade_logs_record)
-        return self._trade_logs.create_data(trade_logs_model_data)
+        target_trade_logs_record = api_records.join(target_epoch_times, on='time', how='inner')
+        target_trade_logs_record['currency_pair'] = self._currency_pair
+        target_trade_logs_record['period'] = self._period
+        return self._trade_logs.create_data(target_trade_logs_record)
 
     def _get_target_epoch_times(self, start_time, end_time):
-        trade_logs_record = self._trade_logs.get_records(end_time, start_time, True)
-        return self._check_missing_records(trade_logs_record, start_time, end_time, self._period)
-
-    @staticmethod
-    def _check_missing_records(trade_logs_record, start_time, end_time, period):
-        to_epoch_times = set([x.time for x in trade_logs_record])
-        target_epoch_times = set()
-        for need_epoch_time in get_need_epoch_times(start_time, end_time, period):
-            if need_epoch_time not in to_epoch_times:
-                target_epoch_times.add(need_epoch_time)
-        return target_epoch_times
-
-    def _set_trade_logs_model_data(self, target_trade_logs_record):
-        trade_logs_model_data = []
-        for trade_logs in target_trade_logs_record:
-            trade_logs_model_data.append(TradeLogs(
-                time=trade_logs['time'],
-                currency_pair=self._currency_pair,
-                period=self._period,
-                open=trade_logs['open'],
-                high=trade_logs['high'],
-                low=trade_logs['low'],
-                close=trade_logs['close'],
-                average=trade_logs['average'],
-                volume=trade_logs['volume'],
-                closed=int(trade_logs['closed'])
-            ))
-        return trade_logs_model_data
+        trade_logs_record = \
+            set(x.time for x in self._trade_logs.get_records(end_time, start_time, True))
+        return check_missing_records(trade_logs_record, start_time, end_time, self._period)
 
     def _get_ohlc_data_from_server(self, end_time):
         public_api = BotPublicApi()
@@ -97,71 +79,60 @@ class MovingAverageSetUp:
         self._count = count
         self._length = length
         self._moving_average = MovingAverageDao(self._currency_pair, self._period, self._length)
+        self._trade_logs = TradeLogsDao(self._currency_pair, self._period)
 
     def execute(self, ma_start_time, tl_start_time, end_time):
-        moving_average_model_data = set()
-        target_epoch_times = self._get_target_epoch_times(ma_start_time, end_time)
-        if len(target_epoch_times) == 0:
+        moving_average_model_data = []
+        target_epoch_times = \
+            pd.DataFrame(index=self._get_target_epoch_times(ma_start_time, end_time))
+        if len(target_epoch_times.index) == 0:
             return True
         trade_logs_moving_average =\
-            self._moving_average.get_trade_logs_moving_average(end_time, tl_start_time)
+            self._get_trade_logs_moving_average(end_time, tl_start_time)
         for i in self._get_moving_average(trade_logs_moving_average, target_epoch_times):
-            moving_average_model_data.add(self._get_moving_average_model_dataset(i['time'],
-                                                                                 i['sma'],
-                                                                                 i['ema'],
-                                                                                 i['closed']))
+            moving_average_model_data.append(self._get_moving_average_model_dataset(i['time'],
+                                                                                    i['sma'],
+                                                                                    i['ema'],
+                                                                                    i['closed']))
         return self._moving_average.create_data(moving_average_model_data)
 
     def _get_target_epoch_times(self, start_time, end_time):
-        moving_average_record = self._moving_average.get_records(end_time, start_time, True)
-        return self._check_missing_records(moving_average_record,
-                                           start_time,
-                                           end_time,
-                                           self._period)
-
-    @staticmethod
-    def _check_missing_records(moving_average_record, start_time, end_time, period):
-        to_epoch_times = set([x.time for x in moving_average_record])
-        target_epoch_times = set()
-        for need_epoch_time in get_need_epoch_times(start_time, end_time, period):
-            if need_epoch_time not in to_epoch_times:
-                target_epoch_times.add(need_epoch_time)
-        return target_epoch_times
+        moving_average_record = \
+            set(x.time for x in self._moving_average.get_records(end_time, start_time, True))
+        return \
+            check_missing_records(moving_average_record, start_time, end_time, self._period)
 
     def _get_moving_average(self, trade_logs_moving_average, target_epoch_times):
-        moving_average = {'time': 0}
-        for i in range(self._length, len(trade_logs_moving_average)):
-            if trade_logs_moving_average[i].TradeLogs.time in target_epoch_times:
-                nums = self._get_nums(trade_logs_moving_average, i)
-                sma = self._get_sma(nums)
-                ema = self._get_ema(trade_logs_moving_average[i - 1], nums, moving_average)
-                moving_average = {'time': trade_logs_moving_average[i].TradeLogs.time,
-                                  'sma': sma,
-                                  'ema': ema,
-                                  'closed': trade_logs_moving_average[i].TradeLogs.closed}
+        moving_average = {}
+        for i in range(self._length, len(trade_logs_moving_average.index)):
+            if trade_logs_moving_average.loc[i]['time'] in target_epoch_times.index:
+                sma = trade_logs_moving_average.loc[i - self._length + 1:i]['close'].mean(axis=0)
+                ema = self._get_ema(trade_logs_moving_average.loc[i - self._length:i])
+                moving_average = {'time': int(trade_logs_moving_average.loc[i]['time']),
+                                  'sma': sma, 'ema': ema,
+                                  'closed': trade_logs_moving_average.loc[i]['closed']}
                 yield moving_average
 
-    def _get_nums(self, trade_logs_moving_average, i):
-        nums = []
-        for j in range(0, self._length + 1):
-            nums.append(trade_logs_moving_average[i - j].TradeLogs.close)
-        return nums
+    def _get_trade_logs_moving_average(self, end_time, start_time):
+        moving_average = \
+            [i.__dict__ for i in self._moving_average.get_records(end_time, start_time, False)]
+        trade_logs = \
+            [j.__dict__ for j in self._trade_logs.get_records(end_time, start_time, False)]
+        trade_logs_df = \
+            pd.DataFrame(trade_logs, columns=['time', 'currency_pair', 'period', 'close', 'closed'])
+        moving_average_df = \
+            pd.DataFrame(moving_average, columns=['time', 'sma', 'ema', 'length'])
+        trade_logs_moving_average = \
+            trade_logs_df.merge(moving_average_df, left_on='time', right_on='time', how='outer')
+        return trade_logs_moving_average
 
-    def _get_ema(self, last_trade_logs_moving_average, nums, moving_average):
-        current_price = nums.pop(0)
-        if last_trade_logs_moving_average.MovingAverages is not None\
-                and last_trade_logs_moving_average.MovingAverages.closed:
-            last_ema = last_trade_logs_moving_average.MovingAverages.ema
-        elif last_trade_logs_moving_average.TradeLogs.time == moving_average['time']:
-            last_ema = moving_average['ema']
-        else:
-            last_ema = np.average(nums)
+    def _get_ema(self, trade_logs_moving_average):
         k = 2 / (self._length + 1)
-        return current_price * k + last_ema * (1 - k)
-
-    @staticmethod
-    def _get_sma(nums):
-        return np.average(nums[0:-1])
+        if pd.isnull(trade_logs_moving_average.iloc[-2]['ema']):
+            last_ema = trade_logs_moving_average.iloc[:-1]['close'].mean(axis=0)
+        else:
+            last_ema = trade_logs_moving_average.iloc[-2]['ema']
+        return trade_logs_moving_average.iloc[-1]['close'] * k + last_ema * (1 - k)
 
     def _get_moving_average_model_dataset(self, time, sma, ema, closed):
         return MovingAverages(
