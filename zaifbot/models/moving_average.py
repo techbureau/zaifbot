@@ -3,8 +3,8 @@ from sqlalchemy import Column, Integer, Float, String
 from zaifbot.models import Base
 
 
-class TradeLogs(Base):
-    __tablename__ = 'trade_logs'
+class OhlcPrices(Base):
+    __tablename__ = 'ohlc_prices'
     time = Column('time', Integer, primary_key=True)
     currency_pair = Column('currency_pair', String, primary_key=True)
     period = Column('period', String, primary_key=True)

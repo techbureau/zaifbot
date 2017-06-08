@@ -1,11 +1,11 @@
 from sqlalchemy import and_
 from zaifbot.modules.dao import DaoBase
-from zaifbot.models.moving_average import TradeLogs, MovingAverages
+from zaifbot.models.moving_average import OhlcPrices, MovingAverages
 from sqlalchemy import exc
 from zaifbot.bot_common.bot_const import CLOSED
 
 
-class TradeLogsDao(DaoBase):
+class OhlcPricesDao(DaoBase):
 
     def __init__(self, currency_pair, period):
         super().__init__()
@@ -13,16 +13,16 @@ class TradeLogsDao(DaoBase):
         self._period = period
 
     def get_model(self):
-        return TradeLogs
+        return OhlcPrices
 
     def get_record(self, select_query):
         return select_query.order_by(self.model.time).all()
 
-    def create_data(self, trade_logs):
+    def create_data(self, ohlc_prices):
         session = self.get_session()
         try:
-            for index, record in trade_logs.iterrows():
-                session.merge(TradeLogs(**record.to_dict()))
+            for index, record in ohlc_prices.iterrows():
+                session.merge(OhlcPrices(**record.to_dict()))
             session.commit()
             session.close()
             return True
