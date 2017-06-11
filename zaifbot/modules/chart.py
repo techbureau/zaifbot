@@ -1,13 +1,13 @@
 import pandas as pd
-from pandas import DataFrame
 import pytz
-from tzlocal import get_localzone
-from plotly.offline import init_notebook_mode, iplot
+from modules.indicators.bollinger_bands import get_bollinger_bands
+from modules.indicators.moving_average import get_ema, get_sma
+from pandas import DataFrame
 from plotly.figure_factory import create_candlestick
 from plotly.graph_objs import Scatter, Line, Marker
+from plotly.offline import init_notebook_mode, iplot
+from tzlocal import get_localzone
 from zaifbot.modules.utils import get_price_info
-from zaifbot.moving_average import get_ema, get_sma
-from zaifbot.bollinger_bands import get_bollinger_bands
 
 INCREASE = '#5959F3'
 DECREASE = '#F03030'

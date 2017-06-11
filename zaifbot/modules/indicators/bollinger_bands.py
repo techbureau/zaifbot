@@ -1,8 +1,9 @@
 import time
-from zaifbot.moving_average import get_end_time
-from zaifbot.modules.ohlc_prices import OhlcPrices
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
+
+from modules.indicators.moving_average import get_end_time
 from talib.abstract import BBANDS
+from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
+from zaifbot.modules.ohlc_prices import OhlcPrices
 
 
 def get_bollinger_bands(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
