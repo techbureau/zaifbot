@@ -9,13 +9,13 @@ from zaifbot.modules.utils import get_price_info
 from zaifbot.moving_average import get_ema, get_sma
 from zaifbot.bollinger_bands import get_bollinger_bands
 
-INCREASE = '#5959F3'
-DECREASE = '#F03030'
-SMA = '#8CAD90'
-EMA = '#DE8889'
-SIGMA1 = '#84B761'
-SIGMA2 = '#00CED1'
-SIGMA3 = '#FF7F50'
+_INCREASE = '#5959F3'
+_DECREASE = '#F03030'
+_SMA = '#8CAD90'
+_EMA = '#DE8889'
+_SIGMA1 = '#84B761'
+_SIGMA2 = '#00CED1'
+_SIGMA3 = '#FF7F50'
 
 
 def draw_candle_chart(currency_pair, period='1d', count=20, to_epoch_time=None, **kwargs):
@@ -51,10 +51,10 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
     df.index = df.index.tz_localize(pytz.utc).tz_convert(get_localzone()).tz_localize(None)
     init_notebook_mode(connected=True)
     decreasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.index,
-                                    direction='decreasing', marker=Marker(color=DECREASE), line=Line(color=DECREASE))
+                                    direction='decreasing', marker=Marker(color=_DECREASE), line=Line(color=_DECREASE))
 
     increasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.index,
-                                    direction='increasing', marker=Marker(color=INCREASE), line=Line(color=INCREASE))
+                                    direction='increasing', marker=Marker(color=_INCREASE), line=Line(color=_INCREASE))
     fig = decreasing
 
     start = df.index[0]
@@ -70,7 +70,7 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
     return fig
 
 
-def _sma_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, color=SMA):
+def _sma_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, color=_SMA):
     sma = DataFrame(get_sma(currency_pair, period, count, to_epoch_time, length)['return']['sma'])
     sma = sma[sma['moving_average'] != 0]
     sma['time_stamp'] = pd.to_datetime(sma['time_stamp'], unit='s')
@@ -81,7 +81,7 @@ def _sma_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=2
     return sma_line
 
 
-def _ema_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, color=EMA):
+def _ema_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, color=_EMA):
     ema = DataFrame(get_ema(currency_pair, period,count, to_epoch_time, length)['return']['ema'])
     ema = ema[ema['moving_average'] != 0]
     ema['time_stamp'] = pd.to_datetime(ema['time_stamp'], unit='s')
@@ -101,9 +101,9 @@ def _band_lines(currency_pair, period='1d', count=20, to_epoch_time=None, length
 
     if colors is None:
         colors = list()
-        colors.append(SIGMA1)
-        colors.append(SIGMA2)
-        colors.append(SIGMA3)
+        colors.append(_SIGMA1)
+        colors.append(_SIGMA2)
+        colors.append(_SIGMA3)
 
     l = list()
     l.append(Scatter(x=bands.index, y=bands['sd1p'], name='+1σ({})'.format(length), line=Line(color=colors[0])))
