@@ -1,5 +1,5 @@
 from zaifbot.modules.dao.bollinger_bands import BollingerBandsDao
-from zaifbot.modules.moving_average import get_need_epoch_times
+from zaifbot.modules.ohlc_prices import get_need_epoch_times
 from zaifbot.models.bollinger_bands import BollingerBands
 from zaifbot.moving_average import get_sma
 import pandas as pd
