@@ -1,41 +1,47 @@
 import time
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
-from zaifbot.modules.moving_average import OhlcPricesSetUp, MovingAverageSetUp
-from zaifbot.modules.dao.moving_average import MovingAverageDao, OhlcPricesDao
-import pandas as pd
+from zaifbot.modules.ohlc_prices import OhlcPrices
+from talib.abstract import SMA, EMA
 
 
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
             to_epoch_time=None, length=LIMIT_LENGTH):
-    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
-    return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'sma')
+    moving_average = _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'sma')
+    return moving_average
 
 
 def get_ema(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
             to_epoch_time=None, length=LIMIT_LENGTH):
-    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
-    return _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'ema')
+    moving_average = _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'ema')
+    return moving_average
 
 
 def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma_ema):
-    if to_epoch_time is None:
-        to_epoch_time = int(time.time())
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     count = min(count, LIMIT_COUNT)
     length = min(length, LIMIT_LENGTH)
     end_time = get_end_time(to_epoch_time, period)
     tl_start_time = end_time - ((count + length) * PERIOD_SECS[period])
-    ma_start_time = end_time - (count * PERIOD_SECS[period])
+    ohlc_prices = OhlcPrices(currency_pair, period, count, length)
+    ohlc_prices_result = ohlc_prices.execute(tl_start_time, end_time)
 
-    ohlc_prices = OhlcPricesSetUp(currency_pair, period, count, length)
-    if ohlc_prices.execute(tl_start_time, end_time) is False:
-        return {'success': 0, 'error': 'failed to set up ohlc data'}
-
-    moving_average = MovingAverageSetUp(currency_pair, period, count, length)
-    ma_result = moving_average.execute(ma_start_time, tl_start_time, end_time)
-    if ma_result is False:
-        return {'success': 0, 'error': 'failed to set up moving average'}
-    return _create_return_dict(sma_ema, currency_pair, period,
-                               length, end_time, tl_start_time, count)
+    if len(ohlc_prices_result.index) == 0:
+        return {'success': 0, 'error': 'failed to get ohlc prices'}
+    sma = SMA(ohlc_prices_result, timeperiod=length)
+    ema = EMA(ohlc_prices_result, timeperiod=length)
+    ohlc_prices_result = \
+        ohlc_prices_result.merge(sma.to_frame(), left_index=True, right_index=True)\
+        .rename(columns={0: 'sma'})
+    ohlc_prices_result = \
+        ohlc_prices_result.merge(ema.to_frame(), left_index=True, right_index=True)\
+        .rename(columns={0: 'ema'})
+    if sma_ema == 'sma':
+        ohlc_prices_result = ohlc_prices_result[-count:].drop('ema', axis=1)\
+            .rename(columns={sma_ema: 'moving_average'}).to_dict(orient='records')
+    else:
+        ohlc_prices_result = ohlc_prices_result[-count:].drop('ema', axis=1)\
+            .rename(columns={sma_ema: 'moving_average'}).to_dict(orient='records')
+    return {'success': 1, 'return': {sma_ema: ohlc_prices_result}}
 
 
 def get_end_time(to_epoch_time, period):
@@ -44,25 +50,3 @@ def get_end_time(to_epoch_time, period):
     else:
         end_time = to_epoch_time - (to_epoch_time % PERIOD_SECS[period])
     return end_time
-
-
-def _create_return_dict(sma_ema, currency_pair, period, length, end_time, tl_start_time, count):
-    return_datas = []
-    moving_average_dao = MovingAverageDao(currency_pair, period, length)
-    ohlc_prices_dao = OhlcPricesDao(currency_pair, period)
-    moving_average = \
-        [i.__dict__ for i in moving_average_dao.get_records(end_time, tl_start_time, False)]
-    ohlc_prices = \
-        [i.__dict__ for i in ohlc_prices_dao.get_records(end_time, tl_start_time, False)]
-    moving_average_df = \
-        pd.DataFrame(moving_average, columns=['time', sma_ema])
-    ohlc_prices_df = \
-        pd.DataFrame(ohlc_prices, columns=['time', 'close', 'closed'])
-    ma_result = \
-        ohlc_prices_df.merge(moving_average_df, left_on='time', right_on='time', how='inner')
-    ma_result.rename(columns={'time': 'time_stamp', sma_ema: 'moving_average'}, inplace=True)
-    ma_result_length = len(ma_result.index)
-    if ma_result_length == 0:
-        return {'success': 0, 'error': 'moving average data is missing'}
-    return_datas = ma_result[ma_result_length - count:].to_dict(orient='records')
-    return {'success': 1, 'return': {sma_ema: return_datas}}
