@@ -3,16 +3,14 @@ from sqlalchemy import Column, Integer, Float, String
 from zaifbot.models import Base
 
 
-class BollingerBands(Base):
-    __tablename__ = 'bollinger_bands'
+class OrderLogs(Base):
+    __tablename__ = 'order_logs'
+    id = Column('id', Integer, primary_key=True)
     time = Column('time', Integer, primary_key=True)
     currency_pair = Column('currency_pair', String, primary_key=True)
-    period = Column('period', String, primary_key=True)
-    length = Column('length', Integer, primary_key=True)
-    sd1p = Column('sd1p', Float, nullable=False)
-    sd2p = Column('sd2p', Float, nullable=False)
-    sd3p = Column('sd3p', Float, nullable=False)
-    sd1n = Column('sd1n', Float, nullable=False)
-    sd2n = Column('sd2n', Float, nullable=False)
-    sd3n = Column('sd3n', Float, nullable=False)
-    closed = Column('closed', Integer, nullable=False)
+    action = Column('action', String, nullable=False)
+    price = Column('price', Float, nullable=False)
+    amount = Column('amount', Float, nullable=False)
+    limit = Column('limit', Float)
+    received = Column('received', Float)
+    remains = Column('remains', Float)
