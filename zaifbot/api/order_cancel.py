@@ -4,11 +4,10 @@ from datetime import datetime
 from threading import Thread, Event
 from uuid import uuid4
 
-from price.cache import ZaifCurrencyPairs
-from zaifbot.price.utils import get_current_last_price
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
-
+from zaifbot.price.cache import ZaifCurrencyPairs
+from zaifbot.price.utils import get_current_last_price
 
 __all__ = ['AutoCancelClient']
 

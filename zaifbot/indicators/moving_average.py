@@ -1,6 +1,6 @@
 import time
 
-from price.ohlc_prices import OhlcPrices
+from zaifbot.price.ohlc_prices import OhlcPrices
 from talib.abstract import SMA, EMA
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
 

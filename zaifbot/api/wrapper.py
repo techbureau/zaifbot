@@ -1,9 +1,10 @@
-import traceback
-import time
 import random
+import time
+import traceback
+
 from zaifbot.bot_common.logger import logger
-from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
+from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5
