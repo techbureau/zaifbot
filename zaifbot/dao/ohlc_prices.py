@@ -2,7 +2,7 @@ from dao import DaoBase
 from sqlalchemy import and_
 from sqlalchemy import exc
 from zaifbot.bot_common.bot_const import CLOSED
-from zaifbot.models.ohlc_prices import OhlcPrices
+from zaifbot.models import OhlcPrices
 
 
 class OhlcPricesDao(DaoBase):
