@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from zaifbot.models import Base, engine, get_session
-from zaifbot.models import moving_average, bollinger_bands
+from zaifbot.models import moving_average, bollinger_bands, order_log
 
 
 class DaoBase(metaclass=ABCMeta):

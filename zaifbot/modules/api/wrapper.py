@@ -72,24 +72,28 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        # todo: 要リファクタリング
-        def _create_logmsg(id, currency_pair, action, price, amount, limit):
-            msg = 'order succeed {{order_id: {}, currency_pair: {}, action: {},' \
-                  ' price: {}, amount: {}, limit: {}}}'.format(id,
-                                                               currency_pair,
-                                                               action,
-                                                               price,
-                                                               amount,
-                                                               limit, )
+        # TODO: リファクタリングしたい
+        def _log_message(id, currency_pair, action, price, amount, limit, received, remains):
+            msg = 'order succeed {{id: {}, currency_pair: {}, action: {},' \
+                  ' price: {}, amount: {}, limit: {}, received: {}, remains: {}}}'.format(id,
+                                                                                          currency_pair,
+                                                                                          action,
+                                                                                          price,
+                                                                                          amount,
+                                                                                          limit,
+                                                                                          received,
+                                                                                          remains)
             return msg
 
         ret = super().trade(**kwargs)
-        msg = _create_logmsg(ret['order_id'],
-                             kwargs.get('currency_pair'),
-                             kwargs.get('action'),
-                             kwargs.get('price'),
-                             kwargs.get('amount'),
-                             kwargs.get('limit', "''"))
+        msg = _log_message(ret['order_id'],
+                           kwargs.get('currency_pair'),
+                           kwargs.get('action'),
+                           kwargs.get('price'),
+                           kwargs.get('amount'),
+                           kwargs.get('limit', 0.0),
+                           ret['received'],
+                           ret['remains'],)
 
         logger.info(msg)
         return ret
