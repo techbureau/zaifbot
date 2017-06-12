@@ -5,6 +5,8 @@ from ohlc_prices import OhlcPrices
 from talib.abstract import BBANDS
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
 
+__all__ = ['get_bollinger_bands']
+
 
 def get_bollinger_bands(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
                         to_epoch_time=None, length=LIMIT_LENGTH, lowbd=2, upbd=2):

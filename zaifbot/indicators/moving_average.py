@@ -5,6 +5,9 @@ from talib.abstract import SMA, EMA
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
 
 
+__all__ = ['get_ema', 'get_sma']
+
+
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
             to_epoch_time=None, length=LIMIT_LENGTH):
     moving_average = _get_moving_average(currency_pair, period, count, to_epoch_time, length, 'sma')
