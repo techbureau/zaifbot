@@ -72,7 +72,27 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        return super().trade(**kwargs)
+        # todo: 要リファクタリング
+        def _create_logmsg(id, currency_pair, action, price, amount, limit):
+            msg = 'order succeed {{order_id: {}, currency_pair: {}, action: {},' \
+                  ' price: {}, amount: {}, limit: {}}}'.format(id,
+                                                               currency_pair,
+                                                               action,
+                                                               price,
+                                                               amount,
+                                                               limit, )
+            return msg
+
+        ret = super().trade(**kwargs)
+        msg = _create_logmsg(ret['order_id'],
+                             kwargs.get('currency_pair'),
+                             kwargs.get('action'),
+                             kwargs.get('price'),
+                             kwargs.get('amount'),
+                             kwargs.get('limit', "''"))
+
+        logger.info(msg)
+        return ret
 
     @_with_retry
     def trade_history(self, **kwargs):
