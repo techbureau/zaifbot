@@ -4,10 +4,12 @@ import random
 from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
-from zaifbot.bot_common import get_keys
+from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
+
+__all__ = ['BotPublicApi', 'BotTradeApi']
 
 
 def _with_retry(func):

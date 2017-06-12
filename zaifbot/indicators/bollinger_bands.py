@@ -1,7 +1,7 @@
 import time
 
 from indicators.moving_average import get_end_time
-from ohlc_prices import OhlcPrices
+from price.ohlc_prices import OhlcPrices
 from talib.abstract import BBANDS
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
 
@@ -19,7 +19,7 @@ def get_bollinger_bands(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
     ohlc_prices_result = ohlc_prices.execute(start_time, end_time)
 
     if len(ohlc_prices_result.index) == 0:
-        return {'success': 0, 'error': 'failed to get ohlc prices'}
+        return {'success': 0, 'error': 'failed to get ohlc price'}
     bbands = BBANDS(ohlc_prices_result, timeperiod=length, nbdevup=upbd, nbdevdn=lowbd, matype=0)
     ohlc_prices_result = ohlc_prices_result.merge(bbands, left_index=True, right_index=True)
     ohlc_prices_result = ohlc_prices_result[-count:][['time', 'lowerband', 'upperband']]

@@ -3,11 +3,10 @@ from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
 
 from api.wrapper import BotPublicApi
+from price.cache import ZaifCurrencyPairs
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
-
-from .cache import ZaifCurrencyPairs
 
 
 class ZaifLastPrice:
