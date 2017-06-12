@@ -5,11 +5,13 @@ from zaifbot.bot_common.logger import logger
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifbot.bot_common import get_keys
+from zaifbot.modules.dao.order_log import OrderLogsDao
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
 
 
+# TODO:　リトライ実装見直したい。Exceptionでリトライするのは微妙だと思われる。
 def _with_retry(func):
     def _wrapper(self, *args, **kwargs):
         for i in range(_RETRY_COUNT):
@@ -72,19 +74,24 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
+        # TODO: リファクタリングしたい
         def _make_dict(**items):
             return str(items)
 
         ret = super().trade(**kwargs)
-        log_msg = _make_dict(id=ret['order_id'],
-                             currency_pair=kwargs.get('currency_pair'),
-                             action=kwargs.get('action'),
-                             price=kwargs.get('price'),
-                             acount=kwargs.get('amount'),
-                             limit=kwargs.get('limit', 0.0),
-                             received=ret['received'],
-                             remains=ret['remains'],)
-        logger.info('order succeeded : {}'.format(log_msg))
+        order_log = _make_dict(id=ret['order_id'],
+                               currency_pair=kwargs.get('currency_pair'),
+                               action=kwargs.get('action'),
+                               price=kwargs.get('price'),
+                               amount=kwargs.get('amount'),
+                               limit=kwargs.get('limit', 0.0),
+                               received=ret['received'],
+                               remains=ret['remains'],)
+        logger.info('order succeeded : {}'.format(order_log))
+        dao = OrderLogsDao()
+        record = eval(order_log)
+        record['time'] = int(time.time())
+        dao.create_data(record)
 
         return ret
 
