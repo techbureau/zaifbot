@@ -72,30 +72,20 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        # TODO: リファクタリングしたい
-        def _log_message(id, currency_pair, action, price, amount, limit, received, remains):
-            msg = 'order succeed {{id: {}, currency_pair: {}, action: {},' \
-                  ' price: {}, amount: {}, limit: {}, received: {}, remains: {}}}'.format(id,
-                                                                                          currency_pair,
-                                                                                          action,
-                                                                                          price,
-                                                                                          amount,
-                                                                                          limit,
-                                                                                          received,
-                                                                                          remains)
-            return msg
+        def _make_dict(**items):
+            return str(items)
 
         ret = super().trade(**kwargs)
-        msg = _log_message(ret['order_id'],
-                           kwargs.get('currency_pair'),
-                           kwargs.get('action'),
-                           kwargs.get('price'),
-                           kwargs.get('amount'),
-                           kwargs.get('limit', 0.0),
-                           ret['received'],
-                           ret['remains'],)
+        log_msg = _make_dict(id=ret['order_id'],
+                             currency_pair=kwargs.get('currency_pair'),
+                             action=kwargs.get('action'),
+                             price=kwargs.get('price'),
+                             acount=kwargs.get('amount'),
+                             limit=kwargs.get('limit', 0.0),
+                             received=ret['received'],
+                             remains=ret['remains'],)
+        logger.info('order succeeded : {}'.format(log_msg))
 
-        logger.info(msg)
         return ret
 
     @_with_retry
