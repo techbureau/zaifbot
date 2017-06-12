@@ -1,8 +1,8 @@
+from dao import DaoBase
 from sqlalchemy import and_
-from zaifbot.modules.dao import DaoBase
-from zaifbot.models.moving_average import MovingAverages
 from sqlalchemy import exc
 from zaifbot.bot_common.bot_const import CLOSED
+from zaifbot.models.moving_average import MovingAverages
 
 
 class MovingAverageDao(DaoBase):

@@ -1,8 +1,9 @@
 import time
+
+from api.wrapper import BotPublicApi
 from zaifbot.bot_common.slack_notifier import SlackNotifier
-from zaifbot.modules.api.stream import ZaifLastPrice
 from zaifbot.modules.api.cache import ZaifCurrencyPairs
-from zaifbot.modules.api.wrapper import BotPublicApi
+from zaifbot.modules.api.stream import ZaifLastPrice
 
 
 def get_price_info(currency_pair, period='1d', count=5, to_epoch_time=None):

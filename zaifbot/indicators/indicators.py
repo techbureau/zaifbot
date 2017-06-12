@@ -1,10 +1,10 @@
 import traceback
+
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
+from utils import get_price_info
 from zaifbot.bot_common.logger import logger
-from zaifbot.modules.utils import get_price_info
-
 
 _HIGH = 'high'
 _LOW = 'low'

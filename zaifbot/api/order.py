@@ -3,10 +3,11 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from threading import Thread, Event
 from uuid import uuid4
+
+from api import ZaifCurrencyPairs
+from utils import get_current_last_price
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
-from zaifbot.modules.api.cache import ZaifCurrencyPairs
-from zaifbot.modules.utils import get_current_last_price
 
 
 class AutoCancelClient:

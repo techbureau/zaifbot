@@ -1,7 +1,8 @@
 import time
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
-from zaifbot.modules.ohlc_prices import OhlcPrices
+
+from ohlc_prices import OhlcPrices
 from talib.abstract import SMA, EMA
+from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
 
 
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
