@@ -44,3 +44,7 @@ def _get_currency_pair_info(currency_pair):
 def send_slack_message(slack_token, channel_id, message, username):
     slack_notifier = SlackNotifier(slack_token)
     return slack_notifier.send_message(channel_id, message, username)
+
+
+def make_dict(**kwargs):
+    return str(kwargs)
