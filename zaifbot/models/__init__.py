@@ -6,9 +6,13 @@ from sqlalchemy.orm import sessionmaker
 from .bollinger_bands import BollingerBands
 from .moving_average import MovingAverages
 from .ohlc_prices import OhlcPrices
+from .order_log import OrderLogs
 
-__all__ = []
-__all__ += [BollingerBands, MovingAverages, OhlcPrices]
+
+__all__ = [BollingerBands,
+           MovingAverages,
+           OhlcPrices,
+           OrderLogs]
 
 
 def _get_connection_string():

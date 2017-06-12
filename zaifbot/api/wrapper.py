@@ -1,10 +1,10 @@
 import random
 import time
-import traceback
 
-from zaifbot.bot_common.logger import logger
+from dao.order_log import OrderLogsDao
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
+from zaifbot.bot_common.logger import logger
 from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5
@@ -13,24 +13,22 @@ _WAIT_SECOND = 5
 __all__ = ['BotPublicApi', 'BotTradeApi']
 
 
+# TODO:　リトライ実装見直したい。Exceptionでリトライするのは微妙だと思われる。
 def _with_retry(func):
     def _wrapper(self, *args, **kwargs):
         for i in range(_RETRY_COUNT):
             try:
                 return func(self, *args, **kwargs)
             except ZaifApiError as e:
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                logger.error(e, exc_info=True)
                 raise e
             except ZaifApiNonceError as e:
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                logger.error(e, exc_info=True)
                 a = random.uniform(0.5, 1.0)
                 time.sleep(a)
                 continue
             except Exception as e:
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                logger.error(e, exc_info=True)
                 time.sleep(_WAIT_SECOND)
                 continue
     return _wrapper
@@ -75,7 +73,27 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        return super().trade(**kwargs)
+        # TODO: リファクタリングしたい
+        def _make_dict(**items):
+            return str(items)
+
+        ret = super().trade(**kwargs)
+        order_log = _make_dict(order_id=ret['order_id'],
+                               currency_pair=kwargs.get('currency_pair'),
+                               action=kwargs.get('action'),
+                               price=kwargs.get('price'),
+                               amount=kwargs.get('amount'),
+                               limit=kwargs.get('limit', 0.0),
+                               received=ret['received'],
+                               remains=ret['remains'],
+                               comment=kwargs.get('comment', ''))
+        logger.info('order succeeded : {}'.format(order_log))
+        dao = OrderLogsDao()
+        record = eval(order_log)
+        record['time'] = int(time.time())
+        dao.create_data(record)
+
+        return ret
 
     @_with_retry
     def trade_history(self, **kwargs):

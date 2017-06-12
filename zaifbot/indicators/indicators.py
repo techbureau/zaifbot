@@ -1,5 +1,3 @@
-import traceback
-
 import pandas as pd
 from zaifbot.bot_common.logger import logger
 from pandas import DataFrame as DF
@@ -23,8 +21,7 @@ def get_adx(currency_pair='btc_jpy', period='1d', count=100, length=14, to_epoch
         adx = pd.concat([df[_TIME], adx], axis=1).dropna()
         return {'success': 1, 'return': {'ADXs': adx.astype(object).to_dict(orient='records')}}
     except Exception as e:
-        logger.error(e)
-        logger.error(traceback.format_exc())
+        logger.error(e, exc_info=True)
         return {'success': 0, 'error': e}
 
 
@@ -36,8 +33,7 @@ def get_macd(currency_pair='btc_jpy', period='1d', count=100, short=12, long=26,
         macd = pd.concat([df[_TIME], macd], axis=1).dropna()
         return {'success': 1, 'return': {'MACDs':  macd.astype(object).to_dict(orient='records')}}
     except Exception as e:
-        logger.error(e)
-        logger.error(traceback.format_exc())
+        logger.error(e, exc_info=True)
         return {'success': 0, 'error': e}
 
 
@@ -49,6 +45,5 @@ def get_rsi(currency_pair='btc_jpy', period='1d', count=100, length=14, to_epoch
         rsi = pd.concat([df[_TIME], rsi], axis=1).dropna()
         return {'success': 1, 'return': {'RSIs': rsi.astype(object).to_dict(orient='records')}}
     except Exception as e:
-        logger.error(e)
-        logger.error(traceback.format_exc())
+        logger.error(e, exc_info=True)
         return {'success': 0, 'error': e}

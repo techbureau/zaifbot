@@ -5,10 +5,12 @@ from zaifbot.models import Base, engine, get_session
 from .ohlc_prices import OhlcPricesDao
 from .moving_average import MovingAverageDao
 from .bollinger_bands import BollingerBandsDao
+from .order_log import OrderLogsDao
 
 __all__ = [OhlcPricesDao,
            MovingAverageDao,
-           BollingerBandsDao]
+           BollingerBandsDao,
+           OrderLogsDao]
 
 
 class DaoBase(metaclass=ABCMeta):

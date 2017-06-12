@@ -53,7 +53,7 @@ class OhlcPrices:
         try:
             api_record = public_api.everything('ohlc_data', self._currency_pair, api_params)
         except Exception as e:
-            logger.error(e)
+            logger.error(e, exc_info=True)
             api_record = []
         required_count = self._count + self._length
         if required_count <= LIMIT_COUNT:
@@ -66,7 +66,7 @@ class OhlcPrices:
             second_api_record =\
                 public_api.everything('ohlc_data', self._currency_pair, second_api_params)
         except Exception as e:
-            logger.error(e)
+            logger.error(e, exc_info=True)
             second_api_record = []
         api_record = second_api_record + api_record
         return api_record
