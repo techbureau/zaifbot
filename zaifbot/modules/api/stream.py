@@ -1,4 +1,3 @@
-import traceback
 from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
 from zaifapi.impl import ZaifPublicStreamApi
@@ -80,8 +79,7 @@ class _StreamThread(Thread):
                 if self._stop_event.is_set():
                     self._stream_api.stop()
         except Exception as e:
-            logger.error(str(e))
-            logger.error(traceback.format_exc())
+            logger.error(e, exc_info=True)
             self._error_event.set()
 
     def _set_first_last_price(self):

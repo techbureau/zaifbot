@@ -1,4 +1,3 @@
-import traceback
 import time
 import random
 from zaifbot.bot_common.logger import logger
@@ -16,18 +15,15 @@ def _with_retry(func):
             try:
                 return func(self, *args, **kwargs)
             except ZaifApiError as e:
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                logger.error(e, exc_info=True)
                 raise e
             except ZaifApiNonceError as e:
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                logger.error(e, exc_info=True)
                 a = random.uniform(0.5, 1.0)
                 time.sleep(a)
                 continue
             except Exception as e:
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                logger.error(e, exc_info=True)
                 time.sleep(_WAIT_SECOND)
                 continue
     return _wrapper
