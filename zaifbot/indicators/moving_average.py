@@ -1,7 +1,11 @@
 import time
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
-from zaifbot.modules.ohlc_prices import OhlcPrices
+
+from zaifbot.price.ohlc_prices import OhlcPrices
 from talib.abstract import SMA, EMA
+from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
+
+
+__all__ = ['get_ema', 'get_sma']
 
 
 def get_sma(currency_pair='btc_jpy', period='1d', count=LIMIT_COUNT,
@@ -26,7 +30,7 @@ def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma
     ohlc_prices_result = ohlc_prices.execute(tl_start_time, end_time)
 
     if len(ohlc_prices_result.index) == 0:
-        return {'success': 0, 'error': 'failed to get ohlc prices'}
+        return {'success': 0, 'error': 'failed to get ohlc price'}
     sma = SMA(ohlc_prices_result, timeperiod=length)
     ema = EMA(ohlc_prices_result, timeperiod=length)
     ohlc_prices_result = \
