@@ -18,7 +18,7 @@ setup(
         'License :: OSI Approved :: MIT License'
     ],
     install_requires=[
-        'zaifapi==1.5.2',
+        'zaifapi==1.5.3',
         'numpy==1.12.0',
         'pandas==0.20.1',
         'reportlab==3.4.0',
