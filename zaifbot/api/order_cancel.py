@@ -3,7 +3,6 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from threading import Thread, Event
 from uuid import uuid4
-
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
 from zaifbot.price.cache import ZaifCurrencyPairs
