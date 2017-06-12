@@ -75,14 +75,15 @@ class BotTradeApi(ZaifTradeApi):
             return str(items)
 
         ret = super().trade(**kwargs)
-        order_log = _make_dict(id=ret['order_id'],
+        order_log = _make_dict(order_id=ret['order_id'],
                                currency_pair=kwargs.get('currency_pair'),
                                action=kwargs.get('action'),
                                price=kwargs.get('price'),
                                amount=kwargs.get('amount'),
                                limit=kwargs.get('limit', 0.0),
                                received=ret['received'],
-                               remains=ret['remains'],)
+                               remains=ret['remains'],
+                               comment=kwargs.get('comment', ''))
         logger.info('order succeeded : {}'.format(order_log))
         dao = OrderLogsDao()
         record = eval(order_log)
