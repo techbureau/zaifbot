@@ -1,3 +1,5 @@
+from sys import platform
+import subprocess
 
 
 class ZaifBot:
@@ -12,3 +14,12 @@ class ZaifBot:
             process.start()
             running_processes.append(process)
         [x.join() for x in running_processes]
+
+
+
+def install_ta_lib():
+    if platform == "linux" or platform == "linux2":
+        subprocess.call(["setup/install_ta_lib.sh"])
+    elif platform == "win32":
+        with zipfile.ZipFile("setup/ta-lib-0.4.0-msvc.zip", "r") as zip_ref:
+            zip_ref.extractall("C:\\ta-lib")

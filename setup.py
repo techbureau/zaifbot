@@ -33,6 +33,7 @@ setup(
       [console_scripts]
       update_assignee_id = zaifbot:main
       init_database = zaifbot.modules.dao:init_database
+      install_ta_lib = zaifbot:install_ta_lib
       """,
     include_package_data=True
 )
