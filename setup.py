@@ -18,7 +18,7 @@ setup(
         'License :: OSI Approved :: MIT License'
     ],
     install_requires=[
-        'zaifapi==1.5.2',
+        'zaifapi==1.5.3',
         'numpy==1.12.0',
         'pandas==0.20.1',
         'reportlab==3.4.0',
@@ -33,6 +33,7 @@ setup(
       [console_scripts]
       update_assignee_id = zaifbot:main
       init_database = zaifbot.modules.dao:init_database
+      install_ta_lib = zaifbot:install_ta_lib
       """,
     include_package_data=True
 )
