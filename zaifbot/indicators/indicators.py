@@ -2,7 +2,7 @@ import pandas as pd
 from zaifbot.bot_common.logger import logger
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from zaifbot.price.utils import get_price_info
+from zaifbot.price.ohlc_prices import get_price_info
 
 _HIGH = 'high'
 _LOW = 'low'

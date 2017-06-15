@@ -7,7 +7,7 @@ from plotly.figure_factory import create_candlestick
 from plotly.graph_objs import Scatter, Line, Marker
 from plotly.offline import init_notebook_mode, iplot
 from tzlocal import get_localzone
-from zaifbot.price.utils import get_price_info
+from zaifbot.price.ohlc_prices import get_price_info
 
 _INCREASE = '#5959F3'
 _DECREASE = '#F03030'
