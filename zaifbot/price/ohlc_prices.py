@@ -4,6 +4,8 @@ from zaifbot.bot_common.logger import logger
 from zaifbot.dao.ohlc_prices import OhlcPricesDao
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
 import time
+
+
 def get_need_epoch_times(start_time, end_time, period):
     while True:
         yield start_time
