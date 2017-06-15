@@ -1,10 +1,9 @@
 import pandas as pd
 from zaifbot.api.wrapper import BotPublicApi
 from zaifbot.bot_common.logger import logger
-from zaifbot.dao import OhlcPricesDao
+from zaifbot.dao.ohlc_prices import OhlcPricesDao
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
-
-
+import time
 def get_need_epoch_times(start_time, end_time, period):
     while True:
         yield start_time
@@ -12,6 +11,13 @@ def get_need_epoch_times(start_time, end_time, period):
         if start_time >= end_time:
             yield end_time
             break
+
+
+def get_price_info(currency_pair, period='1d', count=5, to_epoch_time=None):
+    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
+    public_api = BotPublicApi()
+    second_api_params = {'period': period, 'count': count, 'to_epoch_time': to_epoch_time}
+    return public_api.everything('ohlc_data', currency_pair, second_api_params)
 
 
 def check_missing_records(exist_epoch_times, start_time, end_time, period):
