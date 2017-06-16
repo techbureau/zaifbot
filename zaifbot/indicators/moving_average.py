@@ -34,7 +34,7 @@ class SMA(MA):
         return _get_moving_average(self._currency_pair, self._period, count, to_epoch_time, self._length, 'sma')
 
 
-# TODO: このメソッドはMA内な気がする、、、
+# TODO: 後で適切な場所に実装しなおす！
 def _get_moving_average(currency_pair, period, count, to_epoch_time, length, sma_ema):
     to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
     count = min(count, LIMIT_COUNT)

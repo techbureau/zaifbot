@@ -1,7 +1,7 @@
 import random
 import time
 
-from dao.order_log import OrderLogsDao
+from zaifbot.dao.order_log import OrderLogsDao
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.bot_common.logger import logger

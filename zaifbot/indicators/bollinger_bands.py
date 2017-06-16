@@ -2,7 +2,7 @@ import time
 
 from zaifbot.indicators.moving_average import get_end_time
 from zaifbot.price.ohlc_prices import OhlcPrices
-import  talib.abstract as ab
+import talib.abstract as ab
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
 from .base import Indicator
 

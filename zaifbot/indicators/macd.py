@@ -10,7 +10,6 @@ _LOW = 'low'
 _CLOSE = 'close'
 _TIME = 'time'
 
-
 __all__ = ['MACD']
 
 
