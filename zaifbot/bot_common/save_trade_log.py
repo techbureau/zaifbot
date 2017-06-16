@@ -2,6 +2,7 @@ from json import dumps
 import os
 
 
+# todo: この関数を消して、この内容はロガーに処理させるべき。
 def save_trade_log(filename, time, action, price, amount, limit=None):
     current_dir = os.path.dirname(__file__)
     parent_dir = os.path.abspath(os.path.join(current_dir, os.path.pardir))
