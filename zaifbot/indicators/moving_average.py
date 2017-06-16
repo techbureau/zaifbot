@@ -1,7 +1,7 @@
 import time
 
 from zaifbot.price.ohlc_prices import OhlcPrices
-import talib.abstract as ab
+from talib import abstract as ab
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH, UTC_JP_DIFF
 from .base import Indicator
 
