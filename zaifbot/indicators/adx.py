@@ -3,6 +3,7 @@ from zaifbot.bot_common.logger import logger
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.price.ohlc_prices import get_price_info
+from .base import Indicator
 
 _HIGH = 'high'
 _LOW = 'low'
@@ -12,7 +13,7 @@ _TIME = 'time'
 __all__ = ['ADX']
 
 
-class ADX:
+class ADX(Indicator):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=14):
         self._currency_pair = currency_pair
         self._period = period
