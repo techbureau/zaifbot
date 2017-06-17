@@ -1,5 +1,6 @@
 from sys import platform
 import subprocess
+import os
 
 
 class ZaifBot:
@@ -17,8 +18,10 @@ class ZaifBot:
 
 
 def install_ta_lib():
+    parent_path = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(parent_path + "/setup")
     if platform == "linux" or platform == "linux2":
-        subprocess.call(["setup/install_ta_lib.sh"])
+        subprocess.call(["./install_ta_lib.sh"])
     elif platform == "win32":
-        with zipfile.ZipFile("setup/ta-lib-0.4.0-msvc.zip", "r") as zip_ref:
+        with zipfile.ZipFile("ta-lib-0.4.0-msvc.zip", "r") as zip_ref:
             zip_ref.extractall("C:\\ta-lib")
