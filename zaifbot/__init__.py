@@ -16,7 +16,6 @@ class ZaifBot:
         [x.join() for x in running_processes]
 
 
-
 def install_ta_lib():
     if platform == "linux" or platform == "linux2":
         subprocess.call(["setup/install_ta_lib.sh"])

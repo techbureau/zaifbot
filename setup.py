@@ -1,4 +1,7 @@
 from setuptools import setup, find_packages
+from zaifbot import install_ta_lib
+
+install_ta_lib()
 
 setup(
     name='zaifbot',
