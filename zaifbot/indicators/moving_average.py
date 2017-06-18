@@ -15,9 +15,10 @@ class MA(Indicator):
         self._period = period
         self._length = min(length, LIMIT_LENGTH)
 
-    def get_data(self):
+    def get_data(self, count):
         raise NotImplementedError
 
+    # todo: priceから返却される値が多すぎる
     def _bring_prices(self, count, to_epoch_time):
         to_epoch_time = to_epoch_time or int(time.time())
         count = min(count, LIMIT_COUNT)
@@ -26,20 +27,24 @@ class MA(Indicator):
         return OhlcPrices(self._currency_pair, self._period, count, self._length).execute(tl_start_time, end_time)
 
 
+# todo: get_dataの戻り値がおかしい。
+# todo: エラーの処理のやり方がおかしい。
+# todo: LIMIT_COUNTが何のリミットか分からない。
 class EMA(MA):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=LIMIT_LENGTH):
         super().__init__(currency_pair, period, length)
 
     def get_data(self, count=LIMIT_COUNT, to_epoch_time=None):
+        count = min(count, LIMIT_COUNT)
+
         ohlc_prices = self._bring_prices(count, to_epoch_time)
         if len(ohlc_prices.index) == 0:
             return {'success': 0, 'error': 'failed to get ohlc price'}
 
-        ema = ab.EMA(ohlc_prices, timeperiod=self._length)
+        ema = ab.EMA(ohlc_prices, timeperiod=self._length).dropna()
         ohlc_prices_result = \
             ohlc_prices.merge(ema.to_frame(), left_index=True, right_index=True) \
                 .rename(columns={0: 'ema'}).to_dict(orient='records')
-        print(ohlc_prices_result)
         return {'success': 1, 'return': {'ema': ohlc_prices_result}}
 
 
@@ -48,12 +53,13 @@ class SMA(MA):
         super().__init__(currency_pair, period, length)
 
     def get_data(self, count=LIMIT_COUNT, to_epoch_time=None):
+        count = min(count, LIMIT_COUNT)
         ohlc_prices = self._bring_prices(count, to_epoch_time)
 
         if len(ohlc_prices.index) == 0:
             return {'success': 0, 'error': 'failed to get ohlc price'}
 
-        sma = ab.SMA(ohlc_prices, timeperiod=self._length)
+        sma = ab.SMA(ohlc_prices, timeperiod=self._length).dropna()
 
         ohlc_prices_result = \
             ohlc_prices.merge(sma.to_frame(), left_index=True, right_index=True) \
