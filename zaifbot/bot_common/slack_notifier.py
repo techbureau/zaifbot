@@ -29,4 +29,3 @@ class SlackNotifier:
                 'error': str(e)
             }
         return response
-
