@@ -55,7 +55,7 @@ class StopOrderClient:
 
 class _StopOrder(Thread, metaclass=ABCMeta):
     def __init__(self, trade_api, stop_order_id, trade_params):
-        super().__init__()
+        super().__init__(daemon=True)
         self._trade_api = trade_api
         self._stop_order_id = stop_order_id
         self._sleep_time = trade_params['sleep_time']
