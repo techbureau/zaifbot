@@ -1,6 +1,6 @@
 import time
 
-from zaifbot.indicators.moving_average import get_end_time
+from zaifbot.utils import truncate_time_at_period
 from zaifbot.price.ohlc_prices import OhlcPrices
 from talib import abstract as ab
 from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
@@ -19,7 +19,7 @@ class BBands(Indicator):
         to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
         count = min(count, LIMIT_COUNT)
         length = min(self._length, LIMIT_LENGTH)
-        end_time = get_end_time(to_epoch_time, self._period)
+        end_time = truncate_time_at_period(to_epoch_time, self._period)
         start_time = end_time - ((count + length) * PERIOD_SECS[self._period])
         ohlc_prices = OhlcPrices(self._currency_pair, self._period, count, length)
         ohlc_prices_result = ohlc_prices.execute(start_time, end_time)
