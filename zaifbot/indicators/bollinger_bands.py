@@ -26,7 +26,6 @@ class BBands(Indicator):
         return \
             {'success': 1, 'return': {'bollinger_bands': ohlc_prices_result.to_dict(orient='records')}}
 
-    # もしかしたらこのメソッドOhlcPricesだけでこと足りる可能性がある。
     def _bring_prices(self, count, to_epoch_time):
         to_epoch_time = to_epoch_time or int(time.time())
         count = min(count, LIMIT_COUNT)
