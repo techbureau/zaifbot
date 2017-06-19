@@ -9,6 +9,7 @@ from .base import Indicator
 __all__ = ['EMA', 'SMA']
 
 
+# TODO: 不可能なcountの場合の処理
 class MA(Indicator):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=LIMIT_LENGTH):
         self._currency_pair = currency_pair
@@ -18,8 +19,11 @@ class MA(Indicator):
     def get_data(self, count, to_epoch_time):
         raise NotImplementedError
 
+    def _calc_price_count(self, count):
+        return count + self._length - 1
+
     def _get_ma(self, count, to_epoch_time, name):
-        count = min(count, LIMIT_COUNT)
+        count = self._calc_price_count(min(count, LIMIT_COUNT))
         to_epoch_time = to_epoch_time or int(time.time())
         ohlcs = DF(OhlcPrices(self._currency_pair, self._period).fetch_data(count, to_epoch_time))
         ma = ab.Function(name)(ohlcs, timeperiod=self._length).rename(name).dropna()
