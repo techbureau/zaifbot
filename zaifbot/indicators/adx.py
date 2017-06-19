@@ -2,7 +2,7 @@ import pandas as pd
 from zaifbot.bot_common.logger import logger
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from zaifbot.price.ohlc_prices import get_price_info
+from zaifbot.price.ohlc_prices import OhlcPrices
 from .base import Indicator
 
 _HIGH = 'high'
@@ -22,7 +22,8 @@ class ADX(Indicator):
     def get_data(self, count=100, to_epoch_time=None):
         try:
             count_needed = 2 * self._length - 1 + count
-            df = DF(get_price_info(self._currency_pair, self._period, count_needed, to_epoch_time))
+            ohlc_prices = OhlcPrices(self._currency_pair, self._period)
+            df = DF(ohlc_prices.fetch_data(count_needed, to_epoch_time))
             adx = ab.ADX(df, timeperiod=self._length, prices=[_HIGH, _LOW, _CLOSE], output_names=['adx']).rename('adx')
             adx = pd.concat([df[_TIME], adx], axis=1).dropna()
             return {'success': 1, 'return': {'ADXs': adx.astype(object).to_dict(orient='records')}}

@@ -1,6 +1,7 @@
 from zaifbot.dao import DaoBase
 from sqlalchemy import and_
 from sqlalchemy import exc
+from zaifbot.bot_common.logger import logger
 from zaifbot.bot_common.bot_const import CLOSED
 from zaifbot.models.ohlc_prices import OhlcPrices
 
@@ -21,13 +22,15 @@ class OhlcPricesDao(DaoBase):
     def create_data(self, ohlc_prices):
         session = self.get_session()
         try:
-            for index, record in ohlc_prices.iterrows():
-                session.merge(OhlcPrices(**record.to_dict()))
+            for record in ohlc_prices:
+                record['currency_pair'] = self._currency_pair
+                record['period'] = self._period
+                session.merge(OhlcPrices(**record))
             session.commit()
             session.close()
             return True
         except exc.SQLAlchemyError as e:
-            print(e)
+            logger.exception(e)
             session.rollback()
             session.close()
         return False

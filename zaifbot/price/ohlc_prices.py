@@ -1,18 +1,9 @@
-import pandas as pd
 import time
 from zaifbot.api.wrapper import BotPublicApi
 from zaifbot.bot_common.logger import logger
 from zaifbot.dao.ohlc_prices import OhlcPricesDao
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT
-from zaifbot.utils import truncate_time_at_period, calc_start_from_count_and_end
-
-
-# todo: このメソッドはいづれ消え去る
-def get_price_info(currency_pair, period='1d', count=5, to_epoch_time=None):
-    to_epoch_time = int(time.time()) if to_epoch_time is None else to_epoch_time
-    public_api = BotPublicApi()
-    second_api_params = {'period': period, 'count': count, 'to_epoch_time': to_epoch_time}
-    return public_api.everything('ohlc_data', currency_pair, second_api_params)
+from zaifbot.bot_common.bot_const import LIMIT_COUNT
+from zaifbot.utils import calc_start_from_count_and_end
 
 
 class OhlcPrices:
