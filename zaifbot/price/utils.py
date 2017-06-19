@@ -24,7 +24,9 @@ def get_buyable_amount(currency_pair, amount, price):
 
 def get_round_amount(currency_pair, amount):
     currency_pair_info = _get_currency_pair_info(currency_pair)
-    return amount - (amount % currency_pair_info['item_unit_step'])
+    rounded_amount = amount - (amount % currency_pair_info['item_unit_step'])
+    digits = len(str(currency_pair_info['item_unit_step'])) - 2
+    return round(rounded_amount, digits)
 
 
 def _get_currency_pair_info(currency_pair):
