@@ -23,5 +23,6 @@ def install_ta_lib():
     if platform == "linux" or platform == "linux2":
         subprocess.call(["./install_ta_lib.sh"])
     elif platform == "win32":
-        with zipfile.ZipFile("ta-lib-0.4.0-msvc.zip", "r") as zip_ref:
-            zip_ref.extractall("C:\\ta-lib")
+        subprocess.call(["pip", "install", "setup/TA_Lib-0.4.10-cp36-cp36m-win32.whl"])
+    elif platform == "win64":
+        subprocess.call(["pip", "install", "setup/TA_Lib-0.4.10-cp36-cp36m-win_amd64.whl"])
