@@ -1,9 +1,8 @@
 import time
 from zaifbot.api.wrapper import BotPublicApi
-from zaifbot.bot_common.logger import logger
 from zaifbot.dao.ohlc_prices import OhlcPricesDao
 from zaifbot.bot_common.bot_const import LIMIT_COUNT
-from zaifbot.utils import calc_start_from_count_and_end
+from zaifbot.utils import calc_start_from_count_and_end, truncate_time_at_period
 
 
 class OhlcPrices:
@@ -15,13 +14,14 @@ class OhlcPrices:
     def fetch_data(self, count=LIMIT_COUNT, to_epoch_time=None):
         count = min(count, LIMIT_COUNT)
         to_epoch_time = to_epoch_time or int(time.time())
-        start_time = calc_start_from_count_and_end(count, to_epoch_time, self._period)
+        end_time_rounded = truncate_time_at_period(to_epoch_time, self._period)
+        start_time = calc_start_from_count_and_end(count, end_time_rounded, self._period)
 
-        db_records = self._fetch_data_from_db(start_time=start_time, end_time=to_epoch_time)
+        db_records = self._fetch_data_from_db(start_time=start_time, end_time=end_time_rounded)
         if len(db_records) >= count:
             return db_records
 
-        api_records = self._fetch_data_from_web(count, to_epoch_time)
+        api_records = self._fetch_data_from_web(count, end_time_rounded)
         return api_records
 
     def _fetch_data_from_web(self, count, to_epoch_time):
