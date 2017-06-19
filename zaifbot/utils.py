@@ -18,7 +18,6 @@ def get_keys():
 
 
 # TODO: クラスを作成するか検討
-# 数値のずれを見つけ次第修正
 def truncate_time_at_period(to_epoch_time, period):
     if PERIOD_SECS[period] > PERIOD_SECS['1h']:
         end_time = to_epoch_time - ((to_epoch_time + UTC_JP_DIFF) % PERIOD_SECS[period])
