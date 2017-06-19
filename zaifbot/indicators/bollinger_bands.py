@@ -1,9 +1,10 @@
 import time
-
+from pandas import DataFrame as DF
+import pandas as pd
 from zaifbot.utils import truncate_time_at_period
 from zaifbot.price.ohlc_prices import OhlcPrices
 from talib import abstract as ab
-from zaifbot.bot_common.bot_const import PERIOD_SECS, LIMIT_COUNT, LIMIT_LENGTH
+from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
 from .base import Indicator
 
 __all__ = ['BBands']
@@ -16,19 +17,16 @@ class BBands(Indicator):
         self._length = min(length, LIMIT_LENGTH)
 
     def get_data(self, count=LIMIT_COUNT, lowbd=2, upbd=2, to_epoch_time=None):
-        prices = self._bring_prices(count, to_epoch_time)
-
-        if len(prices.index) == 0:
-            return {'success': 0, 'error': 'failed to get ohlc price'}
-        bbands = ab.BBANDS(prices, timeperiod=self._length, nbdevup=upbd, nbdevdn=lowbd, matype=0)
-        ohlc_prices_result = prices.merge(bbands, left_index=True, right_index=True)
-        ohlc_prices_result = ohlc_prices_result[-count:][['time', 'lowerband', 'upperband']]
-        return \
-            {'success': 1, 'return': {'bollinger_bands': ohlc_prices_result.to_dict(orient='records')}}
-
-    def _bring_prices(self, count, to_epoch_time):
         to_epoch_time = to_epoch_time or int(time.time())
-        count = min(count, LIMIT_COUNT)
+        count = self._calc_price_count(min(count, LIMIT_COUNT))
         end_time = truncate_time_at_period(to_epoch_time, self._period)
-        start_time = end_time - ((count + self._length) * PERIOD_SECS[self._period])
-        return OhlcPrices(self._currency_pair, self._period, count, self._length).execute(start_time, end_time)
+        ohlcs = DF(OhlcPrices(self._currency_pair, self._period).fetch_data(count, end_time))
+
+        bbands = ab.BBANDS(ohlcs, timeperiod=self._length, nbdevup=upbd, nbdevdn=lowbd, matype=0).dropna()
+        formatted_bbands = pd.concat([ohlcs['time'], bbands[['lowerband', 'upperband']]], axis=1).dropna().\
+            astype(object).to_dict(orient='records')
+
+        return {'success': 1, 'return': {'bollinger_bands': formatted_bbands}}
+
+    def _calc_price_count(self, count):
+        return self._length + count - 1
