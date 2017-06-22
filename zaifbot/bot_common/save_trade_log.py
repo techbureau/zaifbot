@@ -3,7 +3,7 @@ import os
 from slack_logger import SlackHandler, SlackFormatter
 
 
-def save_trade_log(logger, filename, webhook_url=None, email={}):
+def save_trade_log(filename, webhook_url=None, email={}):
     dir_path = os.path.abspath(os.path.dirname(__file__))
     log_path = os.path.join(dir_path, filename)
     logging.config.fileConfig(os.path.join(dir_path, 'logging.conf'),
