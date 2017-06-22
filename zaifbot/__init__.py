@@ -23,6 +23,6 @@ def install_ta_lib():
     if platform == "linux" or platform == "linux2":
         subprocess.call(["./install_ta_lib.sh"])
     elif platform == "win32":
-        subprocess.call(["pip", "install", "setup/TA_Lib-0.4.10-cp36-cp36m-win32.whl"])
+        subprocess.call(["pip", "install", "setup/TA_Lib-0.4.10-cp35-cp35m-win32.whl"])
     elif platform == "win64":
-        subprocess.call(["pip", "install", "setup/TA_Lib-0.4.10-cp36-cp36m-win_amd64.whl"])
+        subprocess.call(["pip", "install", "setup/TA_Lib-0.4.10-cp35-cp35m-win_amd64.whl"])
