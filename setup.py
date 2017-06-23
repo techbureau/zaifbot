@@ -27,7 +27,8 @@ setup(
         'slackclient==1.0.5',
         'plotly==2.0.8',
         'pytz==2017.2',
-        'TA-Lib==0.4.10'
+        'TA-Lib==0.4.10',
+        'slack_logger==0.1.2'
     ],
     entry_points="""\
       [console_scripts]
