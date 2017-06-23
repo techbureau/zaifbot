@@ -1,4 +1,5 @@
 import time
+from zaifbot.bot_common.bot_const import TRADE_ACTION
 from uuid import uuid4
 from abc import ABCMeta, abstractmethod
 from threading import Thread
@@ -75,9 +76,9 @@ class _MarketOrder(_Order):
                         amount=self._amount,
                         comment=self._comment)
 
-    # priceの抽象化
-    # todo:　中身を実装する
     def _round_price(self):
+        # 循環参照を防ぐために現在はlast_priceを返している
+        # todo: 中身の実装
         return ZaifLastPrice.last_price(self._currency_pair)
 
 
@@ -158,7 +159,8 @@ class _StopOrder(_Order, _OrderThread):
         return _MarketOrder(self._currency_pair, self._action, self._amount, self._comment).make_order(trade_api)
 
     def _can_execute(self):
-        if self._action is 'bid':
+        # todo: trade_actionの抽象化
+        if self._action is TRADE_ACTION[0]:
             return self._is_higher_than_current_price()
         else:
             return self._is_lower_than_current_price()
