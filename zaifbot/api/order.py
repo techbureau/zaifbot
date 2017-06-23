@@ -2,7 +2,7 @@ import time
 from zaifbot.bot_common.bot_const import TRADE_ACTION
 from uuid import uuid4
 from abc import ABCMeta, abstractmethod
-from threading import Thread
+from threading import Thread, Event, Lock
 from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
 
@@ -13,6 +13,7 @@ class Order:
     def __init__(self, trade_api=None):
         self._trade_api = trade_api or BotTradeApi()
         self._menu = _OrderMenu()
+        self._active_orders = ActiveOrders()
 
     def market_order(self, currency_pair, action, amount, comment=''):
         return self._menu.market_order(currency_pair, action, amount, comment).make_order(self._trade_api)
@@ -22,6 +23,9 @@ class Order:
 
     def stop_order(self, currency_pair, action, stop_price, amount, comment=''):
         return self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._trade_api)
+
+    def active_orders(self):
+        return self._active_orders.all()
 
 
 class _Order(metaclass=ABCMeta):
@@ -116,9 +120,12 @@ _SLEEP_TIME = 1
 
 class _OrderThreadRoutine(metaclass=ABCMeta):
     def _run(self, trade_api):
-        while True:
+        while self._is_alive:
+            self._every_time_before()
             if self._can_execute():
+                self._before_execution()
                 self._execute(trade_api)
+                self._after_execution()
             else:
                 time.sleep(_SLEEP_TIME)
 
@@ -130,6 +137,20 @@ class _OrderThreadRoutine(metaclass=ABCMeta):
     def _execute(self, *args, **kwargs):
         raise NotImplementedError
 
+    @property
+    @abstractmethod
+    def _is_alive(self):
+        raise NotImplementedError
+
+    def _every_time_before(self):
+        pass
+
+    def _before_execution(self):
+        pass
+
+    def _after_execution(self):
+        pass
+
 
 class _StopOrder(_Order, _OrderThreadRoutine):
     def __init__(self, currency_pair, action, stop_price, amount, comment=''):
@@ -138,6 +159,8 @@ class _StopOrder(_Order, _OrderThreadRoutine):
         self._action = action
         self._stop_price = stop_price
         self._amount = amount
+        self._thread = None
+        self._stop_event = Event()
 
     @property
     def name(self):
@@ -153,8 +176,8 @@ class _StopOrder(_Order, _OrderThreadRoutine):
         return info
 
     def make_order(self, trade_api):
-        order = Thread(target=self._run, args=(trade_api,), daemon=True)
-        order.start()
+        self._thread = Thread(target=self._run, args=(trade_api,), daemon=True)
+        self._thread.start()
         return self.info
 
     def _execute(self, trade_api):
@@ -162,22 +185,28 @@ class _StopOrder(_Order, _OrderThreadRoutine):
 
     def _can_execute(self):
         if self._action is TRADE_ACTION[0]:
-            return self._is_price_higher_than_stop_price()
+            return self.__is_price_higher_than_stop_price()
         else:
-            return self._is_price_lower_than_stop_price()
+            return self.__is_price_lower_than_stop_price()
 
-    def _is_price_higher_than_stop_price(self):
+    def __is_price_higher_than_stop_price(self):
         return ZaifLastPrice().last_price(self._currency_pair)['last_price'] > self._stop_price
 
-    def _is_price_lower_than_stop_price(self):
+    def __is_price_lower_than_stop_price(self):
         return ZaifLastPrice().last_price(self._currency_pair)['last_price'] < self._stop_price
 
+    @property
+    def _is_alive(self):
+        return self._stop_event
 
-class _AutoCancelOrder(metaclass=ABCMeta, _OrderThreadRoutine):
+
+# もしかしたらorderを継承する可能性がある。
+class _AutoCancelOrder(_OrderThreadRoutine, metaclass=ABCMeta):
     def __init__(self, target_order_id, *, is_remote=False):
         self._bot_order_id = str(uuid4())
         self._target_order_id = target_order_id
         self._is_remote = is_remote
+        self._stop_event = Event()
 
     @property
     @abstractmethod
@@ -209,6 +238,16 @@ class _AutoCancelOrder(metaclass=ABCMeta, _OrderThreadRoutine):
             self.__order_thread_stop(order_id)
 
     def __order_thread_stop(self, order_id):
+        pass
+
+    @property
+    def _is_alive(self):
+        return self._stop_event
+
+    def _stop(self):
+        self._stop_event.set()
+
+    def _every_time_before(self):
         pass
 
 
@@ -274,8 +313,39 @@ class _AutoCancelByPrice(_AutoCancelOrder):
         last_price = ZaifLastPrice().last_price(self._currency_pair)['last_price']
         return abs(self._start_price - last_price) > self._border_margin
 
+    def _is_alive(self):
+        pass
+
 
 class _OrderMenu:
     market_order = _MarketOrder
     stop_order = _StopOrder
     limit_order = _LimitOrder
+
+
+# observerパターンとやらを実装したら行けそう？
+class ActiveOrders:
+    _instance = None
+    _lock = Lock()
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, *, only_local=False):
+        self._active_orders = []
+        self._only_local = only_local
+
+    def is_found(self, order_id):
+        pass
+
+    def find(self, order_id):
+        return "orderオブジェクト"
+
+    def add(self):
+        pass
+
+    def all(self):
+        return self._active_orders
