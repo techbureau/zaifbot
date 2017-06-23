@@ -7,22 +7,27 @@ from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
 
 
-# todo: calcelに対応できるようにする。
-
 class Order:
     def __init__(self, trade_api=None):
-        self._trade_api = trade_api or BotTradeApi()
+        self._api = trade_api or BotTradeApi()
         self._menu = _OrderMenu()
         self._active_orders = ActiveOrders()
 
     def market_order(self, currency_pair, action, amount, comment=''):
-        return self._menu.market_order(currency_pair, action, amount, comment).make_order(self._trade_api)
+        return self._menu.market_order(currency_pair, action, amount, comment).make_order(self._api)
 
     def limit_order(self, currency_pair, action, limit_price, amount, comment=''):
-        return self._menu.limit_order(currency_pair, action, limit_price, amount, comment).make_order(self._trade_api)
+        return self._menu.limit_order(currency_pair, action, limit_price, amount, comment).make_order(self._api)
 
     def stop_order(self, currency_pair, action, stop_price, amount, comment=''):
-        return self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._trade_api)
+        return self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._api)
+
+    def time_limit_cancel(self, order_id, wait_sec, *, is_remote=False):
+        return self._menu.time_limit_cancel(order_id, is_remote=is_remote).make_order(self._api, wait_sec)
+
+    def price_distance_cancel(self, order_id, currency_pair, distance, *, is_remote=False):
+        return self._menu.price_distance_cancel(order_id, currency_pair, is_remote=is_remote).make_order(self._api,
+                                                                                                         distance)
 
     def active_orders(self):
         return self._active_orders.all()
@@ -251,7 +256,7 @@ class _AutoCancelOrder(_OrderThreadRoutine, metaclass=ABCMeta):
         pass
 
 
-class _AutoCancelByTime(_AutoCancelOrder):
+class _TimeLimitCancel(_AutoCancelOrder):
     def __init__(self, target_order_id, *, is_remote=False):
         super().__init__(target_order_id, is_remote=is_remote)
         self._start_time = None
@@ -282,26 +287,26 @@ class _AutoCancelByTime(_AutoCancelOrder):
         return (int(time.time()) - self._start_time) >= self._wait_sec
 
 
-class _AutoCancelByPrice(_AutoCancelOrder):
+class _PriceDistanceCancel(_AutoCancelOrder):
     def __init__(self, target_order_id, currency_pair, *, is_remote=False):
         super().__init__(target_order_id, is_remote=is_remote)
         self._currency_pair = currency_pair
         self._start_price = ZaifLastPrice().last_price(self._currency_pair)['last_price']
-        self._border_margin = None
+        self._distance = None
 
     @property
     def name(self):
-        return 'AutoCancelByPrice'
+        return 'PriceDistanceCancel'
 
     @property
     def info(self):
         info = super().info
         info['start_price'] = self._start_price
-        info['border_margin'] = self._border_margin
+        info['border_margin'] = self._distance
         return info
 
-    def make_order(self, trade_api, border_margin):
-        self._border_margin = border_margin
+    def make_order(self, trade_api, distance):
+        self._distance = distance
         order = Thread(target=self._run, args=(trade_api,), daemon=True)
         order.start()
         return self.info
@@ -311,16 +316,19 @@ class _AutoCancelByPrice(_AutoCancelOrder):
 
     def __is_price_beyond_the_boundary(self):
         last_price = ZaifLastPrice().last_price(self._currency_pair)['last_price']
-        return abs(self._start_price - last_price) > self._border_margin
+        return abs(self._start_price - last_price) > self._distance
 
     def _is_alive(self):
         pass
 
 
+# この実装ダメすぎる気がする。
 class _OrderMenu:
     market_order = _MarketOrder
     stop_order = _StopOrder
     limit_order = _LimitOrder
+    time_limit_cancel = _TimeLimitCancel
+    price_distance_cancel = _PriceDistanceCancel
 
 
 # observerパターンとやらを実装したら行けそう？
