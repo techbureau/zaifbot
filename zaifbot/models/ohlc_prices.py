@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String
+from sqlalchemy import Column, Integer, Float, String, Boolean
 
 from zaifbot.models import Base
 
@@ -14,4 +14,4 @@ class OhlcPrices(Base):
     close = Column('close', Float, nullable=False)
     average = Column('average', Float, nullable=False)
     volume = Column('volume', Float, nullable=False)
-    closed = Column('closed', Integer, nullable=False)
+    closed = Column('closed', Boolean, nullable=False)
