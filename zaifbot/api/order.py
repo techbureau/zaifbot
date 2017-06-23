@@ -5,6 +5,7 @@ from abc import ABCMeta, abstractmethod
 from threading import Thread
 from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
+from zaifbot.bot_common.logger import logger
 
 
 class OrderClient:
@@ -113,7 +114,7 @@ class _LimitOrder(_Order):
 _SLEEP_TIME = 1
 
 
-class _OrderThread(metaclass=ABCMeta):
+class _OrderThreadRoutine(metaclass=ABCMeta):
     def _run(self, trade_api):
         while True:
             if self._can_execute():
@@ -130,7 +131,7 @@ class _OrderThread(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class _StopOrder(_Order, _OrderThread):
+class _StopOrder(_Order, _OrderThreadRoutine):
     def __init__(self, currency_pair, action, stop_price, amount, comment=''):
         super().__init__(comment)
         self._currency_pair = currency_pair
@@ -152,7 +153,7 @@ class _StopOrder(_Order, _OrderThread):
         return info
 
     def make_order(self, trade_api):
-        order = Thread(target=self._run, args=trade_api, daemon=True)
+        order = Thread(target=self._run, args=(trade_api,), daemon=True)
         order.start()
 
     def _execute(self, trade_api):
@@ -161,15 +162,15 @@ class _StopOrder(_Order, _OrderThread):
     def _can_execute(self):
         # todo: trade_actionの抽象化
         if self._action is TRADE_ACTION[0]:
-            return self._is_higher_than_current_price()
+            return self._is_price_higher_than_stop_price()
         else:
-            return self._is_lower_than_current_price()
+            return self._is_price_lower_than_stop_price()
 
-    def _is_higher_than_current_price(self):
-        return self._stop_price > ZaifLastPrice.last_price(self._currency_pair)
+    def _is_price_higher_than_stop_price(self):
+        return ZaifLastPrice().last_price(self._currency_pair)['last_price'] > self._stop_price
 
-    def _is_lower_than_current_price(self):
-        return self._stop_price < ZaifLastPrice.last_price(self._currency_pair)
+    def _is_price_lower_than_stop_price(self):
+        return ZaifLastPrice().last_price(self._currency_pair)['last_price'] < self._stop_price
 
 
 class _OrderMenu:
