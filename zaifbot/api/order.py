@@ -41,7 +41,6 @@ class _Order(metaclass=ABCMeta):
         info = {
             'bot_order_id': self._bot_order_id,
             'name': self.name,
-            'started': self._started_time,
             'comment': self._comment,
         }
         return info
@@ -124,11 +123,11 @@ class _OrderThreadRoutine(metaclass=ABCMeta):
                 time.sleep(_SLEEP_TIME)
 
     @abstractmethod
-    def _can_execute(self):
+    def _can_execute(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def _execute(self, trade_api):
+    def _execute(self, *args, **kwargs):
         raise NotImplementedError
 
 
@@ -162,7 +161,6 @@ class _StopOrder(_Order, _OrderThreadRoutine):
         return _MarketOrder(self._currency_pair, self._action, self._amount, self._comment).make_order(trade_api)
 
     def _can_execute(self):
-        # todo: TRADE_ACTION[0]だとわかりにくい
         if self._action is TRADE_ACTION[0]:
             return self._is_price_higher_than_stop_price()
         else:
@@ -173,6 +171,108 @@ class _StopOrder(_Order, _OrderThreadRoutine):
 
     def _is_price_lower_than_stop_price(self):
         return ZaifLastPrice().last_price(self._currency_pair)['last_price'] < self._stop_price
+
+
+class _AutoCancelOrder(metaclass=ABCMeta, _OrderThreadRoutine):
+    def __init__(self, target_order_id, *, is_remote=False):
+        self._bot_order_id = str(uuid4())
+        self._target_order_id = target_order_id
+        self._is_remote = is_remote
+
+    @property
+    @abstractmethod
+    def name(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def info(self):
+        info = {
+            'bot_order_id': self._bot_order_id,
+            'name': self.name,
+            'target_order_id': self._target_order_id
+        }
+        return info
+
+    @abstractmethod
+    def make_order(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _can_execute(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def _execute(self, order_id, trade_api):
+        if self._is_remote:
+            trade_api.cancel_order(order_id)
+        else:
+            self.__order_thread_stop(order_id)
+
+    def __order_thread_stop(self, order_id):
+        pass
+
+
+class _AutoCancelByTime(_AutoCancelOrder):
+    def __init__(self, target_order_id, *, is_remote=False):
+        super().__init__(target_order_id, is_remote=is_remote)
+        self._start_time = None
+        self._wait_sec = None
+
+    @property
+    def name(self):
+        return 'AutoCancelByTime'
+
+    @property
+    def info(self):
+        info = super().info
+        info['wait_sec'] = self._wait_sec
+        info['rest_sec'] = self._wait_sec - (int(time.time()) - self._start_time)
+        return info
+
+    def make_order(self, trade_api, wait_sec):
+        self._wait_sec = wait_sec
+        self._start_time = int(time.time())
+        order = Thread(target=self._run, args=(trade_api,), daemon=True)
+        order.start()
+        return self.info
+
+    def _can_execute(self):
+        return self.__is_now_the_time()
+
+    def __is_now_the_time(self):
+        return (int(time.time()) - self._start_time) >= self._wait_sec
+
+
+class _AutoCancelByPrice(_AutoCancelOrder):
+    def __init__(self, target_order_id, currency_pair, *, is_remote=False):
+        super().__init__(target_order_id, is_remote=is_remote)
+        self._currency_pair = currency_pair
+        self._start_price = ZaifLastPrice().last_price(self._currency_pair)['last_price']
+        self._border_margin = None
+
+    @property
+    def name(self):
+        return 'AutoCancelByPrice'
+
+    @property
+    def info(self):
+        info = super().info
+        info['start_price'] = self._start_price
+        info['border_margin'] = self._border_margin
+        return info
+
+    def make_order(self, trade_api, border_margin):
+        self._border_margin = border_margin
+        order = Thread(target=self._run, args=(trade_api,), daemon=True)
+        order.start()
+        return self.info
+
+    def _can_execute(self):
+        return self.__is_price_beyond_the_boundary()
+
+    def __is_price_beyond_the_boundary(self):
+        last_price = ZaifLastPrice().last_price(self._currency_pair)['last_price']
+        return abs(self._start_price - last_price) > self._border_margin
 
 
 class _OrderMenu:
