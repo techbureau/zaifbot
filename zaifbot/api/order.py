@@ -5,10 +5,11 @@ from abc import ABCMeta, abstractmethod
 from threading import Thread
 from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
-from zaifbot.bot_common.logger import logger
 
 
-class OrderClient:
+# todo: calcelに対応できるようにする。
+
+class Order:
     def __init__(self, trade_api=None):
         self._trade_api = trade_api or BotTradeApi()
         self._menu = _OrderMenu()
@@ -78,7 +79,7 @@ class _MarketOrder(_Order):
                                comment=self._comment)
 
     def _round_price(self):
-        # 循環参照を防ぐために現在はlast_priceを返している
+        # 丸め用の関数をimportすると循環参照してるので、現在はlast_priceを返している
         # todo: 中身の実装
         return ZaifLastPrice().last_price(self._currency_pair)['last_price']
 
@@ -155,12 +156,13 @@ class _StopOrder(_Order, _OrderThreadRoutine):
     def make_order(self, trade_api):
         order = Thread(target=self._run, args=(trade_api,), daemon=True)
         order.start()
+        return self.info
 
     def _execute(self, trade_api):
         return _MarketOrder(self._currency_pair, self._action, self._amount, self._comment).make_order(trade_api)
 
     def _can_execute(self):
-        # todo: trade_actionの抽象化
+        # todo: TRADE_ACTION[0]だとわかりにくい
         if self._action is TRADE_ACTION[0]:
             return self._is_price_higher_than_stop_price()
         else:
