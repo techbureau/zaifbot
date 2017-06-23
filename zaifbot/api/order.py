@@ -9,7 +9,6 @@ from zaifbot.api.wrapper import BotTradeApi
 class OrderClient:
     def __init__(self, trade_api=None):
         self._trade_api = trade_api or BotTradeApi()
-        self._active_orders = ActiveOrders()
         self._menu = _OrderMenu()
 
     def market_order(self, currency_pair, action, amount, comment=None):
@@ -20,21 +19,13 @@ class OrderClient:
 
     def stop_order(self, currency_pair, action, stop_price, amount, comment=None):
         return self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._trade_api)
-    #
-    # def auto_cancel_by_price(self):
-    #     pass
-    #
-    # def auto_cancel_by_time(self):
-    #     pass
-    #
-    # def cancel(self, id=None, currency_pair=None, obj=None):
-    #     pass
 
 
 class _Order(metaclass=ABCMeta):
-    def __init__(self):
+    def __init__(self, comment):
         self._bot_order_id = str(uuid4())
         self._started_time = None
+        self._comment = comment
 
     @property
     @abstractmethod
@@ -44,7 +35,13 @@ class _Order(metaclass=ABCMeta):
     @property
     @abstractmethod
     def info(self):
-        raise NotImplementedError
+        info = {
+            'bot_order_id': self._bot_order_id,
+            'name': self.name,
+            'started': self._started_time,
+            'comment': self._comment,
+        }
+        return info
 
     @abstractmethod
     def make_order(self, *args, **kwargs):
@@ -53,11 +50,10 @@ class _Order(metaclass=ABCMeta):
 
 class _MarketOrder(_Order):
     def __init__(self, currency_pair, action, amount, comment=None):
-        super().__init__()
+        super().__init__(comment)
         self._currency_pair = currency_pair
         self._action = action
         self._amount = amount
-        self._comment = comment
 
     @property
     def name(self):
@@ -65,14 +61,11 @@ class _MarketOrder(_Order):
 
     @property
     def info(self):
-        info = {
-            'bot_order_id': self._bot_order_id,
-            'name': self.info,
-            'currency_pair': self._currency_pair,
-            'action': self._action,
-            'price': self._round_price(),
-            'started': self._started_time,
-        }
+        info = super().info
+        info['action'] = self._action
+        info['currency_pair'] = self._currency_pair
+        info['price'] = self._round_price()
+        info['amount'] = self._amount
         return info
 
     def make_order(self, trade_api):
@@ -90,12 +83,11 @@ class _MarketOrder(_Order):
 
 class _LimitOrder(_Order):
     def __init__(self, currency_pair, action, limit_price, amount, comment=None):
-        super().__init__()
+        super().__init__(comment)
         self._currency_pair = currency_pair
         self._action = action
         self._limit_price = limit_price
         self._amount = amount
-        self._comment = comment
 
     @property
     def name(self):
@@ -103,14 +95,11 @@ class _LimitOrder(_Order):
 
     @property
     def info(self):
-        info = {
-            'bot_order_id': self._bot_order_id,
-            'name': self.info,
-            'currency_pair': self._currency_pair,
-            'action': self._action,
-            'limit_price': self._limit_price,
-            'started': self._started_time,
-        }
+        info = super().info
+        info['currency_pair'] = self._currency_pair
+        info['action'] = self._action
+        info['amount'] = self._amount
+        info['limit_price'] = self._limit_price
         return info
 
     def make_order(self, trade_api):
@@ -120,6 +109,8 @@ class _LimitOrder(_Order):
                                amount=self._amount,
                                comment=self._comment)
 
+_SLEEP_TIME = 1
+
 
 class _OrderThread(metaclass=ABCMeta):
     def _run(self, trade_api):
@@ -127,7 +118,7 @@ class _OrderThread(metaclass=ABCMeta):
             if self._can_execute():
                 self._execute(trade_api)
             else:
-                time.sleep(1)
+                time.sleep(_SLEEP_TIME)
 
     @abstractmethod
     def _can_execute(self):
@@ -140,12 +131,11 @@ class _OrderThread(metaclass=ABCMeta):
 
 class _StopOrder(_Order, _OrderThread):
     def __init__(self, currency_pair, action, stop_price, amount, comment=None):
-        super().__init__()
+        super().__init__(comment)
         self._currency_pair = currency_pair
         self._action = action
         self._stop_price = stop_price
         self._amount = amount
-        self._comment = comment
 
     @property
     def name(self):
@@ -153,14 +143,11 @@ class _StopOrder(_Order, _OrderThread):
 
     @property
     def info(self):
-        info = {
-            'bot_order_id': self._bot_order_id,
-            'name': self.info,
-            'currency_pair': self._currency_pair,
-            'action': self._action,
-            'stop_price': self._stop_price,
-            'started': self._started_time,
-        }
+        info = super().info
+        info['currency_pair'] = self._currency_pair
+        info['action'] = self._action
+        info['amount'] = self._amount
+        info['stop_price'] = self._stop_price
         return info
 
     def make_order(self, trade_api):
@@ -187,31 +174,3 @@ class _OrderMenu:
     market_order = _MarketOrder
     stop_order = _StopOrder
     limit_order = _LimitOrder
-
-
-class ActiveOrders:
-    def add(self):
-        pass
-
-    def __init__(self):
-        pass
-
-
-class Observer:
-    def update(self):
-        pass
-
-
-class OpenOrderObserver(Observer):
-    pass
-
-
-# class AutoCancelOrder:
-#     pass
-#
-#
-# class OrderStatus:
-#     """
-#     NotStarted, Active, Executed
-#     """
-#     pass
