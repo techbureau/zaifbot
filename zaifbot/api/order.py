@@ -12,13 +12,13 @@ class OrderClient:
         self._trade_api = trade_api or BotTradeApi()
         self._menu = _OrderMenu()
 
-    def market_order(self, currency_pair, action, amount, comment=None):
+    def market_order(self, currency_pair, action, amount, comment=''):
         return self._menu.market_order(currency_pair, action, amount, comment).make_order(self._trade_api)
 
-    def limit_order(self, currency_pair, action, limit_price, amount, comment=None):
+    def limit_order(self, currency_pair, action, limit_price, amount, comment=''):
         return self._menu.limit_order(currency_pair, action, limit_price, amount, comment).make_order(self._trade_api)
 
-    def stop_order(self, currency_pair, action, stop_price, amount, comment=None):
+    def stop_order(self, currency_pair, action, stop_price, amount, comment=''):
         return self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._trade_api)
 
 
@@ -50,7 +50,7 @@ class _Order(metaclass=ABCMeta):
 
 
 class _MarketOrder(_Order):
-    def __init__(self, currency_pair, action, amount, comment=None):
+    def __init__(self, currency_pair, action, amount, comment=''):
         super().__init__(comment)
         self._currency_pair = currency_pair
         self._action = action
@@ -70,20 +70,20 @@ class _MarketOrder(_Order):
         return info
 
     def make_order(self, trade_api):
-        trade_api.trade(currency_pair=self._currency_pair,
-                        action=self._action,
-                        price=self._round_price(),
-                        amount=self._amount,
-                        comment=self._comment)
+        return trade_api.trade(currency_pair=self._currency_pair,
+                               action=self._action,
+                               price=self._round_price(),
+                               amount=self._amount,
+                               comment=self._comment)
 
     def _round_price(self):
         # 循環参照を防ぐために現在はlast_priceを返している
         # todo: 中身の実装
-        return ZaifLastPrice.last_price(self._currency_pair)
+        return ZaifLastPrice().last_price(self._currency_pair)['last_price']
 
 
 class _LimitOrder(_Order):
-    def __init__(self, currency_pair, action, limit_price, amount, comment=None):
+    def __init__(self, currency_pair, action, limit_price, amount, comment=''):
         super().__init__(comment)
         self._currency_pair = currency_pair
         self._action = action
@@ -131,7 +131,7 @@ class _OrderThread(metaclass=ABCMeta):
 
 
 class _StopOrder(_Order, _OrderThread):
-    def __init__(self, currency_pair, action, stop_price, amount, comment=None):
+    def __init__(self, currency_pair, action, stop_price, amount, comment=''):
         super().__init__(comment)
         self._currency_pair = currency_pair
         self._action = action
