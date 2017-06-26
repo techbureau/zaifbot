@@ -14,14 +14,14 @@ class AutoCancel:
 
     def time_limit_cancel(self, bot_order_id, currency_pair, wait_sec):
         auto_cancel = _AutoCancelByTime(self._trade_api, bot_order_id, currency_pair, wait_sec)
-        auto_cancel.start()
         self._active_orders.add(auto_cancel)
+        auto_cancel.start()
         return auto_cancel.info
 
     def price_range_cancel(self, bot_order_id, currency_pair, target_margin):
         auto_cancel = _AutoCancelByPrice(self._trade_api, bot_order_id, currency_pair, target_margin)
-        auto_cancel.start()
         self._active_orders.add(auto_cancel)
+        auto_cancel.start()
         return auto_cancel.info
 
 _SLEEP_TIME = 1
@@ -32,7 +32,7 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         super().__init__(daemon=True)
         self._api = trade_api
         self._active_orders = ActiveOrders(self._api)
-        self._bot_order_id = BotOrderID()
+        self._bot_order_id = str(BotOrderID())
         self._target_bot_order_id = target_bot_order_id
         self._currency_pair = currency_pair
         self._is_token = self._is_token(currency_pair)
@@ -40,13 +40,16 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         self._start_time = None
 
     def run(self):
-        self._start_time = time.time()
+        self._start_time = int(time.time())
         while self._stop_event.is_set() is False:
             active_orders = self._active_orders.all()
+            print(active_orders)
+            print('d')
             if self._target_bot_order_id not in active_orders:
                 self.stop()
                 continue
             if self._can_execute():
+                print('test')
                 self._execute()
             else:
                 time.sleep(_SLEEP_TIME)

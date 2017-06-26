@@ -12,7 +12,7 @@ __all__ = ['Order']
 
 class _Order(metaclass=ABCMeta):
     def __init__(self, comment):
-        self._bot_order_id = BotOrderID()
+        self._bot_order_id = str(BotOrderID())
         self._started_time = None
         self._comment = comment
         self._info = {}
