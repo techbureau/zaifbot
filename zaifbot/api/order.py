@@ -5,7 +5,8 @@ from abc import ABCMeta, abstractmethod
 from threading import Thread, Event, Lock
 from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
-
+from zaifbot.price.cache import ZaifCurrencyPairs
+from zaifbot.bot_common.errors import ZaifBotError
 
 class Order:
     def __init__(self, trade_api=None):
@@ -51,6 +52,7 @@ class _Order(metaclass=ABCMeta):
         self._bot_order_id = str(uuid4())
         self._started_time = None
         self._comment = comment
+        self._info = {}
 
     @property
     @abstractmethod
@@ -60,12 +62,10 @@ class _Order(metaclass=ABCMeta):
     @property
     @abstractmethod
     def info(self):
-        info = {
-            'bot_order_id': self._bot_order_id,
-            'name': self.name,
-            'comment': self._comment,
-        }
-        return info
+        self._info['bot_order_id'] = self._bot_order_id
+        self._info['name'] = self.name
+        self._info['comment'] = self._comment
+        return self._info
 
     @abstractmethod
     def make_order(self, *args, **kwargs):
@@ -74,6 +74,14 @@ class _Order(metaclass=ABCMeta):
     @abstractmethod
     def cancel(self, **kwargs):
         raise NotImplementedError
+
+    @staticmethod
+    def _is_token(currency_pair):
+        currency_pairs = ZaifCurrencyPairs()
+        record = currency_pairs[currency_pair]
+        if record:
+            return record['is_token']
+        raise ZaifBotError('illegal currency_pair:{}'.format(currency_pair))
 
 
 class _MarketOrder(_Order):
@@ -89,12 +97,11 @@ class _MarketOrder(_Order):
 
     @property
     def info(self):
-        info = super().info
-        info['action'] = self._action
-        info['currency_pair'] = self._currency_pair
-        info['price'] = self._round_price()
-        info['amount'] = self._amount
-        return info
+        self._info['action'] = self._action
+        self._info['currency_pair'] = self._currency_pair
+        self._info['price'] = self._round_price()
+        self._info['amount'] = self._amount
+        return self._info
 
     def make_order(self, trade_api):
         trade_api.trade(currency_pair=self._currency_pair,
@@ -126,12 +133,12 @@ class _LimitOrder(_Order):
 
     @property
     def info(self):
-        info = super().info
-        info['currency_pair'] = self._currency_pair
-        info['action'] = self._action
-        info['amount'] = self._amount
-        info['limit_price'] = self._limit_price
-        return info
+        self._info = super().info
+        self._info['currency_pair'] = self._currency_pair
+        self._info['action'] = self._action
+        self._info['amount'] = self._amount
+        self._info['limit_price'] = self._limit_price
+        return self._info
 
     def make_order(self, trade_api):
         result = trade_api.trade(currency_pair=self._currency_pair,
@@ -139,12 +146,13 @@ class _LimitOrder(_Order):
                                  price=self._limit_price,
                                  amount=self._amount,
                                  comment=self._comment)
-        self.info['zaif_order_id'] = result['order_id']
+        self._info['zaif_order_id'] = result['order_id']
         return self
 
     def cancel(self, *, api):
-        order_id = self.info['order_id']
-        return api.cancel_order(order_id)
+        is_token = self._is_token(self._currency_pair)
+        order_id = self.info['zaif_order_id']
+        return api.cancel_order(order_id=order_id, is_token=is_token)
 
 
 _SLEEP_TIME = 1
@@ -378,10 +386,7 @@ class ActiveOrders:
         self._active_orders[bot_order_id] = order
 
     def all(self):
-        ret = []
-        for order in self._active_orders:
-            ret.append(order.info)
-        return ret
+        return [order.info for order in self._active_orders.values()]
 
     def _update(self):
         with self._lock:
