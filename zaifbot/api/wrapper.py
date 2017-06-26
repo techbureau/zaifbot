@@ -21,15 +21,20 @@ def _with_retry(func):
                 return func(self, *args, **kwargs)
             except ZaifApiError as e:
                 logger.error(e, exc_info=True)
-                raise e
+                if i >= _RETRY_COUNT - 1:
+                    raise e
             except ZaifApiNonceError as e:
                 logger.error(e, exc_info=True)
                 a = random.uniform(0.5, 1.0)
                 time.sleep(a)
+                if i >= _RETRY_COUNT - 1:
+                    raise e
                 continue
             except Exception as e:
                 logger.error(e, exc_info=True)
                 time.sleep(_WAIT_SECOND)
+                if i >= _RETRY_COUNT - 1:
+                    raise e
                 continue
     return _wrapper
 
