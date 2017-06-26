@@ -134,11 +134,12 @@ class _LimitOrder(_Order):
         return info
 
     def make_order(self, trade_api):
-        trade_api.trade(currency_pair=self._currency_pair,
-                        action=self._action,
-                        price=self._limit_price,
-                        amount=self._amount,
-                        comment=self._comment)
+        result = trade_api.trade(currency_pair=self._currency_pair,
+                                 action=self._action,
+                                 price=self._limit_price,
+                                 amount=self._amount,
+                                 comment=self._comment)
+        self.info['zaif_order_id'] = result['order_id']
         return self
 
     def cancel(self, *, api):
