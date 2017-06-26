@@ -35,8 +35,8 @@ class AutoCancel:
         self._auto_cancel_orders[auto_cancel.info['bot_order_id']] = auto_cancel
         return auto_cancel.info
 
-    def price_range_cancel(self, order_id, currency_pair, target_margin):
-        auto_cancel = _AutoCancelByPrice(self._trade_api, order_id, currency_pair, target_margin)
+    def price_range_cancel(self, bot_order_id, currency_pair, target_margin):
+        auto_cancel = _AutoCancelByPrice(self._trade_api, bot_order_id, currency_pair, target_margin)
         auto_cancel.start()
         self._auto_cancel_orders[auto_cancel.info['bot_order_id']] = auto_cancel
         return auto_cancel.info
@@ -180,5 +180,5 @@ class _AutoCancelByPrice(_AutoCancelOrder):
         return 'PriceRangeCancel'
 
 
-class ActiveOrder:
+class ActiveOrders:
     pass

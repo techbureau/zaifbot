@@ -1,13 +1,12 @@
 import time
 from zaifbot.bot_common.bot_const import TRADE_ACTION
-from uuid import uuid4
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event
 from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
 from zaifbot.price.cache import ZaifCurrencyPairs
 from zaifbot.bot_common.errors import ZaifBotError
-from zaifbot.api.auto_cancel import AutoCancel, BotOrderID
+from zaifbot.api.auto_cancel import AutoCancel, BotOrderID, ActiveOrders
 
 
 class Order:
@@ -27,6 +26,12 @@ class Order:
     def stop_order(self, currency_pair, action, stop_price, amount, comment=''):
         order = self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._api)
         return order.info
+
+    def time_limit_cancel(self, bot_order_id, currency_pair, wait_sec):
+        return self._auto_cancel.time_limit_cancel(bot_order_id, currency_pair, wait_sec)
+
+    def price_range_cancel(self, bot_order_id, currency_pair, target_margin):
+        return self.price_range_cancel(bot_order_id, currency_pair, target_margin)
 
 
 class _Order(metaclass=ABCMeta):
@@ -218,7 +223,6 @@ class _StopOrder(_Order, _OrderThreadRoutine):
         self._stop_event.set()
 
 
-# 果たしてこれでよいのか
 class _OrderMenu:
     market_order = _MarketOrder
     stop_order = _StopOrder
