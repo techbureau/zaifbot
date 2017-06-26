@@ -5,7 +5,7 @@ from threading import Thread, Event
 from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.price.cache import ZaifCurrencyPairs
 from zaifbot.bot_common.errors import ZaifBotError
-from zaifbot.api.auto_cancel import BotOrderID
+from zaifbot.order.common import BotOrderID
 
 __all__ = ['Order']
 

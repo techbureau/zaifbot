@@ -26,7 +26,7 @@ class ActiveOrders:
     _active_orders = {}
     _api = None
 
-    def __new__(cls, api, *args, **kwargs):
+    def __new__(cls, api):
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
@@ -37,14 +37,15 @@ class ActiveOrders:
         return self._active_orders.get(bot_order_id, None)
 
     def add(self, order):
-        bot_order_id = order.info['bot_order_id']
-        self._active_orders[bot_order_id] = order
+        with self._lock:
+            bot_order_id = order.info['bot_order_id']
+            self._active_orders[bot_order_id] = order
 
     def remove(self, bot_order_id):
         self._active_orders.pop(bot_order_id)
 
     def all(self):
-        return [order.info for order in self._active_orders.values()]
+        return self._active_orders
 
     def update(self):
         with self._lock:

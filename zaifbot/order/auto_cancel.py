@@ -9,7 +9,6 @@ from zaifbot.order.common import ActiveOrders, BotOrderID
 
 class AutoCancel:
     def __init__(self, trade_api):
-        self._auto_cancel_orders = {}
         self._trade_api = trade_api
         self._active_orders = ActiveOrders(self._trade_api)
 
@@ -32,6 +31,7 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
     def __init__(self, trade_api, target_bot_order_id, currency_pair):
         super().__init__(daemon=True)
         self._api = trade_api
+        self._active_orders = ActiveOrders(self._api)
         self._bot_order_id = BotOrderID()
         self._target_bot_order_id = target_bot_order_id
         self._currency_pair = currency_pair
@@ -42,8 +42,8 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
     def run(self):
         self._start_time = time.time()
         while self._stop_event.is_set() is False:
-            active_orders = self._api.active_orders(currency_pair=self._currency_pair)
-            if str(self._bot_order_id) not in active_orders:
+            active_orders = self._active_orders.all()
+            if self._target_bot_order_id not in active_orders:
                 self.stop()
                 continue
             if self._can_execute():
