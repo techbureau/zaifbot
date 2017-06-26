@@ -11,33 +11,33 @@ class Order:
     def __init__(self, trade_api=None):
         self._api = trade_api or BotTradeApi()
         self._menu = _OrderMenu()
-        self._active_orders = ActiveOrders()
+        self._active_orders = ActiveOrders(self._api)
 
     def market_order(self, currency_pair, action, amount, comment=''):
         order = self._menu.market_order(currency_pair, action, amount, comment).make_order(self._api)
         self._active_orders.add(order)
-        return order
+        return order.info
 
     def limit_order(self, currency_pair, action, limit_price, amount, comment=''):
         order = self._menu.limit_order(currency_pair, action, limit_price, amount, comment).make_order(self._api)
         self._active_orders.add(order)
-        return order
+        return order.info
 
     def stop_order(self, currency_pair, action, stop_price, amount, comment=''):
         order = self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._api)
         self._active_orders.add(order)
-        return order
+        return order.info
 
     def time_limit_cancel(self, order_id, wait_sec, *, is_remote=False):
         order = self._menu.time_limit_cancel(order_id, is_remote=is_remote).make_order(self._api, wait_sec)
         self._active_orders.add(order)
-        return order
+        return order.info
 
     def price_distance_cancel(self, order_id, currency_pair, distance, *, is_remote=False):
         order = self._menu.price_distance_cancel(order_id, currency_pair, is_remote=is_remote).make_order(self._api,
                                                                                                           distance)
         self._active_orders.add(order)
-        return order
+        return order.info
 
     def active_orders(self):
         return self._active_orders.all()
@@ -108,7 +108,7 @@ class _MarketOrder(_Order):
         # todo: 中身の実装
         return ZaifLastPrice().last_price(self._currency_pair)['last_price']
 
-    def cancel(self, **kwargs):
+    def cancel(self):
         pass
 
 
@@ -142,7 +142,6 @@ class _LimitOrder(_Order):
         return self
 
     def cancel(self, *, api):
-        # order_idの実装
         order_id = self.info['order_id']
         return api.cancel_order(order_id)
 
@@ -351,11 +350,11 @@ class _OrderMenu:
     price_distance_cancel = _PriceDistanceCancel
 
 
-# 決めた。order_idとかじゃなくて、オブジェクトの実態を保持しよう。それで、cancelの実装自体は、相手がスレッドなのか、
-# ただの注文なのかにゆだねよう。
 class ActiveOrders:
     _instance = None
     _lock = Lock()
+    _thread = Thread()
+    _active_orders = {}
 
     def __new__(cls, *args, **kwargs):
         with cls._lock:
@@ -363,14 +362,14 @@ class ActiveOrders:
                 cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
-        self._active_orders = {}
+    def __init__(self, api):
+        self._api = api
 
     def is_found(self, order_id):
         pass
 
-    # スレッドセーフにする。
     def find(self, bot_order_id):
+        # 失敗した時の挙動
         return self._active_orders[bot_order_id]
 
     def add(self, order):
@@ -378,4 +377,17 @@ class ActiveOrders:
         self._active_orders[bot_order_id] = order
 
     def all(self):
-        return self._active_orders
+        ret = []
+        for order in self._active_orders:
+            ret.append(order.info)
+        return ret
+
+    def _update(self):
+        with self._lock:
+            remote_orders = self._api.active_orders()
+            for active_order in self._active_orders:
+                if active_order.info.get('zaif_order_id') not in remote_orders:
+                    self._active_orders.pop(active_order.info.bot_order_id)
+            for active_order in self._active_orders:
+                if active_order.is_alive is False:
+                    self._active_orders.pop(active_order.info.bot_order_id)
