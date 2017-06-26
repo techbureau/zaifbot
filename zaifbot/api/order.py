@@ -8,6 +8,8 @@ from zaifbot.price.cache import ZaifCurrencyPairs
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.api.auto_cancel import AutoCancel, BotOrderID, ActiveOrders
 
+__all__ = ['Order']
+
 
 class Order:
     def __init__(self, trade_api=None):

@@ -1,6 +1,6 @@
 import time
 from abc import ABCMeta, abstractmethod
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 from uuid import uuid4
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.price.cache import ZaifCurrencyPairs
@@ -28,42 +28,19 @@ class AutoCancel:
     def __init__(self, trade_api):
         self._auto_cancel_orders = {}
         self._trade_api = trade_api
+        self._active_orders = ActiveOrders(self._trade_api)
 
     def time_limit_cancel(self, bot_order_id, currency_pair, wait_sec):
         auto_cancel = _AutoCancelByTime(self._trade_api, bot_order_id, currency_pair, wait_sec)
         auto_cancel.start()
-        self._auto_cancel_orders[auto_cancel.info['bot_order_id']] = auto_cancel
+        self._active_orders.add(auto_cancel)
         return auto_cancel.info
 
     def price_range_cancel(self, bot_order_id, currency_pair, target_margin):
         auto_cancel = _AutoCancelByPrice(self._trade_api, bot_order_id, currency_pair, target_margin)
         auto_cancel.start()
-        self._auto_cancel_orders[auto_cancel.info['bot_order_id']] = auto_cancel
+        self._active_orders.add(auto_cancel)
         return auto_cancel.info
-
-    def get_active_cancel_orders(self):
-        self._remove_dead_threads()
-        active_cancel_orders = []
-        for auto_cancel_order in self._auto_cancel_orders.values():
-            active_cancel_orders.append(auto_cancel_order.get_info())
-        return active_cancel_orders
-
-    def stop_cancel(self, cancel_id):
-        self._remove_dead_threads()
-        cancel_order = self._auto_cancel_orders.get(cancel_id, None)
-        cancel_order.stop()
-        cancel_order.join()
-        self._remove_dead_threads()
-        return cancel_order.get_info()
-
-    def _remove_dead_threads(self):
-        delete_cancel_ids = []
-        for cancel_id, cancel_thread in self._auto_cancel_orders.items():
-            if cancel_thread.is_alive() is False:
-                delete_cancel_ids.append(cancel_id)
-        for cancel_id in delete_cancel_ids:
-            del self._auto_cancel_orders[cancel_id]
-
 
 _SLEEP_TIME = 1
 
@@ -181,4 +158,44 @@ class _AutoCancelByPrice(_AutoCancelOrder):
 
 
 class ActiveOrders:
-    pass
+    _instance = None
+    _lock = Lock()
+    _thread = Thread()
+    _active_orders = {}
+    _api = None
+
+    def __new__(cls, api, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._api = api
+        return cls._instance
+
+    def find(self, bot_order_id):
+        return self._active_orders.get(bot_order_id, None)
+
+    def add(self, order):
+        bot_order_id = order.info['bot_order_id']
+        self._active_orders[bot_order_id] = order
+
+    def remove(self, bot_order_id):
+        self._active_orders.pop(bot_order_id)
+
+    def all(self):
+        return [order.info for order in self._active_orders.values()]
+
+    def update(self):
+        with self._lock:
+            remote_order_ids = self._fetch_remote_order_ids()
+            for active_order in self._active_orders:
+                if active_order.info.get('zaif_order_id') not in remote_order_ids:
+                    self._active_orders.pop(active_order.info.bot_order_id)
+            for active_order in self._active_orders:
+                if active_order.is_alive is False:
+                    self._active_orders.pop(active_order.info.bot_order_id)
+
+    @classmethod
+    def _fetch_remote_order_ids(cls):
+        orders = cls._api.active_orders(is_token_both=True)
+        return orders['token_active_orders'].keys() + orders['active_orders'].keys()
+
