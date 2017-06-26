@@ -7,12 +7,14 @@ from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
 from zaifbot.price.cache import ZaifCurrencyPairs
 from zaifbot.bot_common.errors import ZaifBotError
+from zaifbot.api.auto_cancel import AutoCancel, BotOrderID
 
 
 class Order:
     def __init__(self, trade_api=None):
         self._api = trade_api or BotTradeApi()
         self._menu = _OrderMenu()
+        self._auto_cancel = AutoCancel(self._api)
 
     def market_order(self, currency_pair, action, amount, comment=''):
         order = self._menu.market_order(currency_pair, action, amount, comment).make_order(self._api)
@@ -29,7 +31,7 @@ class Order:
 
 class _Order(metaclass=ABCMeta):
     def __init__(self, comment):
-        self._bot_order_id = str(uuid4())
+        self._bot_order_id = BotOrderID()
         self._started_time = None
         self._comment = comment
         self._info = {}
