@@ -14,23 +14,36 @@ class Order:
         self._active_orders = ActiveOrders()
 
     def market_order(self, currency_pair, action, amount, comment=''):
-        return self._menu.market_order(currency_pair, action, amount, comment).make_order(self._api)
+        order = self._menu.market_order(currency_pair, action, amount, comment).make_order(self._api)
+        self._active_orders.add(order)
+        return order
 
     def limit_order(self, currency_pair, action, limit_price, amount, comment=''):
-        return self._menu.limit_order(currency_pair, action, limit_price, amount, comment).make_order(self._api)
+        order = self._menu.limit_order(currency_pair, action, limit_price, amount, comment).make_order(self._api)
+        self._active_orders.add(order)
+        return order
 
     def stop_order(self, currency_pair, action, stop_price, amount, comment=''):
-        return self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._api)
+        order = self._menu.stop_order(currency_pair, action, stop_price, amount, comment).make_order(self._api)
+        self._active_orders.add(order)
+        return order
 
     def time_limit_cancel(self, order_id, wait_sec, *, is_remote=False):
-        return self._menu.time_limit_cancel(order_id, is_remote=is_remote).make_order(self._api, wait_sec)
+        order = self._menu.time_limit_cancel(order_id, is_remote=is_remote).make_order(self._api, wait_sec)
+        self._active_orders.add(order)
+        return order
 
     def price_distance_cancel(self, order_id, currency_pair, distance, *, is_remote=False):
-        return self._menu.price_distance_cancel(order_id, currency_pair, is_remote=is_remote).make_order(self._api,
-                                                                                                         distance)
+        order = self._menu.price_distance_cancel(order_id, currency_pair, is_remote=is_remote).make_order(self._api,
+                                                                                                          distance)
+        self._active_orders.add(order)
+        return order
 
     def active_orders(self):
         return self._active_orders.all()
+
+    def cancel(self, bot_order_id):
+        return self._active_orders.find(bot_order_id).cancel(api=self._api)
 
 
 class _Order(metaclass=ABCMeta):
@@ -58,6 +71,10 @@ class _Order(metaclass=ABCMeta):
     def make_order(self, *args, **kwargs):
         raise NotImplementedError
 
+    @abstractmethod
+    def cancel(self, **kwargs):
+        raise NotImplementedError
+
 
 class _MarketOrder(_Order):
     def __init__(self, currency_pair, action, amount, comment=''):
@@ -80,16 +97,19 @@ class _MarketOrder(_Order):
         return info
 
     def make_order(self, trade_api):
-        return trade_api.trade(currency_pair=self._currency_pair,
-                               action=self._action,
-                               price=self._round_price(),
-                               amount=self._amount,
-                               comment=self._comment)
+        trade_api.trade(currency_pair=self._currency_pair,
+                        action=self._action,
+                        price=self._round_price(),
+                        amount=self._amount,
+                        comment=self._comment)
+        return self
 
     def _round_price(self):
-        # 丸め用の関数をimportすると循環参照してるので、現在はlast_priceを返している
         # todo: 中身の実装
         return ZaifLastPrice().last_price(self._currency_pair)['last_price']
+
+    def cancel(self, **kwargs):
+        pass
 
 
 class _LimitOrder(_Order):
@@ -114,11 +134,18 @@ class _LimitOrder(_Order):
         return info
 
     def make_order(self, trade_api):
-        return trade_api.trade(currency_pair=self._currency_pair,
-                               action=self._action,
-                               price=self._limit_price,
-                               amount=self._amount,
-                               comment=self._comment)
+        trade_api.trade(currency_pair=self._currency_pair,
+                        action=self._action,
+                        price=self._limit_price,
+                        amount=self._amount,
+                        comment=self._comment)
+        return self
+
+    def cancel(self, *, api):
+        # order_idの実装
+        order_id = self.info['order_id']
+        return api.cancel_order(order_id)
+
 
 _SLEEP_TIME = 1
 
@@ -131,6 +158,7 @@ class _OrderThreadRoutine(metaclass=ABCMeta):
                 self._before_execution()
                 self._execute(trade_api)
                 self._after_execution()
+                self._stop()
             else:
                 time.sleep(_SLEEP_TIME)
 
@@ -145,6 +173,10 @@ class _OrderThreadRoutine(metaclass=ABCMeta):
     @property
     @abstractmethod
     def _is_alive(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _stop(self):
         raise NotImplementedError
 
     def _every_time_before(self):
@@ -183,7 +215,7 @@ class _StopOrder(_Order, _OrderThreadRoutine):
     def make_order(self, trade_api):
         self._thread = Thread(target=self._run, args=(trade_api,), daemon=True)
         self._thread.start()
-        return self.info
+        return self
 
     def _execute(self, trade_api):
         return _MarketOrder(self._currency_pair, self._action, self._amount, self._comment).make_order(trade_api)
@@ -204,22 +236,21 @@ class _StopOrder(_Order, _OrderThreadRoutine):
     def _is_alive(self):
         return self._stop_event
 
+    def _stop(self):
+        self._stop_event.set()
 
-# もしかしたらorderを継承する可能性がある。
-class _AutoCancelOrder(_OrderThreadRoutine, metaclass=ABCMeta):
+    def cancel(self):
+        self._stop()
+
+
+class _AutoCancelOrder(_Order, _OrderThreadRoutine):
     def __init__(self, target_order_id, *, is_remote=False):
-        self._bot_order_id = str(uuid4())
+        super().__init__()
         self._target_order_id = target_order_id
         self._is_remote = is_remote
         self._stop_event = Event()
 
     @property
-    @abstractmethod
-    def name(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
     def info(self):
         info = {
             'bot_order_id': self._bot_order_id,
@@ -229,10 +260,6 @@ class _AutoCancelOrder(_OrderThreadRoutine, metaclass=ABCMeta):
         return info
 
     @abstractmethod
-    def make_order(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
     def _can_execute(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -240,20 +267,16 @@ class _AutoCancelOrder(_OrderThreadRoutine, metaclass=ABCMeta):
         if self._is_remote:
             trade_api.cancel_order(order_id)
         else:
-            self.__order_thread_stop(order_id)
+            pass
 
-    def __order_thread_stop(self, order_id):
-        pass
-
-    @property
     def _is_alive(self):
         return self._stop_event
 
     def _stop(self):
         self._stop_event.set()
 
-    def _every_time_before(self):
-        pass
+    def cancel(self):
+        self._stop()
 
 
 class _TimeLimitCancel(_AutoCancelOrder):
@@ -278,7 +301,7 @@ class _TimeLimitCancel(_AutoCancelOrder):
         self._start_time = int(time.time())
         order = Thread(target=self._run, args=(trade_api,), daemon=True)
         order.start()
-        return self.info
+        return self
 
     def _can_execute(self):
         return self.__is_now_the_time()
@@ -309,7 +332,7 @@ class _PriceDistanceCancel(_AutoCancelOrder):
         self._distance = distance
         order = Thread(target=self._run, args=(trade_api,), daemon=True)
         order.start()
-        return self.info
+        return self
 
     def _can_execute(self):
         return self.__is_price_beyond_the_boundary()
@@ -318,11 +341,8 @@ class _PriceDistanceCancel(_AutoCancelOrder):
         last_price = ZaifLastPrice().last_price(self._currency_pair)['last_price']
         return abs(self._start_price - last_price) > self._distance
 
-    def _is_alive(self):
-        pass
 
-
-# この実装ダメすぎる気がする。
+# 代替案求む。
 class _OrderMenu:
     market_order = _MarketOrder
     stop_order = _StopOrder
@@ -331,7 +351,8 @@ class _OrderMenu:
     price_distance_cancel = _PriceDistanceCancel
 
 
-# observerパターンとやらを実装したら行けそう？
+# 決めた。order_idとかじゃなくて、オブジェクトの実態を保持しよう。それで、cancelの実装自体は、相手がスレッドなのか、
+# ただの注文なのかにゆだねよう。
 class ActiveOrders:
     _instance = None
     _lock = Lock()
@@ -342,18 +363,19 @@ class ActiveOrders:
                 cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, *, only_local=False):
-        self._active_orders = []
-        self._only_local = only_local
+    def __init__(self):
+        self._active_orders = {}
 
     def is_found(self, order_id):
         pass
 
-    def find(self, order_id):
-        return "orderオブジェクト"
+    # スレッドセーフにする。
+    def find(self, bot_order_id):
+        return self._active_orders[bot_order_id]
 
-    def add(self):
-        pass
+    def add(self, order):
+        bot_order_id = order.info['bot_order_id']
+        self._active_orders[bot_order_id] = order
 
     def all(self):
         return self._active_orders
