@@ -10,6 +10,9 @@ from zaifbot.currency_pairs import CurrencyPair
 __all__ = ['Order']
 
 
+__all__ = ['Order']
+
+
 class Order:
     def __init__(self, trade_api=None):
         self._api = trade_api or BotTradeApi()
