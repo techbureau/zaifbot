@@ -3,9 +3,7 @@ from zaifbot.bot_common.bot_const import TRADE_ACTION
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event
 from zaifbot.currency_pairs import CurrencyPair
-from zaifbot.orders.common import BotOrderID
-
-__all__ = ['Order']
+from zaifbot.api.orders.common import BotOrderID
 
 
 class _Order(metaclass=ABCMeta):

@@ -1,10 +1,8 @@
 import time
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event
-from zaifbot.bot_common.errors import ZaifBotError
-from zaifbot.price.cache import ZaifCurrencyPairs
-from zaifbot.price.utils import get_current_last_price
-from zaifbot.orders.common import ActiveOrders, BotOrderID
+from zaifbot.currency_pairs import CurrencyPair
+from zaifbot.api.orders.common import ActiveOrders, BotOrderID
 
 
 class AutoCancel:
@@ -34,7 +32,7 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
         self._active_orders = ActiveOrders(self._api)
         self._bot_order_id = str(BotOrderID())
         self._target_bot_order_id = target_bot_order_id
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._is_token = self._is_token(currency_pair)
         self._stop_event = Event()
         self._start_time = None
@@ -60,7 +58,7 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
             'bot_order_id': self._bot_order_id,
             'name': self.name,
             'target_bot_order_id': self._target_bot_order_id,
-            'currency_pair': self._currency_pair,
+            'currency_pair': str(self._currency_pair),
             'is_token': self._is_token,
             'started': self._start_time,
         }
@@ -72,14 +70,6 @@ class _AutoCancelOrder(Thread, metaclass=ABCMeta):
 
     def stop(self):
         self._stop_event.set()
-
-    @staticmethod
-    def _is_token(currency_pair):
-        currency_pairs = ZaifCurrencyPairs()
-        record = currency_pairs[currency_pair]
-        if record:
-            return record['is_token']
-        raise ZaifBotError('illegal currency_pair:{}'.format(currency_pair))
 
     @property
     @abstractmethod
@@ -117,7 +107,7 @@ class _AutoCancelByPrice(_AutoCancelOrder):
     def __init__(self, trade_api, order_id, currency_pair, target_margin):
         super().__init__(trade_api, order_id, currency_pair)
         self._target_margin = target_margin
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._start_price = None
 
     @property
@@ -129,11 +119,11 @@ class _AutoCancelByPrice(_AutoCancelOrder):
         return info
 
     def run(self):
-        self._start_price = get_current_last_price(self._currency_pair)['last_price']
+        self._start_price = self._currency_pair.last_price()['last_price']
         super().run()
 
     def _can_execute(self):
-        last_price = get_current_last_price(self._currency_pair)['last_price']
+        last_price = self._currency_pair.last_price()['last_price']
         if abs(self._start_price - last_price) < self._target_margin:
             return False
         return True

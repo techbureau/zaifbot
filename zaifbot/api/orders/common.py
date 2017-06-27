@@ -61,3 +61,7 @@ class ActiveOrders:
     def _fetch_remote_order_ids(cls):
         orders = cls._api.active_orders(is_token_both=True)
         return orders['token_active_orders'].keys() + orders['active_orders'].keys()
+
+
+class OrderThread(Thread):
+    pass

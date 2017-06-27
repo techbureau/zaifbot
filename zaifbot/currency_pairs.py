@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
 
-from api.wrapper import BotPublicApi
+from wrapper import BotPublicApi
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
