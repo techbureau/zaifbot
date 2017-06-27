@@ -1,14 +1,66 @@
 from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
+from zaifapi.impl import ZaifPublicStreamApi
 
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.bot_common.logger import logger
-from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.api.wrapper import BotPublicApi
-from zaifbot.price.cache import ZaifCurrencyPairs
 
 
-class ZaifLastPrice:
+class CurrencyPair:
+    def __init__(self, pair):
+        self._name = pair
+        self._info = _ZaifCurrencyPairs()[pair]
+        self._ohlc_prices = ''
+        self._last_price = _ZaifLastPrice().last_price(pair)
+
+    def __str__(self):
+        return self._name
+
+    def is_token(self):
+        return self._info['is_token']
+
+    def last_price(self):
+        return self._last_price
+
+    def get_round_amount(self, amount):
+        rounded_amount = amount - (amount % self._info['item_unit_step'])
+        digits = len(str(self._info['item_unit_step'])) - 2
+        return round(rounded_amount, digits)
+
+    def get_buyable_amount(self, amount, price):
+        buyable_amount = amount / price
+        return self.get_round_amount(buyable_amount)
+
+    def get_more_executable_price(self, price, *, is_buy):
+        if is_buy:
+            return price + (self._info['aux_unit_step'] -
+                            (price % self._info['aux_unit_step']))
+        else:
+            return price - (price % self._info['aux_unit_step'])
+
+
+class _ZaifCurrencyPairs:
+    _instance = None
+    _lock = Lock()
+    _currency_pairs = None
+
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                api = BotPublicApi()
+                cls._currency_pairs = api.currency_pairs('all')
+        return cls._instance
+
+    def __getitem__(self, currency_pair):
+        record = list(filter(lambda x: x['currency_pair'] == currency_pair, self._currency_pairs))
+        if record:
+            return record[0]
+        return KeyError('the pair does not exist')
+
+
+class _ZaifLastPrice:
     _instance = None
     _lock = Lock()
     _threads = {}
@@ -47,7 +99,7 @@ class ZaifLastPrice:
             return {'timestamp': jst_time_str, 'last_price': last_price}
 
         def is_token():
-            currency_pairs = ZaifCurrencyPairs()
+            currency_pairs = _ZaifCurrencyPairs()
             currency_pair_rec = currency_pairs[currency_pair]
             if currency_pair_rec:
                 return currency_pair_rec['is_token']
@@ -55,7 +107,7 @@ class ZaifLastPrice:
         if is_token():
             return get_token_last_price()
         receive = self._get_target_thread(currency_pair).last_receive
-        return {'timestamp': receive['timestamp'], 'last_price': receive['last_price']['price']}
+        return {'timestamp': receive['timestamp'], 'last_price': receive['last_price']['currencies']}
 
     def close_all_socket(self):
         [event.set() for event in self._stop_events.values()]

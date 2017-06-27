@@ -3,10 +3,8 @@ from zaifbot.bot_common.bot_const import TRADE_ACTION
 from uuid import uuid4
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event
-from zaifbot.price.stream import ZaifLastPrice
 from zaifbot.api.wrapper import BotTradeApi
-from zaifbot.price.cache import ZaifCurrencyPairs
-from zaifbot.bot_common.errors import ZaifBotError
+from zaifbot.currency_pairs import CurrencyPair
 
 
 class Order:
@@ -51,14 +49,6 @@ class _Order(metaclass=ABCMeta):
     def make_order(self, *args, **kwargs):
         raise NotImplementedError
 
-    @staticmethod
-    def _is_token(currency_pair):
-        currency_pairs = ZaifCurrencyPairs()
-        record = currency_pairs[currency_pair]
-        if record:
-            return record['is_token']
-        raise ZaifBotError('illegal currency_pair:{}'.format(currency_pair))
-
 
 class _MarketOrder(_Order):
     def __init__(self, currency_pair, action, amount, comment=''):
@@ -75,7 +65,7 @@ class _MarketOrder(_Order):
     def info(self):
         self._info['action'] = self._action
         self._info['currency_pair'] = self._currency_pair
-        self._info['price'] = self._round_price()
+        self._info['currencies'] = self._round_price()
         self._info['amount'] = self._amount
         return self._info
 
@@ -88,8 +78,8 @@ class _MarketOrder(_Order):
         return self
 
     def _round_price(self):
-        # todo: 中身の実装
-        return ZaifLastPrice().last_price(self._currency_pair)['last_price']
+        pass
+        return 'last_price'
 
 
 class _LimitOrder(_Order):
@@ -168,7 +158,7 @@ class _OrderThreadRoutine(metaclass=ABCMeta):
 class _StopOrder(_Order, _OrderThreadRoutine):
     def __init__(self, currency_pair, action, stop_price, amount, comment=''):
         super().__init__(comment)
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._action = action
         self._stop_price = stop_price
         self._amount = amount
@@ -182,7 +172,7 @@ class _StopOrder(_Order, _OrderThreadRoutine):
     @property
     def info(self):
         self._info = super().info
-        self._info['currency_pair'] = self._currency_pair
+        self._info['currency_pair'] = str(self._currency_pair)
         self._info['action'] = self._action
         self._info['amount'] = self._amount
         self._info['stop_price'] = self._stop_price
@@ -194,7 +184,7 @@ class _StopOrder(_Order, _OrderThreadRoutine):
         return self
 
     def _execute(self, trade_api):
-        return _MarketOrder(self._currency_pair, self._action, self._amount, self._comment).make_order(trade_api)
+        return _MarketOrder(str(self._currency_pair), self._action, self._amount, self._comment).make_order(trade_api)
 
     def _can_execute(self):
         if self._action is TRADE_ACTION[0]:
@@ -203,10 +193,10 @@ class _StopOrder(_Order, _OrderThreadRoutine):
             return self.__is_price_lower_than_stop_price()
 
     def __is_price_higher_than_stop_price(self):
-        return ZaifLastPrice().last_price(self._currency_pair)['last_price'] > self._stop_price
+        return self._currency_pair.last_price() > self._stop_price
 
     def __is_price_lower_than_stop_price(self):
-        return ZaifLastPrice().last_price(self._currency_pair)['last_price'] < self._stop_price
+        return self._currency_pair.last_price() > self._stop_price < self._stop_price
 
     @property
     def is_alive(self):

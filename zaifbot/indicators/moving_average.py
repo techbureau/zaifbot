@@ -1,9 +1,11 @@
 import time
+
 import pandas as pd
+from ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
-from zaifbot.price.ohlc_prices import OhlcPrices
 from talib import abstract as ab
 from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
+
 from .base import Indicator
 
 __all__ = ['EMA', 'SMA']

@@ -1,13 +1,13 @@
 import pandas as pd
 import pytz
-from zaifbot.indicators.moving_average import EMA, SMA
-from zaifbot.indicators.bollinger_bands import BBands
+from ohlc_prices import OhlcPrices
 from pandas import DataFrame
 from plotly.figure_factory import create_candlestick
 from plotly.graph_objs import Scatter, Line, Marker
 from plotly.offline import init_notebook_mode, iplot
 from tzlocal import get_localzone
-from zaifbot.price.ohlc_prices import OhlcPrices
+from zaifbot.indicators.bollinger_bands import BBands
+from zaifbot.indicators.moving_average import EMA, SMA
 
 _INCREASE = '#5959F3'
 _DECREASE = '#F03030'
@@ -67,7 +67,7 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
         'title': '{} ({} ~ {})'.format(currency_pair, start, end),
         'titlefont': {'size': 18},
         'xaxis': {'showgrid': True},
-        'yaxis': {'title': 'price'}
+        'yaxis': {'title': 'currencies'}
     })
     return fig
 
