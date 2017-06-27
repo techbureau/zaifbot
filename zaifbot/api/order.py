@@ -9,6 +9,9 @@ from zaifbot.price.cache import ZaifCurrencyPairs
 from zaifbot.bot_common.errors import ZaifBotError
 
 
+__all__ = ['Order']
+
+
 class Order:
     def __init__(self, trade_api=None):
         self._api = trade_api or BotTradeApi()
