@@ -11,8 +11,7 @@ class CurrencyPair:
     def __init__(self, pair):
         self._name = pair
         self._info = _ZaifCurrencyPairs()[pair]
-        self._ohlc_prices = ''
-        self._last_price = _ZaifLastPrice().last_price(pair)
+        self._last_price = _ZaifLastPrice()
 
     def __str__(self):
         return self._name
@@ -21,7 +20,7 @@ class CurrencyPair:
         return self._info['is_token']
 
     def last_price(self):
-        return self._last_price
+        return self._last_price.last_price(self._name)
 
     def get_round_amount(self, amount):
         rounded_amount = amount - (amount % self._info['item_unit_step'])
@@ -38,26 +37,6 @@ class CurrencyPair:
                             (price % self._info['aux_unit_step']))
         else:
             return price - (price % self._info['aux_unit_step'])
-
-
-class _ZaifCurrencyPairs:
-    _instance = None
-    _lock = Lock()
-    _currency_pairs = None
-
-    def __new__(cls):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super().__new__(cls)
-                api = BotPublicApi()
-                cls._currency_pairs = api.currency_pairs('all')
-        return cls._instance
-
-    def __getitem__(self, currency_pair):
-        record = list(filter(lambda x: x['currency_pair'] == currency_pair, self._currency_pairs))
-        if record:
-            return record[0]
-        return KeyError('the pair does not exist')
 
 
 class _ZaifLastPrice:
@@ -107,11 +86,31 @@ class _ZaifLastPrice:
         if is_token():
             return get_token_last_price()
         receive = self._get_target_thread(currency_pair).last_receive
-        return {'timestamp': receive['timestamp'], 'last_price': receive['last_price']['currencies']}
+        return {'timestamp': receive['timestamp'], 'last_price': receive['last_price']['price']}
 
     def close_all_socket(self):
         [event.set() for event in self._stop_events.values()]
         [thread.join() for thread in self._threads.values()]
+
+
+class _ZaifCurrencyPairs:
+    _instance = None
+    _lock = Lock()
+    _currency_pairs = None
+
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                api = BotPublicApi()
+                cls._currency_pairs = api.currency_pairs('all')
+        return cls._instance
+
+    def __getitem__(self, currency_pair):
+        record = list(filter(lambda x: x['currency_pair'] == currency_pair, self._currency_pairs))
+        if record:
+            return record[0]
+        return KeyError('the pair does not exist')
 
 
 class _StreamThread(Thread):
