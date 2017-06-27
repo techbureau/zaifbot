@@ -1,5 +1,6 @@
 from sys import platform
 import subprocess
+import zipfile
 
 
 class ZaifBot:
@@ -14,7 +15,6 @@ class ZaifBot:
             process.start()
             running_processes.append(process)
         [x.join() for x in running_processes]
-
 
 
 def install_ta_lib():

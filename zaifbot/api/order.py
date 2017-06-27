@@ -10,9 +10,6 @@ from zaifbot.currency_pairs import CurrencyPair
 __all__ = ['Order']
 
 
-__all__ = ['Order']
-
-
 class Order:
     def __init__(self, trade_api=None):
         self._api = trade_api or BotTradeApi()
@@ -59,7 +56,7 @@ class _Order(metaclass=ABCMeta):
 class _MarketOrder(_Order):
     def __init__(self, currency_pair, action, amount, comment=''):
         super().__init__(comment)
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._action = action
         self._amount = amount
 
@@ -70,13 +67,13 @@ class _MarketOrder(_Order):
     @property
     def info(self):
         self._info['action'] = self._action
-        self._info['currency_pair'] = self._currency_pair
+        self._info['currency_pair'] = str(self._currency_pair)
         self._info['price'] = self._round_price()
         self._info['amount'] = self._amount
         return self._info
 
     def make_order(self, trade_api):
-        trade_api.trade(currency_pair=self._currency_pair,
+        trade_api.trade(currency_pair=str(self._currency_pair),
                         action=self._action,
                         price=self._round_price(),
                         amount=self._amount,
@@ -84,14 +81,14 @@ class _MarketOrder(_Order):
         return self
 
     def _round_price(self):
-        pass
-        return 'last_price'
+        # todo: 未実装
+        return self._currency_pair.last_price()
 
 
 class _LimitOrder(_Order):
     def __init__(self, currency_pair, action, limit_price, amount, comment=''):
         super().__init__(comment)
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._action = action
         self._limit_price = limit_price
         self._amount = amount
@@ -103,14 +100,14 @@ class _LimitOrder(_Order):
     @property
     def info(self):
         self._info = super().info
-        self._info['currency_pair'] = self._currency_pair
+        self._info['currency_pair'] = str(self._currency_pair)
         self._info['action'] = self._action
         self._info['amount'] = self._amount
         self._info['limit_price'] = self._limit_price
         return self._info
 
     def make_order(self, trade_api):
-        result = trade_api.trade(currency_pair=self._currency_pair,
+        result = trade_api.trade(currency_pair=str(self._currency_pair),
                                  action=self._action,
                                  price=self._limit_price,
                                  amount=self._amount,
@@ -199,10 +196,10 @@ class _StopOrder(_Order, _OrderThreadRoutine):
             return self.__is_price_lower_than_stop_price()
 
     def __is_price_higher_than_stop_price(self):
-        return self._currency_pair.last_price() > self._stop_price
+        return self._currency_pair.last_price()['last_price'] > self._stop_price
 
     def __is_price_lower_than_stop_price(self):
-        return self._currency_pair.last_price() > self._stop_price < self._stop_price
+        return self._currency_pair.last_price()['last_price'] > self._stop_price < self._stop_price
 
     @property
     def is_alive(self):
