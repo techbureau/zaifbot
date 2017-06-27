@@ -1,8 +1,9 @@
 import pandas as pd
-from zaifbot.bot_common.logger import logger
+from ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from zaifbot.price.ohlc_prices import OhlcPrices
+from zaifbot.bot_common.logger import logger
+
 from .base import Indicator
 
 _HIGH = 'high'

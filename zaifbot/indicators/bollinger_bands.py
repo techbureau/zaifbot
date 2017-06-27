@@ -1,10 +1,12 @@
 import time
-from pandas import DataFrame as DF
+
 import pandas as pd
-from zaifbot.utils import truncate_time_at_period
-from zaifbot.price.ohlc_prices import OhlcPrices
+from ohlc_prices import OhlcPrices
+from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
+from zaifbot.utils import truncate_time_at_period
+
 from .base import Indicator
 
 __all__ = ['BBands']
