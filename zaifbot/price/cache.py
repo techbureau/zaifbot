@@ -23,4 +23,4 @@ class ZaifCurrencyPairs:
         record = list(filter(lambda x: x['currency_pair'] == currency_pair, self._currency_pairs))
         if record:
             return record[0]
-        return None
+        raise KeyError('the pair does not exist')
