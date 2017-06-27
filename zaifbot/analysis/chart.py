@@ -67,7 +67,7 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
         'title': '{} ({} ~ {})'.format(currency_pair, start, end),
         'titlefont': {'size': 18},
         'xaxis': {'showgrid': True},
-        'yaxis': {'title': 'currencies'}
+        'yaxis': {'title': 'price'}
     })
     return fig
 

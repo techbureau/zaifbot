@@ -1,10 +1,13 @@
 import time
-from zaifbot.bot_common.bot_const import TRADE_ACTION
-from uuid import uuid4
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event
-from zaifbot.api.wrapper import BotTradeApi
+from uuid import uuid4
+
+from api.wrapper import BotTradeApi
+from zaifbot.bot_common.bot_const import TRADE_ACTION
 from zaifbot.currency_pairs import CurrencyPair
+
+__all__ = ['Order']
 
 
 class Order:
@@ -65,7 +68,7 @@ class _MarketOrder(_Order):
     def info(self):
         self._info['action'] = self._action
         self._info['currency_pair'] = self._currency_pair
-        self._info['currencies'] = self._round_price()
+        self._info['price'] = self._round_price()
         self._info['amount'] = self._amount
         return self._info
 

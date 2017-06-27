@@ -81,7 +81,7 @@ class BotTradeApi(ZaifTradeApi):
         order_log = _make_dict(order_id=ret['order_id'],
                                currency_pair=kwargs.get('currency_pair'),
                                action=kwargs.get('action'),
-                               price=kwargs.get('currencies'),
+                               price=kwargs.get('price'),
                                amount=kwargs.get('amount'),
                                limit=kwargs.get('limit', 0.0),
                                received=ret['received'],
