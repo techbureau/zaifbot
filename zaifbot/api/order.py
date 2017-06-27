@@ -1,6 +1,6 @@
 from zaifbot.api.wrapper import BotTradeApi
-from zaifbot.order.order import OrderMenu
-from zaifbot.order.auto_cancel import AutoCancel
+from zaifbot.orders.orders import OrderMenu
+from zaifbot.orders.auto_cancel import AutoCancel
 
 __all__ = ['Order']
 
@@ -28,5 +28,3 @@ class Order:
 
     def price_range_cancel(self, bot_order_id, currency_pair, target_margin):
         return self.price_range_cancel(bot_order_id, currency_pair, target_margin)
-
-

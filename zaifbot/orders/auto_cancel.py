@@ -4,7 +4,7 @@ from threading import Thread, Event
 from zaifbot.bot_common.errors import ZaifBotError
 from zaifbot.price.cache import ZaifCurrencyPairs
 from zaifbot.price.utils import get_current_last_price
-from zaifbot.order.common import ActiveOrders, BotOrderID
+from zaifbot.orders.common import ActiveOrders, BotOrderID
 
 
 class AutoCancel:
