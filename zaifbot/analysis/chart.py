@@ -1,6 +1,6 @@
 import pandas as pd
 import pytz
-from ohlc_prices import OhlcPrices
+from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame
 from plotly.figure_factory import create_candlestick
 from plotly.graph_objs import Scatter, Line, Marker
