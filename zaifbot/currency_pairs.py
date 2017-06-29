@@ -13,6 +13,7 @@ class CurrencyPair:
 
     def __new__(cls, pair):
         with cls._lock:
+            pair = str(pair)
             if cls._instances.get(pair, None) is None:
                 cls._instances[pair] = super().__new__(cls)
         return cls._instances[pair]

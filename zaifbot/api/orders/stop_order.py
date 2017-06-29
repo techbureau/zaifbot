@@ -1,7 +1,8 @@
-from zaifbot.api.orders.common import OrderBase
+from zaifbot.api.orders.common import OrderBase, OrderThread
+from threading import Event
 
 
-class _StopOrder(OrderBase, _OrderThreadRoutine):
+class StopOrder(OrderBase, OrderThread):
     def __init__(self, currency_pair, action, stop_price, amount, comment=''):
         super().__init__(currency_pair, comment)
         self._action = action
@@ -11,7 +12,7 @@ class _StopOrder(OrderBase, _OrderThreadRoutine):
         self._stop_event = Event()
 
     @property
-    def name(self):
+    def type(self):
         return 'StopOrder'
 
     @property

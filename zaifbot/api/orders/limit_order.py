@@ -1,7 +1,7 @@
 from zaifbot.api.orders.common import OrderBase
 
 
-class _LimitOrder(OrderBase):
+class LimitOrder(OrderBase):
     def __init__(self, currency_pair, action, limit_price, amount, comment=''):
         super().__init__(currency_pair, comment)
         self._action = action
@@ -9,19 +9,19 @@ class _LimitOrder(OrderBase):
         self._amount = amount
 
     @property
-    def name(self):
+    def type(self):
         return 'LimitOrder'
 
     @property
     def info(self):
         self._info = super().info
-        self._info['currency_pair'] = str(self._currency_pair)
         self._info['action'] = self._action
         self._info['amount'] = self._amount
         self._info['limit_price'] = self._limit_price
         return self._info
 
     def make_order(self, trade_api):
+        # tradeの方でstrにするようにする。
         result = trade_api.trade(currency_pair=str(self._currency_pair),
                                  action=self._action,
                                  price=self._limit_price,

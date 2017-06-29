@@ -1,4 +1,5 @@
 from threading import Thread, Lock
+import time
 from uuid import uuid4
 from abc import abstractmethod, ABCMeta
 from zaifbot.currency_pairs import CurrencyPair
@@ -6,22 +7,23 @@ from zaifbot.currency_pairs import CurrencyPair
 
 class OrderBase(metaclass=ABCMeta):
     def __init__(self, currency_pair, comment):
-        self._bot_order_id = str(BotOrderID)
-        self._currency_pari = CurrencyPair(str(currency_pair))
+        self._bot_order_id = str(BotOrderID())
+        self._currency_pair = CurrencyPair(currency_pair)
         self._comment = comment
         self._started_time = None
         self._info = {}
 
     @property
     @abstractmethod
-    def name(self):
+    def type(self):
         raise NotImplementedError
 
     @property
     @abstractmethod
     def info(self):
         self._info['bot_order_id'] = self._bot_order_id
-        self._info['name'] = self.name
+        self._info['type'] = self.type
+        self._info['currency_pair'] = self._currency_pair
         self._info['comment'] = self._comment
         return self._info
 
@@ -30,10 +32,47 @@ class OrderBase(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class OrderThread(Thread):
-    pass
+class OrderThread(Thread, metaclass=ABCMeta):
+
+    def run(self):
+        while self.is_end:
+            self._every_time_before()
+            if self._can_execute():
+                self._before_execution()
+                self._execute()
+                self._after_execution()
+                self.stop()
+            else:
+                time.sleep(1)
+
+    @abstractmethod
+    def _can_execute(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _execute(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def is_end(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def stop(self):
+        raise NotImplementedError
+
+    def _every_time_before(self):
+        pass
+
+    def _before_execution(self):
+        pass
+
+    def _after_execution(self):
+        pass
 
 
+# スレッドセーフ?
 class BotOrderID:
     order_ids = set()
 
