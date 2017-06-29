@@ -1,4 +1,4 @@
-from threading import Thread, Lock
+from threading import Thread, Lock, Event
 import time
 from uuid import uuid4
 from abc import abstractmethod, ABCMeta
@@ -6,7 +6,8 @@ from zaifbot.currency_pairs import CurrencyPair
 
 
 class OrderBase(metaclass=ABCMeta):
-    def __init__(self, currency_pair, comment):
+    def __init__(self, api, currency_pair, comment):
+        self._api = api
         self._bot_order_id = str(BotOrderID())
         self._currency_pair = CurrencyPair(currency_pair)
         self._comment = comment
@@ -35,7 +36,7 @@ class OrderBase(metaclass=ABCMeta):
 class OrderThread(Thread, metaclass=ABCMeta):
 
     def run(self):
-        while self.is_end:
+        while self._is_end:
             self._every_time_before()
             if self._can_execute():
                 self._before_execution()
@@ -55,7 +56,7 @@ class OrderThread(Thread, metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def is_end(self):
+    def _is_end(self):
         raise NotImplementedError
 
     @abstractmethod
@@ -93,10 +94,10 @@ class BotOrderID:
 
 class ActiveOrders:
     _instance = None
+    _api = None
     _lock = Lock()
     _thread = Thread()
     _active_orders = {}
-    _api = None
 
     def __new__(cls, api):
         with cls._lock:
@@ -134,4 +135,42 @@ class ActiveOrders:
         orders = cls._api.active_orders(is_token_both=True)
         return orders['token_active_orders'].keys() + orders['active_orders'].keys()
 
+
+class AutoCancelOrder(OrderBase, OrderThread):
+    def __init__(self, trade_api, target_bot_order_id, currency_pair, comment=''):
+        super().__init__(trade_api, currency_pair, comment)
+        super(OrderThread, self).__init__(daemon=True)
+        self._target_bot_order_id = target_bot_order_id
+        self._active_orders = ActiveOrders(trade_api)
+        self._stop_event = Event()
+
+    @property
+    def type(self):
+        raise NotImplementedError
+
+    @property
+    def info(self):
+        info = super().info
+        info['target_bot_orderr_id'] = self._target_bot_order_id
+        return info
+
+    def make_order(self):
+        raise NotImplementedError
+
+    def _execute(self):
+        # 未実装
+        self._api.cancel_order(order_id=self._target_bot_order_id, is_token=self._currency_pair.is_token())
+        self.stop()
+
+    def _can_execute(self):
+        raise NotImplementedError
+
+    def stop(self):
+        self._stop_event.set()
+
+    def _is_end(self):
+        return self._stop_event.is_set()
+
+    def _every_time_before(self):
+        print('a')
 

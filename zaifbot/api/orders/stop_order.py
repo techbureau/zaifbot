@@ -5,9 +5,9 @@ from zaifbot.api.orders.market_order import MarketOrder
 
 
 class StopOrder(OrderBase, OrderThread):
-    def __init__(self, currency_pair, action, stop_price, amount, comment=''):
+    def __init__(self, api, currency_pair, action, stop_price, amount, comment=''):
         super(OrderThread, self).__init__(daemon=True)
-        super().__init__(currency_pair, comment)
+        super().__init__(api, currency_pair, comment)
         self._action = action
         self._stop_price = stop_price
         self._amount = amount
@@ -25,12 +25,12 @@ class StopOrder(OrderBase, OrderThread):
         self._info['stop_price'] = self._stop_price
         return self._info
 
-    def make_order(self, trade_api):
+    def make_order(self):
         self.start()
         return self
 
-    def _execute(self, trade_api):
-        return MarketOrder(self._currency_pair, self._action, self._amount, self._comment).make_order(trade_api)
+    def _execute(self):
+        return MarketOrder(self._api, self._currency_pair, self._action, self._amount, self._comment).make_order()
 
     def _can_execute(self):
         if self._action is TRADE_ACTION[0]:
@@ -45,7 +45,7 @@ class StopOrder(OrderBase, OrderThread):
         return self._currency_pair.last_price()['last_price'] > self._stop_price < self._stop_price
 
     @property
-    def is_end(self):
+    def _is_end(self):
         return not self._stop_event.is_set()
 
     def stop(self):

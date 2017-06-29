@@ -2,8 +2,8 @@ from zaifbot.api.orders.common import OrderBase
 
 
 class MarketOrder(OrderBase):
-    def __init__(self, currency_pair, action, amount, comment=''):
-        super().__init__(currency_pair, comment)
+    def __init__(self, api, currency_pair, action, amount, comment=''):
+        super().__init__(api, currency_pair, comment)
         self._action = action
         self._amount = amount
 
@@ -19,8 +19,8 @@ class MarketOrder(OrderBase):
         self._info['amount'] = self._amount
         return self._info
 
-    def make_order(self, trade_api):
-        trade_api.trade(currency_pair=str(self._currency_pair),
+    def make_order(self):
+        self._api.trade(currency_pair=str(self._currency_pair),
                         action=self._action,
                         price=self._round_price(),
                         amount=self._amount,
