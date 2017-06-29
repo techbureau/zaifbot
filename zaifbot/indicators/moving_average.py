@@ -1,7 +1,7 @@
 import time
 
 import pandas as pd
-from ohlc_prices import OhlcPrices
+from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
@@ -18,7 +18,7 @@ class MA(Indicator):
         self._period = period
         self._length = min(length, LIMIT_LENGTH)
 
-    def get_data(self, count, to_epoch_time):
+    def request_data(self, count, to_epoch_time):
         raise NotImplementedError
 
     def _calc_price_count(self, count):

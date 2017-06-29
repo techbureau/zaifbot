@@ -1,5 +1,5 @@
 import pandas as pd
-from ohlc_prices import OhlcPrices
+from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.bot_common.logger import logger
@@ -20,7 +20,7 @@ class ADX(Indicator):
         self._period = period
         self._length = length
 
-    def get_data(self, count=100, to_epoch_time=None):
+    def request_data(self, count=100, to_epoch_time=None):
         try:
             count_needed = 2 * self._length - 1 + count
             ohlc_prices = OhlcPrices(self._currency_pair, self._period)
