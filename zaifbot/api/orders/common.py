@@ -1,4 +1,4 @@
-from threading import Thread, Lock, Event
+from threading import Thread, Lock, Event, Condition
 import time
 from uuid import uuid4
 from abc import abstractmethod, ABCMeta
@@ -92,12 +92,17 @@ class BotOrderID:
         return self._id
 
 
+class ActiveOrderWriter:
+    pass
+
+
 class ActiveOrders:
     _instance = None
     _api = None
     _lock = Lock()
     _thread = Thread()
     _active_orders = {}
+    _orders_lock = Lock()
 
     def __new__(cls, api):
         with cls._lock:
@@ -109,26 +114,32 @@ class ActiveOrders:
     def find(self, bot_order_id):
         return self._active_orders.get(bot_order_id, None)
 
+    def all(self):
+        with self._orders_lock:
+            return self._active_orders
+
     def add(self, order):
-        with self._lock:
+        with self._orders_lock:
             bot_order_id = order.info['bot_order_id']
             self._active_orders[bot_order_id] = order
 
     def remove(self, bot_order_id):
-        self._active_orders.pop(bot_order_id)
-
-    def all(self):
-        return self._active_orders
+        with self._orders_lock:
+            self._active_orders.pop(bot_order_id)
 
     def update(self):
-        with self._lock:
-            remote_order_ids = self._fetch_remote_order_ids()
-            for active_order in self._active_orders:
-                if active_order.info.get('zaif_order_id') not in remote_order_ids:
-                    self._active_orders.pop(active_order.info.bot_order_id)
-            for active_order in self._active_orders:
-                if active_order.is_alive is False:
-                    self._active_orders.pop(active_order.info.bot_order_id)
+        with self._orders_lock:
+            remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), self._active_orders.values())
+            threads_orders = filter(lambda x: x not in list(remote_orders), self._active_orders.values())
+
+            for remote_order in remote_orders:
+                ids_from_server = self._fetch_remote_order_ids()
+                if remote_order.info['zaif_order_id'] not in ids_from_server:
+                    self._active_orders.pop(remote_order.info['bot_order_id'])
+
+            for threads_order in threads_orders:
+                if threads_order.is_end:
+                    self._active_orders.pop(threads_order.info['bot_order_id'])
 
     @classmethod
     def _fetch_remote_order_ids(cls):
