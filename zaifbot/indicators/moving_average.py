@@ -38,7 +38,7 @@ class EMA(MA):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=LIMIT_LENGTH):
         super().__init__(currency_pair, period, length)
 
-    def get_data(self, count=LIMIT_COUNT, to_epoch_time=None):
+    def request_data(self, count=LIMIT_COUNT, to_epoch_time=None):
         return self._get_ma(count, to_epoch_time, 'ema')
 
 
@@ -46,5 +46,5 @@ class SMA(MA):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=LIMIT_LENGTH):
         super().__init__(currency_pair, period, length)
 
-    def get_data(self, count=LIMIT_COUNT, to_epoch_time=None):
+    def request_data(self, count=LIMIT_COUNT, to_epoch_time=None):
         return self._get_ma(count, to_epoch_time, 'sma')
