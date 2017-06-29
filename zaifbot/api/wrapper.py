@@ -1,7 +1,7 @@
 import random
 import time
 
-from dao.order_log import OrderLogsDao
+from zaifbot.dao.order_log import OrderLogsDao
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.bot_common.logger import logger
@@ -13,23 +13,17 @@ _WAIT_SECOND = 5
 __all__ = ['BotPublicApi', 'BotTradeApi']
 
 
-# TODO:　リトライ実装見直したい。Exceptionでリトライするのは微妙だと思われる。
 def _with_retry(func):
     def _wrapper(self, *args, **kwargs):
         for i in range(_RETRY_COUNT):
             try:
                 return func(self, *args, **kwargs)
-            except ZaifApiError as e:
-                logger.error(e, exc_info=True)
-                raise e
-            except ZaifApiNonceError as e:
-                logger.error(e, exc_info=True)
-                a = random.uniform(0.5, 1.0)
+            except (ZaifApiError, ZaifApiNonceError) as e:
+                a = random.uniform(0.1, 0.5)
                 time.sleep(a)
-                continue
-            except Exception as e:
-                logger.error(e, exc_info=True)
-                time.sleep(_WAIT_SECOND)
+                if i >= _RETRY_COUNT - 1:
+                    logger.error(e, exc_info=True)
+                    raise e
                 continue
     return _wrapper
 

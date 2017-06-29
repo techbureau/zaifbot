@@ -1,13 +1,13 @@
 import pandas as pd
 import pytz
-from zaifbot.indicators.moving_average import get_ema, get_sma
-from zaifbot.indicators.bollinger_bands import get_bollinger_bands
+from ohlc_prices import OhlcPrices
 from pandas import DataFrame
 from plotly.figure_factory import create_candlestick
 from plotly.graph_objs import Scatter, Line, Marker
 from plotly.offline import init_notebook_mode, iplot
 from tzlocal import get_localzone
-from zaifbot.price.utils import get_price_info
+from zaifbot.indicators.bollinger_bands import BBands
+from zaifbot.indicators.moving_average import EMA, SMA
 
 _INCREASE = '#5959F3'
 _DECREASE = '#F03030'
@@ -45,12 +45,11 @@ def draw_candle_chart(currency_pair, period='1d', count=20, to_epoch_time=None, 
 
 
 def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
-    df = DataFrame(get_price_info(currency_pair, period, count, to_epoch_time))
+    df = DataFrame(OhlcPrices(currency_pair, period).fetch_data(count, to_epoch_time))
     df = df[['open', 'high', 'low', 'close', 'volume', 'time']]
     df['time'] = pd.to_datetime(df['time'], unit='s')
     df = df.set_index('time')
 
-    # see https://github.com/plotly/plotly.py/issues/209
     df.index = df.index.tz_localize(pytz.utc).tz_convert(get_localzone()).tz_localize(None)
     init_notebook_mode(connected=True)
     decreasing = create_candlestick(df.open, df.high, df.low, df.close, dates=df.index,
@@ -74,7 +73,7 @@ def _candle_chart_fig(currency_pair, period='1d', count=20, to_epoch_time=None):
 
 
 def _sma_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, color=_SMA):
-    sma = DataFrame(get_sma(currency_pair, period, count, to_epoch_time, length)['return']['sma'])
+    sma = DataFrame(SMA(currency_pair, period, length).get_data(count, to_epoch_time)['return']['sma'])
     sma = sma[sma['moving_average'] != 0]
     sma['time_stamp'] = pd.to_datetime(sma['time_stamp'], unit='s')
     sma = sma.set_index('time_stamp')
@@ -85,7 +84,7 @@ def _sma_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=2
 
 
 def _ema_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, color=_EMA):
-    ema = DataFrame(get_ema(currency_pair, period,count, to_epoch_time, length)['return']['ema'])
+    ema = DataFrame(EMA(currency_pair, period, length).get_data(count, to_epoch_time)['return']['ema'])
     ema = ema[ema['moving_average'] != 0]
     ema['time_stamp'] = pd.to_datetime(ema['time_stamp'], unit='s')
     ema = ema.set_index('time_stamp')
@@ -96,7 +95,7 @@ def _ema_line(currency_pair, period='1d', count=20, to_epoch_time=None, length=2
 
 
 def _band_lines(currency_pair, period='1d', count=20, to_epoch_time=None, length=25, colors=None):
-    bands = get_bollinger_bands(currency_pair, period, count, to_epoch_time, length)['return']['bollinger_bands']
+    bands = BBands(currency_pair, period, length).get_data(count, to_epoch_time)['return']['bollinger_bands']
     bands = DataFrame(bands)
     bands['time_stamp'] = pd.to_datetime(bands['time_stamp'], unit='s')
     bands = bands.set_index('time_stamp')
