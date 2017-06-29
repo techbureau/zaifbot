@@ -72,9 +72,9 @@ class OrderThread(Thread, metaclass=ABCMeta):
         pass
 
 
-# スレッドセーフ?
 class BotOrderID:
     order_ids = set()
+    _lock = Lock()
 
     def __init__(self):
         self._id = self._gen_id()
@@ -82,9 +82,10 @@ class BotOrderID:
     @classmethod
     def _gen_id(cls):
         order_id = str(uuid4())
-        if order_id in cls.order_ids:
-            cls._gen_id()
-        return order_id
+        with cls._lock:
+            if order_id not in cls.order_ids:
+                return order_id
+        cls._gen_id()
 
     def __str__(self):
         return self._id
