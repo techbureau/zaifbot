@@ -1,4 +1,4 @@
-from threading import Thread, Lock, Event, Condition
+from threading import Thread, Lock, Event
 import time
 from uuid import uuid4
 from abc import abstractmethod, ABCMeta
@@ -92,10 +92,6 @@ class BotOrderID:
         return self._id
 
 
-class ActiveOrderWriter:
-    pass
-
-
 class ActiveOrders:
     _instance = None
     _api = None
@@ -112,11 +108,8 @@ class ActiveOrders:
         return cls._instance
 
     def find(self, bot_order_id):
-        return self._active_orders.get(bot_order_id, None)
-
-    def all(self):
         with self._orders_lock:
-            return self._active_orders
+            return self._active_orders.get(bot_order_id, None)
 
     def add(self, order):
         with self._orders_lock:
@@ -127,7 +120,7 @@ class ActiveOrders:
         with self._orders_lock:
             self._active_orders.pop(bot_order_id)
 
-    def update(self):
+    def all(self):
         with self._orders_lock:
             remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), self._active_orders.values())
             threads_orders = filter(lambda x: x not in list(remote_orders), self._active_orders.values())
@@ -140,6 +133,7 @@ class ActiveOrders:
             for threads_order in threads_orders:
                 if threads_order.is_end:
                     self._active_orders.pop(threads_order.info['bot_order_id'])
+        return self._active_orders
 
     @classmethod
     def _fetch_remote_order_ids(cls):
@@ -162,16 +156,19 @@ class AutoCancelOrder(OrderBase, OrderThread):
     @property
     def info(self):
         info = super().info
-        info['target_bot_orderr_id'] = self._target_bot_order_id
+        info['target_bot_order_id'] = self._target_bot_order_id
         return info
 
     def make_order(self):
         raise NotImplementedError
 
     def _execute(self):
-        # 未実装
-        self._api.cancel_order(order_id=self._target_bot_order_id, is_token=self._currency_pair.is_token())
-        self.stop()
+        target = self._active_orders.find(self._target_bot_order_id)
+        if target.info.get('zaif_order_id', None):
+            self._api.cancel_order(order_id=self._target_bot_order_id,
+                                   is_token=self._currency_pair.is_token())
+        else:
+            target.stop()
 
     def _can_execute(self):
         raise NotImplementedError
@@ -183,5 +180,5 @@ class AutoCancelOrder(OrderBase, OrderThread):
         return self._stop_event.is_set()
 
     def _every_time_before(self):
-        print('a')
-
+        if self.info['target_bot_order_id'] not in self._active_orders.all():
+            self.stop()
