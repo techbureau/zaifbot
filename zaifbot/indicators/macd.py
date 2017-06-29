@@ -1,5 +1,5 @@
 import pandas as pd
-from ohlc_prices import OhlcPrices
+from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.bot_common.logger import logger
@@ -22,7 +22,7 @@ class MACD(Indicator):
         self._long = long
         self._signal = signal
 
-    def get_data(self, count=100, to_epoch_time=None):
+    def request_data(self, count=100, to_epoch_time=None):
         try:
             count_needed = count + self._long + self._signal - 2
 

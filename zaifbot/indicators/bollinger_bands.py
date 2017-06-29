@@ -1,7 +1,7 @@
 import time
 
 import pandas as pd
-from ohlc_prices import OhlcPrices
+from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
@@ -18,7 +18,7 @@ class BBands(Indicator):
         self._period = period
         self._length = min(length, LIMIT_LENGTH)
 
-    def get_data(self, count=LIMIT_COUNT, lowbd=2, upbd=2, to_epoch_time=None):
+    def request_data(self, count=LIMIT_COUNT, lowbd=2, upbd=2, to_epoch_time=None):
         to_epoch_time = to_epoch_time or int(time.time())
         count = self._calc_price_count(min(count, LIMIT_COUNT))
         end_time = truncate_time_at_period(to_epoch_time, self._period)
