@@ -1,7 +1,9 @@
-class _StopOrder(_Order, _OrderThreadRoutine):
+from zaifbot.api.orders.common import OrderBase
+
+
+class _StopOrder(OrderBase, _OrderThreadRoutine):
     def __init__(self, currency_pair, action, stop_price, amount, comment=''):
-        super().__init__(comment)
-        self._currency_pair = CurrencyPair(currency_pair)
+        super().__init__(currency_pair, comment)
         self._action = action
         self._stop_price = stop_price
         self._amount = amount

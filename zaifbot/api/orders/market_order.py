@@ -1,7 +1,9 @@
-class _MarketOrder(_Order):
+from zaifbot.api.orders.common import OrderBase
+
+
+class _MarketOrder(OrderBase):
     def __init__(self, currency_pair, action, amount, comment=''):
-        super().__init__(comment)
-        self._currency_pair = CurrencyPair(currency_pair)
+        super().__init__(currency_pair, comment)
         self._action = action
         self._amount = amount
 

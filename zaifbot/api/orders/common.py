@@ -1,5 +1,37 @@
 from threading import Thread, Lock
 from uuid import uuid4
+from abc import abstractmethod, ABCMeta
+from zaifbot.currency_pairs import CurrencyPair
+
+
+class OrderBase(metaclass=ABCMeta):
+    def __init__(self, currency_pair, comment):
+        self._bot_order_id = str(BotOrderID)
+        self._currency_pari = CurrencyPair(str(currency_pair))
+        self._comment = comment
+        self._started_time = None
+        self._info = {}
+
+    @property
+    @abstractmethod
+    def name(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def info(self):
+        self._info['bot_order_id'] = self._bot_order_id
+        self._info['name'] = self.name
+        self._info['comment'] = self._comment
+        return self._info
+
+    @abstractmethod
+    def make_order(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class OrderThread(Thread):
+    pass
 
 
 class BotOrderID:
@@ -63,30 +95,3 @@ class ActiveOrders:
         return orders['token_active_orders'].keys() + orders['active_orders'].keys()
 
 
-class _Order(metaclass=ABCMeta):
-    def __init__(self, comment):
-        self._bot_order_id = str(BotOrderID)
-        self._started_time = None
-        self._comment = comment
-        self._info = {}
-
-    @property
-    @abstractmethod
-    def name(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def info(self):
-        self._info['bot_order_id'] = self._bot_order_id
-        self._info['name'] = self.name
-        self._info['comment'] = self._comment
-        return self._info
-
-    @abstractmethod
-    def make_order(self, *args, **kwargs):
-        raise NotImplementedError
-
-
-class OrderThread(Thread):
-    pass
