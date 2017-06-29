@@ -1,6 +1,6 @@
 import time
 
-from wrapper import BotPublicApi
+from .wrapper import BotPublicApi
 from zaifbot.bot_common.bot_const import LIMIT_COUNT
 from zaifbot.dao.ohlc_prices import OhlcPricesDao
 from zaifbot.utils import calc_start_from_count_and_end, truncate_time_at_period
