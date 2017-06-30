@@ -38,7 +38,7 @@ def install_ta_lib():
 
 
 def __install_talib_for_windows(bits, py_version):
-    if bits == 32:
+    if bits == '32':
         file = os.path.join(os.path.dirname(__file__),
                             "setup/TA_Lib-0.4.10-cp{v}-cp{v}m-win32.whl".format(v=py_version))
     else:
