@@ -22,8 +22,11 @@ class ZaifBot:
 def install_ta_lib():
     parent_path = os.path.dirname(os.path.abspath(__file__))
     os.chdir(parent_path + "/setup")
-    if sys.platform == "linux" or sys.platform == "linux2":
+    if sys.platform.startswith('linux'):
         subprocess.call(["./install_ta_lib.sh"])
+    elif sys.platform.startswith('mac'):
+        # todo: 実装
+        pass
     elif sys.platform.startswith('win'):
         bits = '32' if sys.maxsize < 2 ** 31 else '64'
         pyv = str(sys.version_info.major) + str(sys.version_info.minor)
