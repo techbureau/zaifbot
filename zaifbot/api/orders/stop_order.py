@@ -45,7 +45,7 @@ class StopOrder(OrderBase, OrderThread):
         return self._currency_pair.last_price()['last_price'] > self._stop_price < self._stop_price
 
     @property
-    def _is_end(self):
+    def is_end(self):
         return not self._stop_event.is_set()
 
     def stop(self):

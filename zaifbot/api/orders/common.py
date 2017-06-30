@@ -36,7 +36,7 @@ class OrderBase(metaclass=ABCMeta):
 class OrderThread(Thread, metaclass=ABCMeta):
 
     def run(self):
-        while self._is_end:
+        while self.is_end:
             self._every_time_before()
             if self._can_execute():
                 self._before_execution()
@@ -56,7 +56,7 @@ class OrderThread(Thread, metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _is_end(self):
+    def is_end(self):
         raise NotImplementedError
 
     @abstractmethod
@@ -177,7 +177,7 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def stop(self):
         self._stop_event.set()
 
-    def _is_end(self):
+    def is_end(self):
         return self._stop_event.is_set()
 
     def _every_time_before(self):
