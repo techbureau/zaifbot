@@ -30,8 +30,7 @@ class MA(Indicator):
         ohlcs = DF(OhlcPrices(self._currency_pair, self._period).fetch_data(count, to_epoch_time))
         ma = ab.Function(name)(ohlcs, timeperiod=self._length).rename(name).dropna()
         formatted_ma = pd.concat([ohlcs['time'], ma], axis=1).dropna().astype(object).to_dict(orient='records')
-
-        return {'success': 1, 'return': {name: formatted_ma}}
+        return formatted_ma
 
 
 class EMA(MA):
