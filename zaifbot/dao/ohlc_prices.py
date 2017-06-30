@@ -1,8 +1,8 @@
-from zaifbot.dao import DaoBase
 from sqlalchemy import and_
 from sqlalchemy import exc
-from zaifbot.bot_common.logger import logger
-from zaifbot.bot_common.bot_const import CLOSED
+from zaifbot.common.bot_const import CLOSED
+from zaifbot.common.logger import logger
+from zaifbot.dao import DaoBase
 from zaifbot.models.ohlc_prices import OhlcPrices
 
 

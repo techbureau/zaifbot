@@ -1,6 +1,6 @@
 from os import environ as env
-from zaifbot.bot_common.slack_notifier import SlackNotifier
-from zaifbot.bot_common.bot_const import UTC_JP_DIFF, PERIOD_SECS
+from zaifbot.common.notifier import SlackNotifier
+from zaifbot.common.bot_const import UTC_JP_DIFF, PERIOD_SECS
 
 
 def send_slack_message(slack_token, channel_id, message, username):

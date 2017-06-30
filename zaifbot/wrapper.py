@@ -1,10 +1,10 @@
 import random
 import time
 
-from zaifbot.dao.order_log import OrderLogsDao
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
-from zaifbot.bot_common.logger import logger
+from zaifbot.common.logger import logger
+from zaifbot.dao.order_log import OrderLogsDao
 from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5

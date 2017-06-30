@@ -1,5 +1,5 @@
 from threading import Event
-from zaifbot.bot_common.bot_const import TRADE_ACTION
+from zaifbot.common.bot_const import TRADE_ACTION
 from zaifbot.api.orders.common import OrderBase, OrderThread
 from zaifbot.api.orders.market_order import MarketOrder
 
