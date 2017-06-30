@@ -6,7 +6,6 @@ from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
 from zaifbot.utils import truncate_time_at_period
-
 from .base import Indicator
 
 __all__ = ['BBands']
@@ -23,12 +22,10 @@ class BBands(Indicator):
         count = self._calc_price_count(min(count, LIMIT_COUNT))
         end_time = truncate_time_at_period(to_epoch_time, self._period)
         ohlcs = DF(OhlcPrices(self._currency_pair, self._period).fetch_data(count, end_time))
-
         bbands = ab.BBANDS(ohlcs, timeperiod=self._length, nbdevup=upbd, nbdevdn=lowbd, matype=0).dropna()
         formatted_bbands = pd.concat([ohlcs['time'], bbands[['lowerband', 'upperband']]], axis=1).dropna().\
             astype(object).to_dict(orient='records')
-
-        return {'success': 1, 'return': {'bollinger_bands': formatted_bbands}}
+        return formatted_bbands
 
     def _calc_price_count(self, count):
         return self._length + count - 1
