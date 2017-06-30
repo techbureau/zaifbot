@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
 from threading import Thread, Event, Lock
-
 from .wrapper import BotPublicApi
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.bot_common.errors import ZaifBotError
@@ -46,6 +44,7 @@ class CurrencyPair:
         return self.get_round_amount(buyable_amount)
 
     def get_more_executable_price(self, price, *, is_buy):
+        # todo: incorrect processing
         if is_buy:
             return price + (self._info['aux_unit_step'] -
                             (price % self._info['aux_unit_step']))
@@ -107,9 +106,7 @@ class _ZaifLastPrice:
         def get_token_last_price():
             api = BotPublicApi()
             last_price = api.last_price(currency_pair)['last_price']
-            jst_time = datetime.utcnow() + timedelta(hours=9)
-            jst_time_str = jst_time.strftime('%Y-%m-%d %H:%M:%S.%f')
-            return {'timestamp': jst_time_str, 'last_price': last_price}
+            return last_price
 
         def is_token():
             currency_pairs = _ZaifCurrencyPairsCache()
@@ -120,7 +117,7 @@ class _ZaifLastPrice:
         if is_token():
             return get_token_last_price()
         receive = self._get_target_thread(currency_pair).last_receive
-        return {'timestamp': receive['timestamp'], 'last_price': receive['last_price']['price']}
+        return receive['last_price']['price']
 
     def close_all_socket(self):
         [event.set() for event in self._stop_events.values()]

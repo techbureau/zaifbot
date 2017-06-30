@@ -1,3 +1,8 @@
+"""
+this module is not supported now
+"""
+
+
 import pandas as pd
 import pytz
 from zaifbot.ohlc_prices import OhlcPrices

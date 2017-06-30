@@ -15,18 +15,17 @@ class MarketOrder(OrderBase):
     def info(self):
         self._info['action'] = self._action
         self._info['currency_pair'] = str(self._currency_pair)
-        self._info['price'] = self._round_price()
         self._info['amount'] = self._amount
         return self._info
 
     def make_order(self):
+        # todo: need refactoring
+        is_buy = True if self.info['action'] == 'bid' else False
+        price = self._currency_pair.get_more_executable_price(self._currency_pair.last_price(), is_buy=is_buy)
+        price_rounded = self._currency_pair.get_round_amount(price)
         self._api.trade(currency_pair=str(self._currency_pair),
                         action=self._action,
-                        price=self._round_price(),
+                        price=price_rounded,
                         amount=self._amount,
                         comment=self._comment)
         return self
-
-    def _round_price(self):
-        # todo: 未実装
-        return self._currency_pair.last_price()

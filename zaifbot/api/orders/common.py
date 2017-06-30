@@ -1,6 +1,6 @@
-from threading import Thread, Lock, Event
 import time
 from uuid import uuid4
+from threading import Thread, Lock, Event
 from abc import abstractmethod, ABCMeta
 from zaifbot.currency_pairs import CurrencyPair
 
@@ -24,7 +24,7 @@ class OrderBase(metaclass=ABCMeta):
     def info(self):
         self._info['bot_order_id'] = self._bot_order_id
         self._info['type'] = self.type
-        self._info['currency_pair'] = self._currency_pair
+        self._info['currency_pair'] = str(self._currency_pair)
         self._info['comment'] = self._comment
         return self._info
 
@@ -36,13 +36,14 @@ class OrderBase(metaclass=ABCMeta):
 class OrderThread(Thread, metaclass=ABCMeta):
 
     def run(self):
-        while self._is_end:
+        while not self.is_end:
             self._every_time_before()
             if self._can_execute():
                 self._before_execution()
                 self._execute()
-                self._after_execution()
                 self.stop()
+                self._after_execution()
+
             else:
                 time.sleep(1)
 
@@ -56,7 +57,7 @@ class OrderThread(Thread, metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _is_end(self):
+    def is_end(self):
         raise NotImplementedError
 
     @abstractmethod
@@ -122,11 +123,11 @@ class ActiveOrders:
 
     def all(self):
         with self._orders_lock:
-            remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), self._active_orders.values())
-            threads_orders = filter(lambda x: x not in list(remote_orders), self._active_orders.values())
-
+            # change if better way founded
+            remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), set(self._active_orders.values()))
+            threads_orders = filter(lambda x: not x.info.get('zaif_order_id', None), set(self._active_orders.values()))
+            ids_from_server = self._fetch_remote_order_ids()
             for remote_order in remote_orders:
-                ids_from_server = self._fetch_remote_order_ids()
                 if remote_order.info['zaif_order_id'] not in ids_from_server:
                     self._active_orders.pop(remote_order.info['bot_order_id'])
 
@@ -138,13 +139,13 @@ class ActiveOrders:
     @classmethod
     def _fetch_remote_order_ids(cls):
         orders = cls._api.active_orders(is_token_both=True)
-        return orders['token_active_orders'].keys() + orders['active_orders'].keys()
+        return list(map(int, orders['token_active_orders'].keys())) + list(map(int, orders['active_orders'].keys()))
 
 
 class AutoCancelOrder(OrderBase, OrderThread):
     def __init__(self, trade_api, target_bot_order_id, currency_pair, comment=''):
-        super().__init__(trade_api, currency_pair, comment)
         super(OrderThread, self).__init__(daemon=True)
+        super().__init__(trade_api, currency_pair, comment)
         self._target_bot_order_id = target_bot_order_id
         self._active_orders = ActiveOrders(trade_api)
         self._stop_event = Event()
@@ -165,7 +166,7 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def _execute(self):
         target = self._active_orders.find(self._target_bot_order_id)
         if target.info.get('zaif_order_id', None):
-            self._api.cancel_order(order_id=self._target_bot_order_id,
+            self._api.cancel_order(order_id=target.info['zaif_order_id'],
                                    is_token=self._currency_pair.is_token())
         else:
             target.stop()
@@ -176,9 +177,13 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def stop(self):
         self._stop_event.set()
 
-    def _is_end(self):
+    @property
+    def is_end(self):
         return self._stop_event.is_set()
 
     def _every_time_before(self):
         if self.info['target_bot_order_id'] not in self._active_orders.all():
             self.stop()
+
+    def _after_execution(self):
+        pass
