@@ -22,7 +22,7 @@ def _with_retry(func):
                 a = random.uniform(0.1, 0.5)
                 time.sleep(a)
                 if i >= _RETRY_COUNT - 1:
-                    bot_logger.error(e, exc_info=True)
+                    bot_logger.exception(e)
                     raise e
                 continue
     return _wrapper

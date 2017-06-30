@@ -1,6 +1,5 @@
 from sqlalchemy import and_
 from sqlalchemy import exc
-from zaifbot.common.bot_const import CLOSED
 from zaifbot.common.logger import bot_logger
 from zaifbot.dao import DaoBase
 from zaifbot.models.ohlc_prices import OhlcPrices
@@ -43,7 +42,7 @@ class OhlcPricesDao(DaoBase):
                                                     self.model.time > start_time,
                                                     self.model.currency_pair == self._currency_pair,
                                                     self.model.period == self._period,
-                                                    self.model.closed == CLOSED
+                                                    self.model.closed == self._CLOSED
                                                     ))
         else:
             select_query = select_query.filter(and_(self.model.time <= end_time,

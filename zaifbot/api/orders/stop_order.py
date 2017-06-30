@@ -1,5 +1,5 @@
 from threading import Event
-from zaifbot.common.bot_const import TRADE_ACTION
+from zaifbot.common.bot_const import Action
 from zaifbot.api.orders.common import OrderBase, OrderThread
 from zaifbot.api.orders.market_order import MarketOrder
 
@@ -8,7 +8,7 @@ class StopOrder(OrderBase, OrderThread):
     def __init__(self, api, currency_pair, action, stop_price, amount, comment=''):
         super(OrderThread, self).__init__(daemon=True)
         super().__init__(api, currency_pair, comment)
-        self._action = action
+        self._action = Action(action)
         self._stop_price = stop_price
         self._amount = amount
         self._stop_event = Event()
@@ -30,10 +30,10 @@ class StopOrder(OrderBase, OrderThread):
         return self
 
     def _execute(self):
-        return MarketOrder(self._api, self._currency_pair, self._action, self._amount, self._comment).make_order()
+        return MarketOrder(self._api, self._currency_pair, self._action.value, self._amount, self._comment).make_order()
 
     def _can_execute(self):
-        if self._action is TRADE_ACTION[0]:
+        if self._action is Action.Buy:
             return self.__is_price_higher_than_stop_price()
         else:
             return self.__is_price_lower_than_stop_price()
