@@ -3,6 +3,8 @@ from zaifbot.models import Base, engine, get_session, moving_average, bollinger_
 
 
 class DaoBase(metaclass=ABCMeta):
+    _CLOSED = 1
+
     def __init__(self):
         self.model = self.get_model()
 
