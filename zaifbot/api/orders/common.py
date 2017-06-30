@@ -1,6 +1,6 @@
-from threading import Thread, Lock, Event
 import time
 from uuid import uuid4
+from threading import Thread, Lock, Event
 from abc import abstractmethod, ABCMeta
 from zaifbot.currency_pairs import CurrencyPair
 
@@ -24,7 +24,7 @@ class OrderBase(metaclass=ABCMeta):
     def info(self):
         self._info['bot_order_id'] = self._bot_order_id
         self._info['type'] = self.type
-        self._info['currency_pair'] = self._currency_pair
+        self._info['currency_pair'] = str(self._currency_pair)
         self._info['comment'] = self._comment
         return self._info
 
@@ -122,8 +122,9 @@ class ActiveOrders:
 
     def all(self):
         with self._orders_lock:
-            remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), self._active_orders.values())
-            threads_orders = filter(lambda x: x not in list(remote_orders), self._active_orders.values())
+            # change if better way founded
+            remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), set(self._active_orders.values()))
+            threads_orders = filter(lambda x: not x.info.get('zaif_order_id', None), set(self._active_orders.values()))
 
             for remote_order in remote_orders:
                 ids_from_server = self._fetch_remote_order_ids()
@@ -138,7 +139,7 @@ class ActiveOrders:
     @classmethod
     def _fetch_remote_order_ids(cls):
         orders = cls._api.active_orders(is_token_both=True)
-        return orders['token_active_orders'].keys() + orders['active_orders'].keys()
+        return list(orders['token_active_orders'].keys()) + list(orders['active_orders'].keys())
 
 
 class AutoCancelOrder(OrderBase, OrderThread):

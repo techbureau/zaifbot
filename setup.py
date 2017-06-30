@@ -10,7 +10,7 @@ setup(
     long_description='https://pypi.python.org/pypi/zaifbot',
     url='https://github.com/Akira-Taniguchi/zaifbot',
     author='AkiraTaniguchi Monji',
-    author_email='a.taniguchi@techbureau.jp ttskmnj@gmail.com',
+    author_email='a.taniguchi@techbureau.jp daikishiroi@gmail.com',
     packages=find_packages(),
     license='MIT',
     keywords='zaif bit coin btc xem mona jpy virtual currency block chain bot',
