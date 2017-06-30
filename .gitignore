@@ -92,3 +92,6 @@ ENV/
 
 # db
 *.db
+
+# for empty directory
+!.gitkeep
