@@ -2,7 +2,7 @@ from threading import Thread, Event, Lock
 
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.common.errors import ZaifBotError
-from zaifbot.common.logger import logger
+from zaifbot.common.logger import bot_logger
 
 from .wrapper import BotPublicApi
 
@@ -144,7 +144,7 @@ class _StreamThread(Thread):
                 if self._stop_event.is_set():
                     self._stream_api.stop()
         except Exception as e:
-            logger.error(e, exc_info=True)
+            bot_logger.error(e, exc_info=True)
             self._error_event.set()
 
     def _set_first_last_price(self):

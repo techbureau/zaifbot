@@ -3,7 +3,7 @@ import time
 
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
-from zaifbot.common.logger import logger
+from zaifbot.common.logger import trade_logger, bot_logger
 from zaifbot.dao.order_log import OrderLogsDao
 from zaifbot.utils import get_keys
 
@@ -22,7 +22,7 @@ def _with_retry(func):
                 a = random.uniform(0.1, 0.5)
                 time.sleep(a)
                 if i >= _RETRY_COUNT - 1:
-                    logger.error(e, exc_info=True)
+                    bot_logger.error(e, exc_info=True)
                     raise e
                 continue
     return _wrapper
@@ -81,7 +81,7 @@ class BotTradeApi(ZaifTradeApi):
                                received=ret['received'],
                                remains=ret['remains'],
                                comment=kwargs.get('comment', ''))
-        logger.info('orders succeeded : {}'.format(order_log))
+        trade_logger.info('orders succeeded : {}'.format(order_log))
         dao = OrderLogsDao()
         record = eval(order_log)
         record['time'] = int(time.time())
