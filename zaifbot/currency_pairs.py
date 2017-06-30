@@ -26,6 +26,10 @@ class CurrencyPair:
     def __str__(self):
         return self._name
 
+    @property
+    def info(self):
+        return self._info
+
     def is_token(self):
         return self._info['is_token']
 
