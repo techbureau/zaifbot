@@ -1,7 +1,6 @@
 from zaifbot.dao import DaoBase
 from sqlalchemy import and_
 from sqlalchemy import exc
-from zaifbot.common.bot_const import CLOSED
 from zaifbot.models.moving_average import MovingAverages
 
 
@@ -25,7 +24,7 @@ class MovingAverageDao(DaoBase):
                                                     self.model.currency_pair == self._currency_pair,
                                                     self.model.period == self._period,
                                                     self.model.length == self._length,
-                                                    self.model.closed == CLOSED
+                                                    self.model.closed == self._CLOSED
                                                     ))
         else:
             select_query = select_query.filter(and_(self.model.time <= end_time,

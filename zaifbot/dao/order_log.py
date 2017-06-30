@@ -1,5 +1,5 @@
 from sqlalchemy import exc
-from zaifbot.common.logger import logger
+from zaifbot.common.logger import bot_logger
 from zaifbot.dao import DaoBase
 from zaifbot.models.order_log import OrderLogs
 
@@ -16,7 +16,7 @@ class OrderLogsDao(DaoBase):
             session.close()
             return True
         except exc.SQLAlchemyError as e:
-            logger.error(e, exc_info=True)
+            bot_logger.exception(e)
             session.rollback()
             session.close()
         return False
