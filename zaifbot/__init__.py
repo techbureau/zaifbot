@@ -1,7 +1,7 @@
 import sys
 import subprocess
 import os
-from zaifbot.bot_common.errors import ZaifBotError
+from zaifbot.common.errors import ZaifBotError
 
 
 class ZaifBot:

@@ -1,8 +1,8 @@
-from zaifbot.dao import DaoBase
 from sqlalchemy import and_
 from sqlalchemy import exc
-from zaifbot.bot_common.logger import logger
-from zaifbot.bot_common.bot_const import CLOSED
+from zaifbot.common.bot_const import CLOSED
+from zaifbot.common.logger import bot_logger
+from zaifbot.dao import DaoBase
 from zaifbot.models.ohlc_prices import OhlcPrices
 
 
@@ -30,7 +30,7 @@ class OhlcPricesDao(DaoBase):
             session.close()
             return True
         except exc.SQLAlchemyError as e:
-            logger.exception(e)
+            bot_logger.exception(e)
             session.rollback()
             session.close()
         return False

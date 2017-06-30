@@ -1,7 +1,7 @@
-from zaifbot.models.order_log import OrderLogs
-from zaifbot.dao import DaoBase
 from sqlalchemy import exc
-from zaifbot.bot_common.logger import logger
+from zaifbot.common.logger import logger
+from zaifbot.dao import DaoBase
+from zaifbot.models.order_log import OrderLogs
 
 
 class OrderLogsDao(DaoBase):

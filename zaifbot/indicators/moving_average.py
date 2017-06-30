@@ -4,7 +4,7 @@ import pandas as pd
 from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from zaifbot.bot_common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
+from zaifbot.common.bot_const import LIMIT_COUNT, LIMIT_LENGTH
 
 from .base import Indicator
 
