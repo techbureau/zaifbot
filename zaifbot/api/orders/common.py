@@ -41,8 +41,9 @@ class OrderThread(Thread, metaclass=ABCMeta):
             if self._can_execute():
                 self._before_execution()
                 self._execute()
-                self._after_execution()
                 self.stop()
+                self._after_execution()
+
             else:
                 time.sleep(1)
 
@@ -70,7 +71,7 @@ class OrderThread(Thread, metaclass=ABCMeta):
         pass
 
     def _after_execution(self):
-        print('executed')
+        pass
 
 
 class BotOrderID:
@@ -183,3 +184,6 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def _every_time_before(self):
         if self.info['target_bot_order_id'] not in self._active_orders.all():
             self.stop()
+
+    def _after_execution(self):
+        pass

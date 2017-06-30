@@ -18,16 +18,16 @@ class PriceBoundaryCancel(AutoCancelOrder):
         info = super().info
         info['start_price'] = self._start_price
         info['target_margin'] = self._target_margin
-        info['current_margin'] = abs(self._currency_pair.last_price()['last_price'] - self._start_price)
+        info['current_margin'] = abs(self._currency_pair.last_price()- self._start_price)
         return info
 
     def make_order(self, *args, **kwargs):
-        self._start_price = self._currency_pair.last_price()['last_price']
+        self._start_price = self._currency_pair.last_price()
         self.start()
         return self
 
     def _can_execute(self):
-        last_price = self._currency_pair.last_price()['last_price']
+        last_price = self._currency_pair.last_price()
         if abs(self._start_price - last_price) < self._target_margin:
             return False
         return True
