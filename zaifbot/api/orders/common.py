@@ -70,7 +70,7 @@ class OrderThread(Thread, metaclass=ABCMeta):
         pass
 
     def _after_execution(self):
-        pass
+        print('executed')
 
 
 class BotOrderID:
@@ -125,9 +125,8 @@ class ActiveOrders:
             # change if better way founded
             remote_orders = filter(lambda x: x.info.get('zaif_order_id', None), set(self._active_orders.values()))
             threads_orders = filter(lambda x: not x.info.get('zaif_order_id', None), set(self._active_orders.values()))
-
+            ids_from_server = self._fetch_remote_order_ids()
             for remote_order in remote_orders:
-                ids_from_server = self._fetch_remote_order_ids()
                 if remote_order.info['zaif_order_id'] not in ids_from_server:
                     self._active_orders.pop(remote_order.info['bot_order_id'])
 
@@ -139,7 +138,7 @@ class ActiveOrders:
     @classmethod
     def _fetch_remote_order_ids(cls):
         orders = cls._api.active_orders(is_token_both=True)
-        return list(orders['token_active_orders'].keys()) + list(orders['active_orders'].keys())
+        return list(map(int, orders['token_active_orders'].keys())) + list(map(int, orders['active_orders'].keys()))
 
 
 class AutoCancelOrder(OrderBase, OrderThread):
@@ -166,7 +165,7 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def _execute(self):
         target = self._active_orders.find(self._target_bot_order_id)
         if target.info.get('zaif_order_id', None):
-            self._api.cancel_order(order_id=self._target_bot_order_id,
+            self._api.cancel_order(order_id=target.info['zaif_order_id'],
                                    is_token=self._currency_pair.is_token())
         else:
             target.stop()
