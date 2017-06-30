@@ -36,7 +36,7 @@ class OrderBase(metaclass=ABCMeta):
 class OrderThread(Thread, metaclass=ABCMeta):
 
     def run(self):
-        while self.is_end:
+        while not self.is_end:
             self._every_time_before()
             if self._can_execute():
                 self._before_execution()
@@ -144,8 +144,8 @@ class ActiveOrders:
 
 class AutoCancelOrder(OrderBase, OrderThread):
     def __init__(self, trade_api, target_bot_order_id, currency_pair, comment=''):
-        super().__init__(trade_api, currency_pair, comment)
         super(OrderThread, self).__init__(daemon=True)
+        super().__init__(trade_api, currency_pair, comment)
         self._target_bot_order_id = target_bot_order_id
         self._active_orders = ActiveOrders(trade_api)
         self._stop_event = Event()
@@ -177,6 +177,7 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def stop(self):
         self._stop_event.set()
 
+    @property
     def is_end(self):
         return self._stop_event.is_set()
 

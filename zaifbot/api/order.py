@@ -23,13 +23,13 @@ class Order:
         self._active_orders.add(order)
         return order.info
 
-    def time_limit_cancel(self, bot_order_id, currency_pair, wait_sec):
-        order = self._menu.time_limit_cancel(self._api, bot_order_id, currency_pair, wait_sec)
+    def time_limit_cancel(self, bot_order_id, currency_pair, wait_sec, comment=''):
+        order = self._menu.time_limit_cancel(self._api, bot_order_id, currency_pair, wait_sec, comment).make_order()
         self._active_orders.add(order)
         return order.info
 
     def price_boundary_cancel(self, bot_order_id, currency_pair, target_margin):
-        order = self._menu.price_boundary_cancel(self._api, bot_order_id, currency_pair, target_margin)
+        order = self._menu.price_boundary_cancel(self._api, bot_order_id, currency_pair, target_margin).make_order()
         self._active_orders.add(order)
         return order.info
 
