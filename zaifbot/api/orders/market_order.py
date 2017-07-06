@@ -25,7 +25,7 @@ class MarketOrder(OrderBase):
         is_buy = True if self.info['action'] == Action.Buy else False
         price = self._currency_pair.get_more_executable_price(self._currency_pair.last_price(), is_buy=is_buy)
         price_rounded = self._currency_pair.get_round_amount(price)
-        self._api.trade(currency_pair=str(self._currency_pair),  # trade_apiでやりたい
+        self._api.trade(currency_pair=self._currency_pair,
                         action=self._action.value,  # trade_apiでやりたい
                         price=price_rounded,
                         amount=self._amount,

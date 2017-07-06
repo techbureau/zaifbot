@@ -23,8 +23,7 @@ class LimitOrder(OrderBase):
 
     @log_before_trade('order made')
     def make_order(self):
-        # tradeの方でstrにするようにする。
-        result = self._api.trade(currency_pair=str(self._currency_pair),
+        result = self._api.trade(currency_pair=self._currency_pair,
                                  action=self._action.value,
                                  price=self._limit_price,
                                  amount=self._amount,

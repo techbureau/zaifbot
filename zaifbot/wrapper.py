@@ -67,6 +67,10 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
+        def __params_preprocessing(**kwa):
+            kwa.__setitem__('currency_pair', str(kwa.get('currency_pair')))
+            return kwa
+        kwargs = __params_preprocessing(**kwargs)
 
         trade_result = super().trade(**kwargs)
         order_log = {'zaif_order_id': trade_result['order_id'],

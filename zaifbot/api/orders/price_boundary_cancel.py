@@ -18,7 +18,7 @@ class PriceBoundaryCancel(AutoCancelOrder):
         info = super().info
         info['start_price'] = self._start_price
         info['target_margin'] = self._target_margin
-        info['current_margin'] = abs(self._currency_pair.last_price()- self._start_price)
+        info['current_margin'] = abs(self._currency_pair.last_price() - self._start_price)
         return info
 
     @log_after_trade('order made')
