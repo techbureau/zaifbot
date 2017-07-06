@@ -5,27 +5,27 @@ from zaifbot.trade import Trade
 
 
 class Entry(Rule, metaclass=ABCMeta):
-    def __init__(self, currency_pair, amount, api, action='bid'):
-        self._currency_pair = currency_pair
-        self._amount = amount
-        self._api = api
-        self._action = Action(action)
+    def __init__(self, amount, action='bid'):
+        self.currency_pair = None
+        self.amount = amount
+        self.trade_api = None
+        self.action = Action(action)
 
     @abstractmethod
     def can_entry(self):
         raise NotImplementedError
 
     def entry(self):
-        price = self._currency_pair.last_price()
-        self._api.trade(currency_pair=self._currency_pair,
-                        amount=self._amount,
-                        price=price,
-                        action=self._action)
+        price = self.currency_pair.last_price()
+        self.trade_api.trade(currency_pair=self.currency_pair,
+                             amount=self.amount,
+                             price=price,
+                             action=self.action)
 
-        trade = Trade(currency_pair=self._currency_pair,
-                      amount=self._amount,
+        trade = Trade(currency_pair=self.currency_pair,
+                      amount=self.amount,
                       entry_price=price,
-                      action=self._action)
+                      action=self.action)
 
         trade.save()
         return trade

@@ -3,8 +3,8 @@ from abc import ABCMeta, abstractmethod
 
 
 class Exit(Rule, metaclass=ABCMeta):
-    def __init__(self, trade_api):
-        self._trade_api = trade_api
+    def __init__(self):
+        self.trade_api = None
 
     @abstractmethod
     def can_exit(self, trade):
