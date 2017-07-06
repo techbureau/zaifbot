@@ -1,18 +1,16 @@
 from zaifbot.rules.rule import Rule
-from abc import ABCMeta, abstractmethod
 from zaifbot.common.bot_const import Action
 from zaifbot.trade import Trade
 
 
-class Entry(Rule, metaclass=ABCMeta):
+class Entry(Rule):
     def __init__(self, amount, action='bid'):
         self.currency_pair = None
         self.amount = amount
         self.trade_api = None
         self.action = Action(action)
 
-    @abstractmethod
-    def can_entry(self):
+    def can_entry(self, *args, **kwargs):
         raise NotImplementedError
 
     def entry(self):

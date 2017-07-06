@@ -19,11 +19,11 @@ class Strategy:
         pass
 
     def _entry(self):
-        self._trade = self._entry_rule.entry(self._trade_api)
+        self._trade = self._entry_rule.entry()
         self._have_position = True
 
     def _exit(self):
-        self._exit_rule.exit(self._trade_api, self._trade)
+        self._exit_rule.exit(self._trade)
         self._have_position = False
 
     def _check_entry(self):
