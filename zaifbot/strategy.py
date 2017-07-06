@@ -37,30 +37,3 @@ class Strategy:
             else:
                 self._check_entry()
             time.sleep(sec_wait)
-
-# if __name__ == '__main__':
-#     from zaifbot.rules.entry.entry import Entry
-#     from zaifbot.rules.exit.exit import Exit
-#     from zaifbot.wrapper import BotTradeApi
-#
-#     class MyEntry(Entry):
-#         def can_entry(self):
-#             if self._currency_pair.last_price() > 100000:
-#                 return True
-#
-#         def entry(self):
-#             self._api.trade(currency_pair=self)
-#
-#
-#     my_entry = MyEntry(currency_pair='xem_jpy', amount=100, action='bid', api=BotTradeApi(key='', secret=''))
-#
-#     class MyExit(Exit):
-#         def can_exit(self, trade):
-#             pass
-#
-#         def exit(self, trade_api, trade):
-#             pass
-#
-#     my_exit = Exit()
-#     my_strategy = Strategy(my_entry, my_exit)
-#     my_strategy.start(sec_wait=5)
