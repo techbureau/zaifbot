@@ -1,7 +1,8 @@
 from threading import Event
+
+from zaifbot.order.orders.common import OrderBase, OrderThread, log_after_trade
 from zaifbot.common.bot_const import Action
-from zaifbot.api.orders.common import OrderBase, OrderThread, log_after_trade
-from zaifbot.api.orders.market_order import MarketOrder
+from zaifbot.order.orders.market_order import MarketOrder
 
 
 class StopOrder(OrderBase, OrderThread):

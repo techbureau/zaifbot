@@ -1,5 +1,5 @@
-from zaifbot.api.orders.common import OrderBase, log_before_trade
 from zaifbot.common.bot_const import Action
+from zaifbot.order.orders.common import OrderBase, log_before_trade
 
 
 class MarketOrder(OrderBase):

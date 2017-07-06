@@ -1,6 +1,6 @@
 import time
 from threading import Event
-from zaifbot.api.orders.common import AutoCancelOrder, log_after_trade
+from zaifbot.order.orders.common import AutoCancelOrder, log_after_trade
 
 
 class TimeLimitCancel(AutoCancelOrder):

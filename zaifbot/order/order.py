@@ -1,6 +1,7 @@
+from zaifbot.order.orders.common import ActiveOrders
 from zaifbot.wrapper import BotTradeApi
-from zaifbot.api.orders.common import ActiveOrders
-from .orders import OrderMenu
+
+from zaifbot.order import OrderMenu
 
 
 class Order:
