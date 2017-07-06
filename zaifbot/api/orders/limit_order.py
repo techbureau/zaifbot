@@ -1,4 +1,4 @@
-from zaifbot.api.orders.common import OrderBase
+from zaifbot.api.orders.common import OrderBase, log_before_trade
 from zaifbot.common.bot_const import Action
 
 
@@ -21,10 +21,10 @@ class LimitOrder(OrderBase):
         self._info['limit_price'] = self._limit_price
         return self._info
 
+    @log_before_trade('order made')
     def make_order(self):
-        # tradeの方でstrにするようにする。
-        result = self._api.trade(currency_pair=str(self._currency_pair),
-                                 action=self._action.value,
+        result = self._api.trade(currency_pair=self._currency_pair,
+                                 action=self._action,
                                  price=self._limit_price,
                                  amount=self._amount,
                                  comment=self._comment)

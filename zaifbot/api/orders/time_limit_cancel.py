@@ -1,6 +1,6 @@
 import time
 from threading import Event
-from zaifbot.api.orders.common import AutoCancelOrder
+from zaifbot.api.orders.common import AutoCancelOrder, log_after_trade
 
 
 class TimeLimitCancel(AutoCancelOrder):
@@ -21,6 +21,7 @@ class TimeLimitCancel(AutoCancelOrder):
         info['rest_time'] = self._wait_sec - (int(time.time()) - self._start_time)
         return info
 
+    @log_after_trade('order made')
     def make_order(self, *args, **kwargs):
         self._started_time = int(time.time())
         self.start()

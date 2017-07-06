@@ -2,7 +2,27 @@ import time
 from uuid import uuid4
 from threading import Thread, Lock, Event
 from abc import abstractmethod, ABCMeta
+from zaifbot.common.logger import trade_logger
 from zaifbot.currency_pairs import CurrencyPair
+
+
+def log_after_trade(msg):
+    def _log_after_trade(func):
+        def _wrapper(self, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            trade_logger.info('{}: {}'.format(msg, self.info))
+            return result
+        return _wrapper
+    return _log_after_trade
+
+
+def log_before_trade(msg):
+    def _log_before_trade(func):
+        def _wrapper(self, *args, **kwargs):
+            trade_logger.info('{}: {}'.format(msg, self.info))
+            return func(self, *args, **kwargs)
+        return _wrapper
+    return _log_before_trade
 
 
 class OrderBase(metaclass=ABCMeta):
@@ -163,6 +183,7 @@ class AutoCancelOrder(OrderBase, OrderThread):
     def make_order(self):
         raise NotImplementedError
 
+    @log_after_trade('order executed')
     def _execute(self):
         target = self._active_orders.find(self._target_bot_order_id)
         if target.info.get('zaif_order_id', None):

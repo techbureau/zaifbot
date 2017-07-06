@@ -4,6 +4,7 @@ import time
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.common.logger import trade_logger, bot_logger
+from zaifbot.common.bot_const import Action
 from zaifbot.dao.order_log import OrderLogsDao
 from zaifbot.utils import get_keys
 
@@ -33,7 +34,7 @@ class BotTradeApi(ZaifTradeApi):
         if key is None and secret is None:
             key, secret = get_keys()
         elif type(key) is not type(secret):
-            raise KeyError('only key or secret is set')
+            raise TypeError('only key or secret is set')
 
         super().__init__(key, secret)
 
@@ -67,27 +68,28 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        # TODO: リファクタリングしたい
-        def _make_dict(**items):
-            return str(items)
+        def __params_preprocessing(**kwa):
+            kwa['currency_pair'] = str(kwa['currency_pair'])
+            kwa['action'] = kwa['action'].value if kwa['action'] in Action else kwa['action']
+            return kwa
+        kwargs = __params_preprocessing(**kwargs)
 
-        ret = super().trade(**kwargs)
-        order_log = _make_dict(order_id=ret['order_id'],
-                               currency_pair=kwargs.get('currency_pair'),
-                               action=kwargs.get('action'),
-                               price=kwargs.get('price'),
-                               amount=kwargs.get('amount'),
-                               limit=kwargs.get('limit', 0.0),
-                               received=ret['received'],
-                               remains=ret['remains'],
-                               comment=kwargs.get('comment', ''))
-        trade_logger.info('orders succeeded : {}'.format(order_log))
+        trade_result = super().trade(**kwargs)
+        order_log = {'zaif_order_id': trade_result['order_id'],
+                     'currency_pair': kwargs.get('currency_pair'),
+                     'action': kwargs.get('action'),
+                     'price': kwargs.get('price'),
+                     'amount': kwargs.get('amount'),
+                     'limit': kwargs.get('limit', 0.0),
+                     'received': trade_result['received'],
+                     'remains': trade_result['remains'],
+                     'comment': kwargs.get('comment', ''),
+                     'time': int(time.time())}
+
+        trade_logger.info('zaif received: {}'.format(order_log))
         dao = OrderLogsDao()
-        record = eval(order_log)
-        record['time'] = int(time.time())
-        dao.create_data(record)
-
-        return ret
+        dao.create_data(order_log)
+        return trade_result
 
     @_with_retry
     def trade_history(self, **kwargs):
