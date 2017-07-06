@@ -33,7 +33,7 @@ class BotTradeApi(ZaifTradeApi):
         if key is None and secret is None:
             key, secret = get_keys()
         elif type(key) is not type(secret):
-            raise KeyError('only key or secret is set')
+            raise TypeError('only key or secret is set')
 
         super().__init__(key, secret)
 
