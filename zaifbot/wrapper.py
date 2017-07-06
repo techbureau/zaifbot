@@ -67,27 +67,23 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        # TODO: リファクタリングしたい
-        def _make_dict(**items):
-            return str(items)
 
-        ret = super().trade(**kwargs)
-        order_log = _make_dict(order_id=ret['order_id'],
-                               currency_pair=kwargs.get('currency_pair'),
-                               action=kwargs.get('action'),
-                               price=kwargs.get('price'),
-                               amount=kwargs.get('amount'),
-                               limit=kwargs.get('limit', 0.0),
-                               received=ret['received'],
-                               remains=ret['remains'],
-                               comment=kwargs.get('comment', ''))
-        trade_logger.info('orders succeeded : {}'.format(order_log))
+        trade_result = super().trade(**kwargs)
+        order_log = {'zaif_order_id': trade_result['order_id'],
+                     'currency_pair': kwargs.get('currency_pair'),
+                     'action': kwargs.get('action'),
+                     'price': kwargs.get('price'),
+                     'amount': kwargs.get('amount'),
+                     'limit': kwargs.get('limit', 0.0),
+                     'received': trade_result['received'],
+                     'remains': trade_result['remains'],
+                     'comment': kwargs.get('comment', ''),
+                     'time': int(time.time())}
+
+        trade_logger.info('zaif received: {}'.format(order_log))
         dao = OrderLogsDao()
-        record = eval(order_log)
-        record['time'] = int(time.time())
-        dao.create_data(record)
-
-        return ret
+        dao.create_data(order_log)
+        return trade_result
 
     @_with_retry
     def trade_history(self, **kwargs):
