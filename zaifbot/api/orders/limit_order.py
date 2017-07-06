@@ -1,4 +1,4 @@
-from zaifbot.api.orders.common import OrderBase, log_after_trade, log_before_trade
+from zaifbot.api.orders.common import OrderBase, log_before_trade
 from zaifbot.common.bot_const import Action
 
 
