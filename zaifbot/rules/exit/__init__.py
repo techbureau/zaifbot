@@ -9,4 +9,4 @@ class Exit(Rule):
         raise NotImplementedError
 
     def exit(self, trade):
-        raise NotImplementedError
+       pass
