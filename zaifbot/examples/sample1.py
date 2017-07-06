@@ -1,4 +1,4 @@
-from zaifbot.strategy import Strategy
+from zaifbot.trading_strategy import Strategy
 from zaifbot.web import BotTradeApi
 from zaifbot.utils import preset_keys
 from zaifbot.rules.entry.buy_lower_entry import BuyLowerEntry
