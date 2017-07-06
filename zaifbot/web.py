@@ -75,7 +75,7 @@ class BotTradeApi(ZaifTradeApi):
         kwargs = __params_preprocessing(**kwargs)
 
         trade_result = super().trade(**kwargs)
-        order_log = {'zaif_order_id': trade_result['order_id'],
+        order_log = {'order_id': trade_result['order_id'],
                      'currency_pair': kwargs.get('currency_pair'),
                      'action': kwargs.get('action'),
                      'price': kwargs.get('price'),
