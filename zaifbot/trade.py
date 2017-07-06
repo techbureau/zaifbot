@@ -11,4 +11,3 @@ class Trade:
 
     def profit(self):
         pass
-
