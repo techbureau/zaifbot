@@ -1,6 +1,6 @@
 from threading import Event
 from zaifbot.common.bot_const import Action
-from zaifbot.api.orders.common import OrderBase, OrderThread
+from zaifbot.api.orders.common import OrderBase, OrderThread, log_after_trade
 from zaifbot.api.orders.market_order import MarketOrder
 
 
@@ -25,10 +25,12 @@ class StopOrder(OrderBase, OrderThread):
         self._info['stop_price'] = self._stop_price
         return self._info
 
+    @log_after_trade('order made')
     def make_order(self):
         self.start()
         return self
 
+    @log_after_trade('order executed')
     def _execute(self):
         return MarketOrder(self._api, self._currency_pair, self._action.value, self._amount, self._comment).make_order()
 

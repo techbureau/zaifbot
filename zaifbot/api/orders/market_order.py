@@ -1,4 +1,4 @@
-from zaifbot.api.orders.common import OrderBase
+from zaifbot.api.orders.common import OrderBase, log_before_trade
 from zaifbot.common.bot_const import Action
 
 
@@ -19,6 +19,7 @@ class MarketOrder(OrderBase):
         self._info['amount'] = self._amount
         return self._info
 
+    @log_before_trade('order made')
     def make_order(self):
         # todo: need refactoring
         is_buy = True if self.info['action'] == Action.Buy else False

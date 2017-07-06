@@ -1,5 +1,5 @@
 from threading import Event
-from zaifbot.api.orders.common import AutoCancelOrder
+from zaifbot.api.orders.common import AutoCancelOrder, log_after_trade
 
 
 class PriceBoundaryCancel(AutoCancelOrder):
@@ -21,6 +21,7 @@ class PriceBoundaryCancel(AutoCancelOrder):
         info['current_margin'] = abs(self._currency_pair.last_price()- self._start_price)
         return info
 
+    @log_after_trade('order made')
     def make_order(self, *args, **kwargs):
         self._start_price = self._currency_pair.last_price()
         self.start()
