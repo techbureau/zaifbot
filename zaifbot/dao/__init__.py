@@ -8,8 +8,8 @@ class DaoBase(metaclass=ABCMeta):
     def __init__(self):
         self.model = self.get_model()
 
-    @classmethod
-    def get_session(cls):
+    @staticmethod
+    def get_session():
         return get_session()
 
     @abstractmethod

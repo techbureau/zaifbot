@@ -85,8 +85,8 @@ class BotTradeApi(ZaifTradeApi):
                      'remains': trade_result['remains'],
                      'comment': kwargs.get('comment', ''),
                      'time': int(time.time())}
-
         trade_logger.info('zaif received: {}'.format(order_log))
+
         dao = OrderLogsDao()
         dao.create_data(order_log)
         return trade_result

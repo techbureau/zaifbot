@@ -6,18 +6,19 @@ class Trade:
     def __init__(self, currency_pair, entry_price, amount, action):
         self.currency_pair = currency_pair
         self.entry_datetime = datetime.now()
-        self.amount = amount
         self.entry_price = entry_price
+        self.amount = amount
         self.action = Action(action)
-
-    def entry_point(self):
-        pass
-
-    def exit_point(self):
-        pass
+        self.exit_price = None
+        self.exit_datetime = None
 
     def profit(self):
         pass
 
     def save(self):
+        """DBに保存"""
+        pass
+
+    def update(self):
+        """execute時"""
         pass
