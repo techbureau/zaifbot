@@ -1,19 +1,19 @@
 import time
-
 from .wrapper import BotPublicApi
-from zaifbot.common.bot_const import LIMIT_COUNT
 from zaifbot.dao.ohlc_prices import OhlcPricesDao
 from zaifbot.utils import calc_start_from_count_and_end, truncate_time_at_period
 
 
 class OhlcPrices:
+    MAX_COUNT = 1500
+
     def __init__(self, currency_pair, period):
         self._currency_pair = currency_pair
         self._period = period
         self._dao = OhlcPricesDao(self._currency_pair, self._period)
 
-    def fetch_data(self, count=LIMIT_COUNT, to_epoch_time=None):
-        count = min(count, LIMIT_COUNT)
+    def fetch_data(self, count=100, to_epoch_time=None):
+        count = min(count, self.MAX_COUNT)
         to_epoch_time = to_epoch_time or int(time.time())
         end_time_rounded = truncate_time_at_period(to_epoch_time, self._period)
         start_time = calc_start_from_count_and_end(count, end_time_rounded, self._period)
