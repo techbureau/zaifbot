@@ -24,7 +24,7 @@ class LimitOrder(OrderBase):
     @log_before_trade('order made')
     def make_order(self):
         result = self._api.trade(currency_pair=self._currency_pair,
-                                 action=self._action.value,
+                                 action=self._action,
                                  price=self._limit_price,
                                  amount=self._amount,
                                  comment=self._comment)

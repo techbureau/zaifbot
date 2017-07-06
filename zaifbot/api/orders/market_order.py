@@ -21,12 +21,11 @@ class MarketOrder(OrderBase):
 
     @log_before_trade('order made')
     def make_order(self):
-        # todo: need refactoring
         is_buy = True if self.info['action'] == Action.Buy else False
         price = self._currency_pair.get_more_executable_price(self._currency_pair.last_price(), is_buy=is_buy)
         price_rounded = self._currency_pair.get_round_amount(price)
         self._api.trade(currency_pair=self._currency_pair,
-                        action=self._action.value,  # trade_apiでやりたい
+                        action=self._action,
                         price=price_rounded,
                         amount=self._amount,
                         comment=self._comment)
