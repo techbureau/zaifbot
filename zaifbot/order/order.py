@@ -1,5 +1,5 @@
 from zaifbot.order.orders.common import ActiveOrders
-from zaifbot.wrapper import BotTradeApi
+from zaifbot.web import BotTradeApi
 
 from zaifbot.order import OrderMenu
 

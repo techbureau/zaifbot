@@ -2,7 +2,7 @@ from threading import Thread, Event, Lock
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.common.errors import ZaifBotError
 from zaifbot.common.logger import bot_logger
-from .wrapper import BotPublicApi
+from .web import BotPublicApi
 
 
 class CurrencyPair:
