@@ -24,9 +24,4 @@ def _get_engine(file_path):
 
 engine = _get_engine(__db_path())
 metadata = MetaData(bind=engine)
-
 Session = sessionmaker(bind=engine)
-
-
-def get_session():
-    return Session()
