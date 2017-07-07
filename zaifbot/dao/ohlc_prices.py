@@ -5,6 +5,7 @@ from zaifbot.dao import DaoBase
 from zaifbot.models.ohlc_prices import OhlcPrices
 
 
+
 class OhlcPricesDao(DaoBase):
 
     def __init__(self, currency_pair, period):
