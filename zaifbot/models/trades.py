@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, Float, String, Boolean
 from zaifbot.models import Base
 
 
-class Trade(Base):
+class Trades(Base):
     __tablename__ = 'trades'
     currency_pair = Column('currency_pair', String, primary_key=True)
     amount = Column('amount', Float, nullable=False)
