@@ -38,6 +38,14 @@ class EMA(MA):
     def request_data(self, count=100, to_epoch_time=None):
         return self._get_ma(count, to_epoch_time, 'ema')
 
+    # todo: 抽象化
+    def is_increasing(self):
+        previous, last = self.request_data(2, int(time.time()))
+        return last['ema'] > previous['ema']
+
+    def is_decreasing(self):
+        return not self.is_increasing()
+
 
 class SMA(MA):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=25):
@@ -45,3 +53,10 @@ class SMA(MA):
 
     def request_data(self, count=100, to_epoch_time=None):
         return self._get_ma(count, to_epoch_time, 'sma')
+
+    def is_increasing(self):
+        previous, last = self.request_data(2, int(time.time()))
+        return last['sma'] > previous['sma']
+
+    def is_decreasing(self):
+        return not self.is_increasing()
