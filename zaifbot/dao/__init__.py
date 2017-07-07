@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from zaifbot.models import Base, engine, get_session, moving_average, bollinger_bands, ohlc_prices, order_log
+from zaifbot.models import get_session
 
 
 class DaoBase(metaclass=ABCMeta):
@@ -15,7 +15,3 @@ class DaoBase(metaclass=ABCMeta):
     @abstractmethod
     def get_model(self):
         raise NotImplementedError()
-
-
-def init_database():
-    Base.metadata.create_all(bind=engine)
