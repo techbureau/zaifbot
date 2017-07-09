@@ -48,7 +48,8 @@ class DaoBase(metaclass=ABCMeta):
     def create_multiple(self, items):
         with self._transaction() as s:
             for item in items:
-                s.merge(item)
+                new_record = self.new(**item)
+                s.merge(new_record)
         return True
 
     def new(self, **kwargs):
