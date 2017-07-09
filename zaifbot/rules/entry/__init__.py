@@ -1,5 +1,5 @@
 from zaifbot.rules.rule import Rule
-from zaifbot.common.bot_const import Action
+from zaifbot.common.action import Action
 from zaifbot.trade import Trade
 
 

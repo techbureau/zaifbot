@@ -4,8 +4,7 @@ import time
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.common.logger import trade_logger, bot_logger
-from zaifbot.common.bot_const import Action
-from zaifbot.dao.order_log import OrderLogsDao
+from zaifbot.dao import OrderLogsDao
 from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5
@@ -70,7 +69,8 @@ class BotTradeApi(ZaifTradeApi):
     def trade(self, **kwargs):
         def __params_preprocessing(**kwa):
             kwa['currency_pair'] = str(kwa['currency_pair'])
-            kwa['action'] = kwa['action'].value if kwa['action'] in Action else kwa['action']
+            kwa['action'] = str(kwa['action'])
+            kwa['period'] = str(kwa['period'])
             return kwa
         kwargs = __params_preprocessing(**kwargs)
 
@@ -88,7 +88,7 @@ class BotTradeApi(ZaifTradeApi):
         trade_logger.info('zaif received: {}'.format(order_log))
 
         dao = OrderLogsDao()
-        dao.create_data(order_log)
+        dao.create(**order_log)
         return trade_result
 
     @_with_retry

@@ -1,4 +1,4 @@
-from zaifbot.common.bot_const import Action
+from zaifbot.common.action import Action
 from datetime import datetime
 
 
