@@ -7,27 +7,35 @@ from zaifbot.models import OrderLogs, OhlcPrices
 from zaifbot.common.logger import bot_logger
 
 
-@contextmanager
-def transaction():
-    session = Session()
-    try:
-        yield session
-        session.commit()
-    except SQLAlchemyError as e:
-        bot_logger.exception(e)
-        session.rollback()
-        raise
-    finally:
-        session.close()
-
-
 class DaoBase(metaclass=ABCMeta):
     def __init__(self):
         self._Model = self._get_model()
 
-    @classmethod
-    def _get_session(cls):
-        return Session()
+    @staticmethod
+    @contextmanager
+    def _transaction():
+        s = Session()
+        try:
+            yield s
+            s.commit()
+        except SQLAlchemyError as e:
+            bot_logger.exception(e)
+            s.rollback()
+            raise
+        finally:
+            s.close()
+
+    @staticmethod
+    @contextmanager
+    def _session():
+        s = Session()
+        try:
+            yield s
+        except SQLAlchemyError as e:
+            bot_logger.exception(e)
+            raise
+        finally:
+            s.close()
 
     @abstractmethod
     def _get_model(self):
@@ -38,32 +46,28 @@ class DaoBase(metaclass=ABCMeta):
         self.save(item)
 
     def new(self, **kwargs):
-        return self._Model(kwargs)
+        return self._Model(**kwargs)
 
     def find(self, id_):
-        session = self._get_session()
-        return session.query(self._get_model()).filter_by(id=id_).first()
+        with self._session() as s:
+            return s.query(self._Model).filter_by(id=id_).first()
 
     @classmethod
     def update(cls, id_, **kwargs):
-        session = cls._get_session()
-        item = cls.find(id_)
-        for key, value in kwargs.items():
-            setattr(item, key, value)
-        session.add(item)
-        session.commit()
+        with cls._transaction() as s:
+            item = cls.find(id_)
+            for key, value in kwargs.items():
+                setattr(item, key, value)
+                s.add(item)
 
     def find_all(self):
-        session = self._get_session()
-        session.query(self._get_model()).all()
+        with self._session() as s:
+            return s.query(self._get_model()).all()
 
     @classmethod
     def save(cls, item):
-        session = cls._get_session()
-        session.add(item)
-        # todo: flushとは何ぞや
-        # session.flush()
-        session.commit()
+        with cls._transaction() as s:
+            s.add(item)
 
 
 class OhlcPricesDao(DaoBase):
@@ -76,16 +80,15 @@ class OhlcPricesDao(DaoBase):
         return OhlcPrices
 
     def get_records(self, start_time, end_time, *, closed=False):
-        session = self._get_session()
-        result = session.query(self._Model).filter(
-            and_(self._Model.time <= end_time,
-                 self._Model.time > start_time,
-                 self._Model.currency_pair == self._currency_pair,
-                 self._Model.period == self._period,
-                 self._Model.closed == int(closed)
-                 )
-        ).order_by(self._Model.time).all()
-        session.close()
+        with self._session() as s:
+            result = s.query(self._Model).filter(
+                and_(self._Model.time <= end_time,
+                     self._Model.time > start_time,
+                     self._Model.currency_pair == self._currency_pair,
+                     self._Model.period == self._period,
+                     self._Model.closed == int(closed)
+                     )
+            ).order_by(self._Model.time).all()
         return result
 
 

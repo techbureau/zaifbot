@@ -22,8 +22,8 @@ class OhlcPrices(Base):
 
 class OrderLogs(Base):
     __tablename__ = 'order_logs'
-    id = Column(Integer, primary_key=True)
-    order_id = Column('id', Integer)
+    id = Column('id', Integer, primary_key=True)
+    order_id = Column('order_id', Integer)
     time = Column('time', Integer)
     currency_pair = Column('currency_pair', String)
     action = Column('action', String, nullable=False)
@@ -33,5 +33,3 @@ class OrderLogs(Base):
     received = Column('received', Float)
     remains = Column('remains', Float)
     comment = Column('comment', Text)
-
-
