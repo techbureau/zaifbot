@@ -1,7 +1,7 @@
 import time
 from .wrapper import BotPublicApi
-from zaifbot.dao.ohlc_prices import OhlcPricesDao
-from zaifbot.utils import calc_start_from_count_and_end, truncate_time_at_period
+from zaifbot.dao import OhlcPricesDao
+from zaifbot.utils import calc_start_from_count_and_end, truncate_time_at_period, merge_dict
 
 
 class OhlcPrices:
@@ -29,11 +29,15 @@ class OhlcPrices:
         public_api = BotPublicApi()
         api_params = {'period': self._period, 'count': count, 'to_epoch_time': to_epoch_time}
         records = public_api.everything('ohlc_data', self._currency_pair, api_params)
-        self._dao.create_data(records)
+        db_records = [merge_dict(record,
+                                 {'currency_pair': self._currency_pair, 'period': self._period})
+                      for record in records]
+
+        self._dao.create_multiple(db_records)
         return records
 
     def _fetch_data_from_db(self, start_time, end_time):
-        records = list(map(self._row2dict, self._dao.get_records(end_time, start_time, closed=False)))
+        records = list(map(self._row2dict, self._dao.get_records(start_time, end_time, closed=False)))
         return records
 
     # todo: もっと汎用的な場所に移動させる
