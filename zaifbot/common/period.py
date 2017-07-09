@@ -1,20 +1,24 @@
+from abc import ABCMeta, abstractclassmethod
+
+
 def Period(label_or_sec):
     for cls in _TradePeriod.__subclasses__():
         if isinstance(label_or_sec, str):
             if cls.is_my_label(label_or_sec):
                 return cls(label_or_sec)
-            raise ValueError
-        elif isinstance(label_or_sec, int):
+            continue
+
+        if isinstance(label_or_sec, int):
             if cls.is_my_sec(label_or_sec):
                 return cls(label_or_sec)
-            raise ValueError
+            continue
         raise ValueError
 
 
-class _TradePeriod:
-    def __init__(self, label_or_sec):
-        self._label = self._get_label()
-        self._sec = self._get_sec()
+class _TradePeriod(metaclass=ABCMeta):
+    def __init__(self, a):
+        self._label = self.get_label()
+        self._sec = self.get_sec()
 
     def __str__(self):
         return self._label
@@ -31,24 +35,28 @@ class _TradePeriod:
             return self._sec == other
         return False
 
-    def _get_label(self):
+    @abstractclassmethod
+    def get_label(self):
         raise NotImplementedError
 
-    def _get_sec(self):
+    @abstractclassmethod
+    def get_sec(self):
         raise NotImplementedError
 
+    @abstractclassmethod
     def is_my_label(self):
         raise NotImplementedError
 
+    @abstractclassmethod
     def is_my_sec(self):
         raise NotImplementedError
 
 
 class _OneDay(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '1d'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 86400
 
     @staticmethod
@@ -57,14 +65,15 @@ class _OneDay(_TradePeriod):
 
     @staticmethod
     def is_my_sec(sec):
+        print(sec)
         return sec == 86400
 
 
 class _TwelveHour(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '12h'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 43200
 
     @staticmethod
@@ -77,10 +86,10 @@ class _TwelveHour(_TradePeriod):
 
 
 class _EightHour(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '8h'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 28800
 
     @staticmethod
@@ -93,10 +102,10 @@ class _EightHour(_TradePeriod):
 
 
 class _FourHour(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '4h'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 14400
 
     @staticmethod
@@ -109,10 +118,10 @@ class _FourHour(_TradePeriod):
 
 
 class _OneHour(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '1h'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 3600
 
     @staticmethod
@@ -125,10 +134,10 @@ class _OneHour(_TradePeriod):
 
 
 class _ThirtyMinutes(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '30m'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 1800
 
     @staticmethod
@@ -141,10 +150,10 @@ class _ThirtyMinutes(_TradePeriod):
 
 
 class _FifteenMinutes(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '15m'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 900
 
     @staticmethod
@@ -157,10 +166,10 @@ class _FifteenMinutes(_TradePeriod):
 
 
 class _FiveMinutes(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '5m'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 300
 
     @staticmethod
@@ -169,14 +178,15 @@ class _FiveMinutes(_TradePeriod):
 
     @staticmethod
     def is_my_sec(sec):
+
         return sec == 300
 
 
 class _OneMinute(_TradePeriod):
-    def _get_label(self):
+    def get_label(self):
         return '1m'
 
-    def _get_sec(self):
+    def get_sec(self):
         return 60
 
     @staticmethod

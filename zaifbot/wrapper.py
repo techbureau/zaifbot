@@ -71,6 +71,7 @@ class BotTradeApi(ZaifTradeApi):
         def __params_preprocessing(**kwa):
             kwa['currency_pair'] = str(kwa['currency_pair'])
             kwa['action'] = str(kwa['action'])
+            kwa['period'] = str(kwa['period'])
             return kwa
         kwargs = __params_preprocessing(**kwargs)
 
