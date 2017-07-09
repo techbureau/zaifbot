@@ -39,9 +39,6 @@ class DaoBase(metaclass=ABCMeta):
         item = self.new(**kwargs)
         self.save(item)
 
-    def delete(self, id_):
-        self.find(id_).delete()
-
     def new(self, **kwargs):
         return self._Model(kwargs)
 
@@ -72,7 +69,6 @@ class DaoBase(metaclass=ABCMeta):
 
 
 class OhlcPricesDao(DaoBase):
-
     def __init__(self, currency_pair, period):
         super().__init__()
         self._currency_pair = currency_pair
