@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from zaifbot.common.database import Session
-from zaifbot.models import OrderLogs, OhlcPrices
+from zaifbot.models.models import OrderLogs, OhlcPrices
 from zaifbot.common.logger import bot_logger
 
 

@@ -1,7 +1,7 @@
 import time
 
 from .web import BotPublicApi
-from zaifbot.dao import OhlcPricesDao
+from zaifbot.dao.dao import OhlcPricesDao
 from zaifbot.utils import calc_start_from_count_and_end, truncate_time_at_period, merge_dict
 
 
