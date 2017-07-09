@@ -1,9 +1,9 @@
-from enum import Enum
-
-
-class Action(Enum):
-    Buy = 'bid'
-    Sell = 'ask'
+# from enum import Enum
+#
+#
+# class Action(Enum):
+#     Buy = 'bid'
+#     Sell = 'ask'
 
 
 PERIOD_SECS = {'1d': 86400, '12h': 43200, '8h': 28800, '4h': 14400,
