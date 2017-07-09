@@ -22,8 +22,6 @@ def transaction():
 
 
 class DaoBase(metaclass=ABCMeta):
-    _CLOSED = 1
-
     def __init__(self):
         self._Model = self._get_model()
 
@@ -77,42 +75,16 @@ class OhlcPricesDao(DaoBase):
     def _get_model(self):
         return OhlcPrices
 
-    def get_record(self, select_query):
-        return select_query.order_by(self._Model.time).all()
-
-    def create_data(self, ohlc_prices):
+    def get_records(self, start_time, end_time, *, closed=False):
         session = self._get_session()
-        try:
-            for record in ohlc_prices:
-                record['currency_pair'] = self._currency_pair
-                record['period'] = self._period
-                session.merge(OhlcPrices(**record))
-            session.commit()
-            session.close()
-            return True
-        except SQLAlchemyError as e:
-            bot_logger.exception(e)
-            session.rollback()
-            session.close()
-        return False
-
-    def get_records(self, end_time, start_time, closed):
-        session = self._get_session()
-        select_query = session.query(self._Model)
-        if closed:
-            select_query = select_query.filter(and_(self._Model.time <= end_time,
-                                                    self._Model.time > start_time,
-                                                    self._Model.currency_pair == self._currency_pair,
-                                                    self._Model.period == self._period,
-                                                    self._Model.closed == self._CLOSED
-                                                    ))
-        else:
-            select_query = select_query.filter(and_(self._Model.time <= end_time,
-                                                    self._Model.time >= start_time,
-                                                    self._Model.currency_pair == self._currency_pair,
-                                                    self._Model.period == self._period
-                                                    ))
-        result = select_query.order_by(self._Model.time).all()
+        result = session.query(self._Model).filter(
+            and_(self._Model.time <= end_time,
+                 self._Model.time > start_time,
+                 self._Model.currency_pair == self._currency_pair,
+                 self._Model.period == self._period,
+                 self._Model.closed == int(closed)
+                 )
+        ).order_by(self._Model.time).all()
         session.close()
         return result
 
@@ -120,16 +92,3 @@ class OhlcPricesDao(DaoBase):
 class OrderLogsDao(DaoBase):
     def _get_model(self):
         return OrderLogs
-
-    def create_data(self, order_log):
-        session = self._get_session()
-        session.merge(OrderLogs(**order_log))
-        try:
-            session.commit()
-            session.close()
-            return True
-        except SQLAlchemyError as e:
-            bot_logger.exception(e)
-            session.rollback()
-            session.close()
-        return False
