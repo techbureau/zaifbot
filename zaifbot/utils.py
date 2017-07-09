@@ -36,3 +36,9 @@ def calc_start_from_count_and_end(count, end_time, period):
     rount_end_time = truncate_time_at_period(end_time, period)
     start_time = rount_end_time - PERIOD_SECS[period] * count
     return start_time
+
+
+def merge_dict(base_dict, *dicts):
+    for dic in dicts:
+        base_dict.update(dic) or base_dict
+    return base_dict
