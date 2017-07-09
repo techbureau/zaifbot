@@ -45,6 +45,11 @@ class DaoBase(metaclass=ABCMeta):
         item = self.new(**kwargs)
         self.save(item)
 
+    def create_multiple(self, items):
+        with self._transaction() as s:
+            for item in items:
+                s.merge(item)
+
     def new(self, **kwargs):
         return self._Model(**kwargs)
 
@@ -54,20 +59,19 @@ class DaoBase(metaclass=ABCMeta):
 
     @classmethod
     def update(cls, id_, **kwargs):
-        with cls._transaction() as s:
+        with cls._transaction():
             item = cls.find(id_)
             for key, value in kwargs.items():
                 setattr(item, key, value)
-                s.add(item)
 
     def find_all(self):
         with self._session() as s:
-            return s.query(self._get_model()).all()
+            return s.query(self._Model).all()
 
     @classmethod
     def save(cls, item):
         with cls._transaction() as s:
-            s.add(item)
+            s.merge(item)
 
 
 class OhlcPricesDao(DaoBase):
