@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from zaifbot.common.database import Session
-from zaifbot.models.models import OrderLogs, OhlcPrices
+from zaifbot.models.models import OrderLogs, CandleSticks
 from zaifbot.common.logger import bot_logger
 
 
@@ -78,14 +78,14 @@ class DaoBase(metaclass=ABCMeta):
         return True
 
 
-class OhlcPricesDao(DaoBase):
+class CandleSticksDao(DaoBase):
     def __init__(self, currency_pair, period):
         super().__init__()
         self._currency_pair = currency_pair
         self._period = period
 
     def _get_model(self):
-        return OhlcPrices
+        return CandleSticks
 
     def get_records(self, start_time, end_time, *, closed=False):
         with self._session() as s:

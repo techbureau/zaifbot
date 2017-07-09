@@ -6,8 +6,8 @@ from zaifbot.common.database import metadata
 Base = declarative_base(metadata=metadata)
 
 
-class OhlcPrices(Base):
-    __tablename__ = 'ohlc_prices'
+class CandleSticks(Base):
+    __tablename__ = 'candle_sticks'
     time = Column('time', Integer, primary_key=True)
     currency_pair = Column('currency_pair', String, primary_key=True)
     period = Column('period', String, primary_key=True)

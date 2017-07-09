@@ -1,20 +1,21 @@
 import time
 
-from .web import BotPublicApi
-from zaifbot.dao.dao import OhlcPricesDao
+from zaifbot.web import BotPublicApi
+from zaifbot.dao.dao import CandleSticksDao
 from zaifbot.utils import merge_dict
 from zaifbot.common.period import Period
+from .indicator import Indicator
 
 
-class OhlcPrices:
+class CandleSticks(Indicator):
     MAX_COUNT = 1500
 
     def __init__(self, currency_pair, period):
         self._currency_pair = currency_pair
         self._period = Period(period)
-        self._dao = OhlcPricesDao(self._currency_pair, self._period)
+        self._dao = CandleSticksDao(self._currency_pair, self._period)
 
-    def fetch_data(self, count=100, to_epoch_time=None):
+    def request_data(self, count=100, to_epoch_time=None):
         count = min(count, self.MAX_COUNT)
         to_epoch_time = to_epoch_time or int(time.time())
         end_time_rounded = self._period.truncate_sec(to_epoch_time)
