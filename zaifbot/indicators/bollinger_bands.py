@@ -5,7 +5,7 @@ from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.utils import truncate_time_at_period
-from .base import Indicator
+from .indicator import Indicator
 
 __all__ = ['BBands']
 
