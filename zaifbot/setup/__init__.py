@@ -1,4 +1,4 @@
-from zaifbot.models import Base
+from zaifbot.models.models import Base
 
 
 def init_database():

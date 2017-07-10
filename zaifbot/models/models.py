@@ -22,7 +22,7 @@ class CandleSticks(Base):
 
 class OrderLogs(Base):
     __tablename__ = 'order_logs'
-    id = Column('id', Integer, primary_key=True)
+    id = Column('id', Integer, primary_key=True, autoincrement=True)
     order_id = Column('order_id', Integer)
     time = Column('time', Integer)
     currency_pair = Column('currency_pair', String)
@@ -37,12 +37,13 @@ class OrderLogs(Base):
 
 class Trades(Base):
     __tablename__ = 'trades'
-    currency_pair = Column('currency_pair', String, primary_key=True)
+    id = Column('id', Integer, primary_key=True, autoincrement=True)
+    currency_pair = Column('currency_pair', String, nullable=False)
     amount = Column('amount', Float, nullable=False)
     action = Column('action', String, nullable=False)
     entry_price = Column('entry_price', Float, nullable=False)
-    entry_time = Column('entry_time', Integer, primary_key=False)
+    entry_time = Column('entry_time', Integer)
     exit_price = Column('exit_price', Float, nullable=True)
-    exit_time = Column('exit_time', Integer, primary_key=False)
+    exit_time = Column('exit_time', Integer)
     profit = Column('profit', Float, nullable=True)
     closed = Column('closed', Boolean, nullable=False)
