@@ -4,6 +4,7 @@ from zaifbot.currency_pairs import CurrencyPair
 
 
 class Strategy:
+    # todo: ruleを複数持たせられるようにする
     def __init__(self, currency_pair, entry_rule, exit_rule, stop_rule=None, trade_api=None):
         self._trade_api = trade_api or BotTradeApi()
         self._currency_pair = CurrencyPair(currency_pair)
@@ -15,8 +16,8 @@ class Strategy:
 
         self.__initialize_rules()
 
-    def stop(self):
-        pass
+    def _need_stop(self):
+        return self._stop_rule.need_stop()
 
     def _entry(self):
         self._trade = self._entry_rule.entry()
@@ -36,11 +37,15 @@ class Strategy:
 
     def start(self, *, sec_wait=1):
         while True:
+            if self._need_stop():
+                break
             if self._have_position:
                 self._check_exit()
             else:
                 self._check_entry()
             time.sleep(sec_wait)
+        else:
+            pass
 
     def __initialize_rules(self):
         self._entry_rule.trade_api = self._trade_api
