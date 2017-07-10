@@ -1,5 +1,5 @@
 from datetime import datetime
-from zaifbot.common.action import Action, Buy
+from zaifbot.common.action import Action, Buy, Sell
 from zaifbot.currency_pairs import CurrencyPair
 from zaifbot.dao.trades import TradesDao
 
@@ -46,4 +46,12 @@ class Trade:
             return self.exit_price - self.entry_price
         else:
             return self.entry_price - self.exit_price
+
+    @property
+    def is_short(self):
+        return self.action == Sell
+
+    @property
+    def is_long(self):
+        return self.action == Buy
 
