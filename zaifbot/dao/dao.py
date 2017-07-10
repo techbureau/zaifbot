@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from zaifbot.common.database import Session
-from zaifbot.models.models import OrderLogs, CandleSticks
+from zaifbot.models.models import OrderLogs, CandleSticks, Trades
 from zaifbot.common.logger import bot_logger
 
 
@@ -103,3 +103,8 @@ class CandleSticksDao(DaoBase):
 class OrderLogsDao(DaoBase):
     def _get_model(self):
         return OrderLogs
+
+
+class TradesDao(DaoBase):
+    def _get_model(self):
+        return Trades
