@@ -20,8 +20,10 @@ class Entry(Rule):
                              price=price,
                              action=self._action)
 
-        trade = Trade(currency_pair=self.currency_pair,
-                      amount=self._amount,
-                      entry_price=price,
-                      action=self._action).save()
+        trade = Trade()
+        trade.entry(currency_pair=self.currency_pair,
+                    amount=self._amount,
+                    entry_price=price,
+                    action=self._action)
+
         return trade

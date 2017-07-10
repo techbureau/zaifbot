@@ -9,9 +9,9 @@ class Trades(Base):
     amount = Column('amount', Float, nullable=False)
     action = Column('action', String, nullable=False)
     entry_price = Column('entry_price', Float, nullable=False)
-    entry_time = Column('entry_time', Integer)
+    entry_datetime = Column('entry_time', Integer)
     exit_price = Column('exit_price', Float, nullable=True)
-    exit_time = Column('exit_time', Integer)
+    exit_datetime = Column('exit_time', Integer)
     profit = Column('profit', Float, nullable=True)
     closed = Column('closed', Boolean, nullable=False)
 

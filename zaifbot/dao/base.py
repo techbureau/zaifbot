@@ -6,7 +6,7 @@ from zaifbot.common.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):
-    # todo transactionの実装を見直す。
+    # todo transaction実装を見直す。
     def __init__(self):
         self._Model = self._get_model()
 

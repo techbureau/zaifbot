@@ -26,8 +26,8 @@ class _Buy(_TradeAction):
         return action == 'ask'
 
     @staticmethod
-    def get_opposite_action():
-        return 'bid'
+    def opposite_action():
+        return Action('bid')
 
 
 class _Sell(_TradeAction):
@@ -36,5 +36,9 @@ class _Sell(_TradeAction):
         return action == 'bid'
 
     @staticmethod
-    def get_opposite_action():
-        return 'ask'
+    def opposite_action():
+        return Action('ask')
+
+
+Sell = Action('ask')
+Buy = Action('bid')
