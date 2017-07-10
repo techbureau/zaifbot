@@ -6,6 +6,7 @@ from zaifbot.common.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):
+    # todo transactionの実装を見直す。
     def __init__(self):
         self._Model = self._get_model()
 
@@ -41,7 +42,7 @@ class DaoBase(metaclass=ABCMeta):
 
     def create(self, **kwargs):
         item = self.new(**kwargs)
-        self.save(item)
+        return self.save(item)
 
     def create_multiple(self, items):
         with self._transaction() as s:
@@ -69,5 +70,8 @@ class DaoBase(metaclass=ABCMeta):
 
     @classmethod
     def save(cls, item):
-        with cls._transaction() as s:
-                s.merge(item)
+        with cls._session() as s:
+            s.add(item)
+            s.commit()
+            s.refresh(item)
+            return item
