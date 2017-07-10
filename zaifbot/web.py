@@ -4,7 +4,7 @@ import time
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.common.logger import bot_logger
-from zaifbot.utils import get_keys
+from zaifbot.tools import get_keys
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5

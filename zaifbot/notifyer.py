@@ -29,3 +29,8 @@ class SlackNotifier:
                 'error': str(e)
             }
         return response
+
+
+def send_slack_message(slack_token, channel_id, message, username):
+    slack_notifier = SlackNotifier(slack_token)
+    return slack_notifier.send_message(channel_id, message, username)
