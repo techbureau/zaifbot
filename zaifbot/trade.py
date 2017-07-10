@@ -2,6 +2,7 @@ from datetime import datetime
 from zaifbot.common.action import Action, Buy, Sell
 from zaifbot.currency_pairs import CurrencyPair
 from zaifbot.dao.trades import TradesDao
+from zaifbot.common.logger import trade_logger
 
 
 class Trade:
@@ -30,6 +31,10 @@ class Trade:
                                      action=str(self.action),
                                      entry_datetime=self.entry_datetime)
         self.id = trade_obj.id
+        log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
+                    " amount: {}, entry_price: {}, entry_datetime: {}}}"
+        trade_logger.info(log_frame.format(self.id, self.currency_pair, self.action,
+                                           self.amount, self.entry_price, self.entry_datetime))
 
     def exit(self, exit_price):
         self.exit_price = exit_price
@@ -38,6 +43,9 @@ class Trade:
         self._dao.update(exit_price=self.exit_price,
                          exit_datetime=self.exit_datetime,
                          profit=self.profit())
+
+        log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
+        trade_logger.info(log_frame.format(self.id, self.currency_pair, self.exit_price, self.exit_datetime))
 
         self.closed = True
 
@@ -54,4 +62,8 @@ class Trade:
     @property
     def is_long(self):
         return self.action == Buy
+
+    @property
+    def is_closed(self):
+        return self.closed
 

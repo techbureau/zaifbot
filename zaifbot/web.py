@@ -3,8 +3,7 @@ import time
 
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
-from zaifbot.common.logger import trade_logger, bot_logger
-from zaifbot.dao.order_logs import OrderLogsDao
+from zaifbot.common.logger import bot_logger
 from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5
@@ -67,29 +66,13 @@ class BotTradeApi(ZaifTradeApi):
 
     @_with_retry
     def trade(self, **kwargs):
-        def __params_preprocessing(**kwa):
+        def __params_pre_processing(**kwa):
             kwa['currency_pair'] = str(kwa['currency_pair'])
             kwa['action'] = str(kwa['action'])
             kwa['period'] = str(kwa['period'])
             return kwa
-        kwargs = __params_preprocessing(**kwargs)
-
-        trade_result = super().trade(**kwargs)
-        order_log = {'order_id': trade_result['order_id'],
-                     'currency_pair': kwargs.get('currency_pair'),
-                     'action': kwargs.get('action'),
-                     'price': kwargs.get('price'),
-                     'amount': kwargs.get('amount'),
-                     'limit': kwargs.get('limit', 0.0),
-                     'received': trade_result['received'],
-                     'remains': trade_result['remains'],
-                     'comment': kwargs.get('comment', ''),
-                     'time': int(time.time())}
-        trade_logger.info('zaif received: {}'.format(order_log))
-
-        dao = OrderLogsDao()
-        dao.create(**order_log)
-        return trade_result
+        kwargs = __params_pre_processing(**kwargs)
+        return super().trade(**kwargs)
 
     @_with_retry
     def trade_history(self, **kwargs):
