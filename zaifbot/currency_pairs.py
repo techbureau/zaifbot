@@ -3,6 +3,7 @@ from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.common.errors import ZaifBotError
 from zaifbot.common.logger import bot_logger
 from .web import BotPublicApi
+from zaifbot.common.currency_pair import ZaifCurrencyPairsInfo
 
 
 class CurrencyPair:
@@ -18,7 +19,7 @@ class CurrencyPair:
 
     def __init__(self, pair):
         self._name = pair
-        self._info = _ZaifCurrencyPairsCache()[pair]
+        self._info = ZaifCurrencyPairsInfo()[pair]
         self._last_price = _ZaifLastPrice()
 
     def __str__(self):
@@ -50,26 +51,6 @@ class CurrencyPair:
                             (price % self._info['aux_unit_step']))
         else:
             return price - (price % self._info['aux_unit_step'])
-
-
-class _ZaifCurrencyPairsCache:
-    _instance = None
-    _lock = Lock()
-    _currency_pairs = None
-
-    def __new__(cls):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super().__new__(cls)
-                api = BotPublicApi()
-                cls._currency_pairs = api.currency_pairs('all')
-        return cls._instance
-
-    def __getitem__(self, currency_pair):
-        record = list(filter(lambda x: x['currency_pair'] == currency_pair, self._currency_pairs))
-        if record:
-            return record[0]
-        return KeyError('the pair does not exist')
 
 
 class _ZaifLastPrice:
@@ -109,7 +90,7 @@ class _ZaifLastPrice:
             return last_price
 
         def is_token():
-            currency_pairs = _ZaifCurrencyPairsCache()
+            currency_pairs = ZaifCurrencyPairsInfo()
             currency_pair_rec = currency_pairs[currency_pair]
             if currency_pair_rec:
                 return currency_pair_rec['is_token']
