@@ -6,9 +6,9 @@ from zaifbot.trade import Trade
 class Entry(Rule):
     def __init__(self, amount, action='bid'):
         self.currency_pair = None
-        self.amount = amount
         self.trade_api = None
-        self.action = Action(action)
+        self._amount = amount
+        self._action = Action(action)
 
     def can_entry(self, *args, **kwargs):
         raise NotImplementedError
@@ -16,14 +16,12 @@ class Entry(Rule):
     def entry(self):
         price = self.currency_pair.last_price()
         self.trade_api.trade(currency_pair=self.currency_pair,
-                             amount=self.amount,
+                             amount=self._amount,
                              price=price,
-                             action=self.action)
+                             action=self._action)
 
         trade = Trade(currency_pair=self.currency_pair,
-                      amount=self.amount,
+                      amount=self._amount,
                       entry_price=price,
-                      action=self.action)
-
-        trade.save()
+                      action=self._action).save()
         return trade

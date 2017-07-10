@@ -1,5 +1,6 @@
-from zaifbot.common.action import Action
 from datetime import datetime
+from zaifbot.common.action import Action
+from zaifbot.dao.dao import TradesDao
 
 
 class Trade:
@@ -11,13 +12,19 @@ class Trade:
         self.action = Action(action)
         self.exit_price = None
         self.exit_datetime = None
+        self._dao = TradesDao
 
     def profit(self):
         pass
 
     def save(self):
-        """DBに保存"""
-        pass
+        self._dao.create(
+            currency_pair=str(self.currency_pair),
+            amount=self.amount,
+            entry_price=self.entry_price,
+            action=str(self.action)
+        )
+        return self
 
     def update(self):
         """execute時"""

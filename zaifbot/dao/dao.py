@@ -65,7 +65,7 @@ class DaoBase(metaclass=ABCMeta):
             for key, value in kwargs.items():
                 setattr(item, key, value)
                 s.merge(item)
-        return True
+        return item
 
     def find_all(self):
         with self._session() as s:
@@ -75,7 +75,7 @@ class DaoBase(metaclass=ABCMeta):
     def save(cls, item):
         with cls._transaction() as s:
                 s.merge(item)
-        return True
+        return item
 
 
 class CandleSticksDao(DaoBase):
