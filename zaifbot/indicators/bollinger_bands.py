@@ -18,9 +18,9 @@ class BBands(Indicator):
         to_epoch_time = to_epoch_time or int(time.time())
         count = self._calc_price_count(min(count, self.MAX_COUNT))
         end_time = self._period.truncate_sec(to_epoch_time)
-        ohlcs = DF(CandleSticks(self._currency_pair, self._period).request_data(count, end_time))
-        bbands = ab.BBANDS(ohlcs, timeperiod=self._length, nbdevup=upbd, nbdevdn=lowbd, matype=0).dropna()
-        formatted_bbands = pd.concat([ohlcs['time'], bbands[['lowerband', 'upperband']]], axis=1).dropna().\
+        candlesticks = DF(CandleSticks(self._currency_pair, self._period).request_data(count, end_time))
+        bbands = ab.BBANDS(candlesticks, timeperiod=self._length, nbdevup=upbd, nbdevdn=lowbd, matype=0).dropna()
+        formatted_bbands = pd.concat([candlesticks['time'], bbands[['lowerband', 'upperband']]], axis=1).dropna().\
             astype(object).to_dict(orient='records')
         return formatted_bbands
 

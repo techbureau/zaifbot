@@ -22,8 +22,8 @@ class RSI(Indicator):
     def request_data(self, count=MAX_COUNT, to_epoch_time=None):
         count = min(count, self.MAX_COUNT)
         count_needed = count + self._length
-        ohlc_prices = CandleSticks(self._currency_pair, self._period)
-        df = DF(ohlc_prices.request_data(count_needed, to_epoch_time))
+        candlesticks = CandleSticks(self._currency_pair, self._period)
+        df = DF(candlesticks.request_data(count_needed, to_epoch_time))
         rsi = ab.RSI(df, price=_CLOSE, timeperiod=self._length).rename('rsi')
         rsi = pd.concat([df[_TIME], rsi], axis=1).dropna()
         return rsi.astype(object).to_dict(orient='records')
