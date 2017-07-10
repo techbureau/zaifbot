@@ -1,9 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from zaifbot.common.database import Session
-from zaifbot.models.models import OrderLogs, CandleSticks, Trades
 from zaifbot.common.logger import bot_logger
 
 
@@ -76,35 +74,3 @@ class DaoBase(metaclass=ABCMeta):
         with cls._transaction() as s:
                 s.merge(item)
         return item
-
-
-class CandleSticksDao(DaoBase):
-    def __init__(self, currency_pair, period):
-        super().__init__()
-        self._currency_pair = currency_pair
-        self._period = period
-
-    def _get_model(self):
-        return CandleSticks
-
-    def get_records(self, start_time, end_time, *, closed=False):
-        with self._session() as s:
-            result = s.query(self._Model).filter(
-                and_(self._Model.time <= end_time,
-                     self._Model.time > start_time,
-                     self._Model.currency_pair == self._currency_pair,
-                     self._Model.period == self._period,
-                     self._Model.closed == int(closed)
-                     )
-            ).order_by(self._Model.time).all()
-        return result
-
-
-class OrderLogsDao(DaoBase):
-    def _get_model(self):
-        return OrderLogs
-
-
-class TradesDao(DaoBase):
-    def _get_model(self):
-        return Trades

@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 
 def __db_path():
@@ -25,3 +26,4 @@ def _get_engine(file_path):
 engine = _get_engine(__db_path())
 metadata = MetaData(bind=engine)
 Session = sessionmaker(bind=engine)
+Base = declarative_base(metadata=metadata)
