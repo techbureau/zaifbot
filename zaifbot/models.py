@@ -16,21 +16,6 @@ class Trades(Base):
     closed = Column('closed', Boolean, nullable=False)
 
 
-class OrderLogs(Base):
-    __tablename__ = 'order_logs'
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    order_id = Column('order_id', Integer)
-    time = Column('time', Integer)
-    currency_pair = Column('currency_pair', String)
-    action = Column('action', String, nullable=False)
-    price = Column('price', Float, nullable=False)
-    amount = Column('amount', Float, nullable=False)
-    limit = Column('limit', Float)
-    received = Column('received', Float)
-    remains = Column('remains', Float)
-    comment = Column('comment', Text)
-
-
 class CandleSticks(Base):
     __tablename__ = 'candle_sticks'
     time = Column('time', Integer, primary_key=True)
