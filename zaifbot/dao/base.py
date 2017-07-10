@@ -41,14 +41,13 @@ class DaoBase(metaclass=ABCMeta):
 
     def create(self, **kwargs):
         item = self.new(**kwargs)
-        return self.save(item)
+        self.save(item)
 
     def create_multiple(self, items):
         with self._transaction() as s:
             for item in items:
                 new_record = self.new(**item)
                 s.merge(new_record)
-        return True
 
     def new(self, **kwargs):
         return self._Model(**kwargs)
@@ -63,7 +62,6 @@ class DaoBase(metaclass=ABCMeta):
             for key, value in kwargs.items():
                 setattr(item, key, value)
                 s.merge(item)
-        return item
 
     def find_all(self):
         with self._session() as s:
@@ -73,4 +71,3 @@ class DaoBase(metaclass=ABCMeta):
     def save(cls, item):
         with cls._transaction() as s:
                 s.merge(item)
-        return item

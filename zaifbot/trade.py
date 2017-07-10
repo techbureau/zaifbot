@@ -1,6 +1,6 @@
 from datetime import datetime
 from zaifbot.common.action import Action
-from zaifbot.dao.base import TradesDao
+from zaifbot.dao.trades import TradesDao
 
 
 class Trade:

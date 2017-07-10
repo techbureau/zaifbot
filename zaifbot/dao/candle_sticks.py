@@ -12,7 +12,7 @@ class CandleSticksDao(DaoBase):
     def _get_model(self):
         return CandleSticks
 
-    def get_records(self, start_time, end_time, *, closed=False):
+    def get_by_time_width(self, start_time, end_time, *, closed=False):
         with self._session() as s:
             result = s.query(self._Model).filter(
                 and_(self._Model.time <= end_time,
