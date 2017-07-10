@@ -14,19 +14,19 @@ class _TradeAction:
 
     def __eq__(self, other):
         if isinstance(other, _TradeAction):
-            return self._action is other._action
+            return self._action == other._action
         if isinstance(other, str):
-            return self._action is other
+            return self._action == other
         return False
 
 
 class _Buy(_TradeAction):
     @staticmethod
     def is_my_action(action):
-        return action is 'ask'
+        return action == 'ask'
 
 
 class _Sell(_TradeAction):
     @staticmethod
     def is_my_action(action):
-        return action is 'bid'
+        return action == 'bid'

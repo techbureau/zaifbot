@@ -1,15 +1,13 @@
 import pandas as pd
-from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from .base import Indicator
+from .indicator import Indicator
+from .candle_sticks import CandleSticks
 
 _HIGH = 'high'
 _LOW = 'low'
 _CLOSE = 'close'
 _TIME = 'time'
-
-__all__ = ['RSI']
 
 
 class RSI(Indicator):
@@ -24,8 +22,8 @@ class RSI(Indicator):
     def request_data(self, count=MAX_COUNT, to_epoch_time=None):
         count = min(count, self.MAX_COUNT)
         count_needed = count + self._length
-        ohlc_prices = OhlcPrices(self._currency_pair, self._period)
-        df = DF(ohlc_prices.fetch_data(count_needed, to_epoch_time))
+        ohlc_prices = CandleSticks(self._currency_pair, self._period)
+        df = DF(ohlc_prices.request_data(count_needed, to_epoch_time))
         rsi = ab.RSI(df, price=_CLOSE, timeperiod=self._length).rename('rsi')
         rsi = pd.concat([df[_TIME], rsi], axis=1).dropna()
         return rsi.astype(object).to_dict(orient='records')

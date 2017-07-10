@@ -6,8 +6,8 @@ from zaifbot.common.database import metadata
 Base = declarative_base(metadata=metadata)
 
 
-class OhlcPrices(Base):
-    __tablename__ = 'ohlc_prices'
+class CandleSticks(Base):
+    __tablename__ = 'candle_sticks'
     time = Column('time', Integer, primary_key=True)
     currency_pair = Column('currency_pair', String, primary_key=True)
     period = Column('period', String, primary_key=True)
@@ -33,3 +33,16 @@ class OrderLogs(Base):
     received = Column('received', Float)
     remains = Column('remains', Float)
     comment = Column('comment', Text)
+
+
+class Trades(Base):
+    __tablename__ = 'trades'
+    currency_pair = Column('currency_pair', String, primary_key=True)
+    amount = Column('amount', Float, nullable=False)
+    action = Column('action', String, nullable=False)
+    entry_price = Column('entry_price', Float, nullable=False)
+    entry_time = Column('entry_time', Integer, primary_key=False)
+    exit_price = Column('exit_price', Float, nullable=True)
+    exit_time = Column('exit_time', Integer, primary_key=False)
+    profit = Column('profit', Float, nullable=True)
+    closed = Column('closed', Boolean, nullable=False)

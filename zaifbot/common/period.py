@@ -16,6 +16,8 @@ def Period(label_or_sec):
 
 
 class _TradePeriod(metaclass=ABCMeta):
+    _UTC_JP_DIFF = None
+
     def __init__(self, a):
         self._label = self.get_label()
         self._sec = self.get_sec()
@@ -50,6 +52,23 @@ class _TradePeriod(metaclass=ABCMeta):
     @abstractclassmethod
     def is_my_sec(self):
         raise NotImplementedError
+
+    def truncate_sec(self, sec):
+        if self.get_sec() > Period('1h').get_sec():
+            return sec - ((sec + self._UTC_JP_DIFF) % self.get_sec())
+        else:
+            return sec - (sec % self.get_sec())
+
+    def calc_count(self, start_sec, end_sec):
+        round_end_sec = self.truncate_sec(end_sec)
+        round_start_sec = self.truncate_sec(start_sec)
+        count = int((round_end_sec - round_start_sec) / self.get_sec())
+        return count
+
+    def calc_start(self, count, end_sec):
+        round_end_sec = self.truncate_sec(end_sec)
+        start_sec = round_end_sec - self.get_sec() * count
+        return start_sec
 
 
 class _OneDay(_TradePeriod):

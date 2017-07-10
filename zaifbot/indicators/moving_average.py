@@ -1,13 +1,11 @@
 import time
 
 import pandas as pd
-from zaifbot.ohlc_prices import OhlcPrices
 from pandas import DataFrame as DF
 from talib import abstract as ab
 
-from .base import Indicator
-
-__all__ = ['EMA', 'SMA']
+from .indicator import Indicator
+from .candle_sticks import CandleSticks
 
 
 class MA(Indicator):
@@ -25,7 +23,7 @@ class MA(Indicator):
     def _get_ma(self, count, to_epoch_time, name):
         count = self._calc_price_count(min(count, self.MAX_COUNT))
         to_epoch_time = to_epoch_time or int(time.time())
-        ohlcs = DF(OhlcPrices(self._currency_pair, self._period).fetch_data(count, to_epoch_time))
+        ohlcs = DF(CandleSticks(self._currency_pair, self._period).request_data(count, to_epoch_time))
         ma = ab.Function(name)(ohlcs, timeperiod=self._length).rename(name).dropna()
         formatted_ma = pd.concat([ohlcs['time'], ma], axis=1).dropna().astype(object).to_dict(orient='records')
         return formatted_ma
