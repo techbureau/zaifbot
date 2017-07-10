@@ -9,4 +9,14 @@ class Exit(Rule):
         raise NotImplementedError
 
     def exit(self, trade):
-       pass
+        amount = trade.amount
+        currency_pair = trade.currency_pair
+        action = trade.action.opposite_action()
+        price = currency_pair.last_price()
+
+        self.trade_api.trade(currency_pair=currency_pair,
+                             amount=amount,
+                             price=price,
+                             action=action)
+
+        trade.exit(price)

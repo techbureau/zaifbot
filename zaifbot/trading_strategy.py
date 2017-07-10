@@ -1,15 +1,15 @@
 import time
+from zaifbot.web import BotTradeApi
 from zaifbot.currency_pairs import CurrencyPair
 
 
 class Strategy:
-    def __init__(self, trade_api, currency_pair, entry_rule, exit_rule, stop_rule=None, filter_rule=None):
-        self._trade_api = trade_api
+    def __init__(self, currency_pair, entry_rule, exit_rule, stop_rule=None, trade_api=None):
+        self._trade_api = trade_api or BotTradeApi()
         self._currency_pair = CurrencyPair(currency_pair)
         self._entry_rule = entry_rule
         self._exit_rule = exit_rule
         self._stop_rule = stop_rule
-        self._filter_rule = filter_rule
         self._trade = None
         self._have_position = False
 
@@ -45,6 +45,4 @@ class Strategy:
     def __initialize_rules(self):
         self._entry_rule.trade_api = self._trade_api
         self._entry_rule.currency_pair = self._currency_pair
-
         self._exit_rule.trade_api = self._trade_api
-        self._exit_rule.currency_pair = self._currency_pair

@@ -1,13 +1,12 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from zaifbot.common.database import Session
-from zaifbot.models.models import OrderLogs, CandleSticks
 from zaifbot.common.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):
+    # todo transaction実装を見直す。
     def __init__(self):
         self._Model = self._get_model()
 
@@ -50,7 +49,6 @@ class DaoBase(metaclass=ABCMeta):
             for item in items:
                 new_record = self.new(**item)
                 s.merge(new_record)
-        return True
 
     def new(self, **kwargs):
         return self._Model(**kwargs)
@@ -65,7 +63,6 @@ class DaoBase(metaclass=ABCMeta):
             for key, value in kwargs.items():
                 setattr(item, key, value)
                 s.merge(item)
-        return True
 
     def find_all(self):
         with self._session() as s:
@@ -73,33 +70,8 @@ class DaoBase(metaclass=ABCMeta):
 
     @classmethod
     def save(cls, item):
-        with cls._transaction() as s:
-                s.merge(item)
-        return True
-
-
-class CandleSticksDao(DaoBase):
-    def __init__(self, currency_pair, period):
-        super().__init__()
-        self._currency_pair = currency_pair
-        self._period = period
-
-    def _get_model(self):
-        return CandleSticks
-
-    def get_records(self, start_time, end_time, *, closed=False):
-        with self._session() as s:
-            result = s.query(self._Model).filter(
-                and_(self._Model.time <= end_time,
-                     self._Model.time > start_time,
-                     self._Model.currency_pair == self._currency_pair,
-                     self._Model.period == self._period,
-                     self._Model.closed == int(closed)
-                     )
-            ).order_by(self._Model.time).all()
-        return result
-
-
-class OrderLogsDao(DaoBase):
-    def _get_model(self):
-        return OrderLogs
+        with cls._session() as s:
+            s.add(item)
+            s.commit()
+            s.refresh(item)
+            return item

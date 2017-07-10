@@ -25,8 +25,20 @@ class _Buy(_TradeAction):
     def is_my_action(action):
         return action == 'ask'
 
+    @staticmethod
+    def opposite_action():
+        return Action('bid')
+
 
 class _Sell(_TradeAction):
     @staticmethod
     def is_my_action(action):
         return action == 'bid'
+
+    @staticmethod
+    def opposite_action():
+        return Action('ask')
+
+
+Sell = Action('ask')
+Buy = Action('bid')

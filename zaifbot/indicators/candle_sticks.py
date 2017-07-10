@@ -1,7 +1,7 @@
 import time
 
 from zaifbot.web import BotPublicApi
-from zaifbot.dao.dao import CandleSticksDao
+from zaifbot.dao.candle_sticks import CandleSticksDao
 from zaifbot.utils import merge_dict
 from zaifbot.common.period import Period
 from .indicator import Indicator
@@ -16,6 +16,7 @@ class CandleSticks(Indicator):
         self._dao = CandleSticksDao(self._currency_pair, self._period)
 
     def request_data(self, count=100, to_epoch_time=None):
+        # daoにそのう移動させる。
         count = min(count, self.MAX_COUNT)
         to_epoch_time = to_epoch_time or int(time.time())
         end_time_rounded = self._period.truncate_sec(to_epoch_time)
@@ -40,7 +41,7 @@ class CandleSticks(Indicator):
         return records
 
     def _fetch_data_from_db(self, start_time, end_time):
-        records = list(map(self._row2dict, self._dao.get_records(start_time, end_time, closed=False)))
+        records = list(map(self._row2dict, self._dao.get_by_time_width(start_time, end_time, closed=False)))
         return records
 
     # todo: もっと汎用的な場所に移動させる

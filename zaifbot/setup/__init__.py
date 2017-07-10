@@ -1,5 +1,2 @@
-from zaifbot.models import Base
-
-
-def init_database():
-    Base.metadata.create_all()
+from zaifbot.models import init_database
+init_database()
