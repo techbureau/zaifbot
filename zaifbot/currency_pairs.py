@@ -14,8 +14,8 @@ class CurrencyPair:
         return cls._instances[pair]
 
     def __init__(self, pair):
-        self._name = pair
-        self._info = _ZaifCurrencyPairsInfo()[pair]
+        self._name = str(pair)
+        self._info = _ZaifCurrencyPairsInfo()[self._name]
 
     def __str__(self):
         return self._name

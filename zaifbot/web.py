@@ -91,7 +91,7 @@ class BotPublicApi(ZaifPublicApi):
 
     @_with_retry
     def last_price(self, currency_pair):
-        return super().last_price(currency_pair)
+        return super().last_price(str(currency_pair))
 
     @_with_retry
     def ticker(self, currency_pair):

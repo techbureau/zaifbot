@@ -58,7 +58,7 @@ class _StreamThread(Thread):
 
     def __init__(self, currency_pair, stop_event, error_event):
         super(_StreamThread, self).__init__(name='{}_wss_stream'.format(currency_pair), daemon=True)
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._stop_event = stop_event
         self._last_receive = None
         self._stream_api = ZaifPublicStreamApi()
@@ -67,7 +67,7 @@ class _StreamThread(Thread):
 
     def run(self):
         try:
-            for receive in self._stream_api.execute(self._currency_pair):
+            for receive in self._stream_api.execute(str(self._currency_pair)):
                 self._last_receive = receive
                 if self._stop_event.is_set():
                     self._stream_api.stop()
@@ -76,7 +76,7 @@ class _StreamThread(Thread):
             self._error_event.set()
 
     def _set_first_last_price(self):
-        self._last_receive = next(self._stream_api.execute(self._currency_pair))
+        self._last_receive = next(self._stream_api.execute(str(self._currency_pair)))
 
     @property
     def last_receive(self):
