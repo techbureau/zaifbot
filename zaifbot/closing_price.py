@@ -2,7 +2,7 @@ from threading import Thread, Event, Lock
 from zaifapi.impl import ZaifPublicStreamApi
 from zaifbot.common.errors import ZaifBotError
 from zaifbot.common.logger import bot_logger
-from .web import BotPublicApi
+from zaifbot.api_manage import APIRegistry
 from .currency_pairs import CurrencyPair
 
 
@@ -26,7 +26,7 @@ class _ClosingPrice:
     def latest_price(self, currency_pair):
         currency_pair = CurrencyPair(currency_pair)
         if currency_pair.is_token:
-            api = BotPublicApi()
+            api = APIRegistry().public_api
             return api.last_price(currency_pair)['last_price']
 
         receive = self._get_target_thread(currency_pair).last_receive
