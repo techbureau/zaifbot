@@ -3,9 +3,10 @@ import time
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from .indicator import Indicator
+from zaifbot.period import Period
+
 from .candle_sticks import CandleSticks
-from zaifbot.common.period import Period
+from .indicator import Indicator
 
 
 class BBands(Indicator):

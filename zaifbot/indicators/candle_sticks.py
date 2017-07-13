@@ -1,9 +1,10 @@
 import time
 
-from zaifbot.web import BotPublicApi
 from zaifbot.dao.candle_sticks import CandleSticksDao
+from zaifbot.period import Period
 from zaifbot.utils import merge_dict
-from zaifbot.common.period import Period
+from zaifbot.web import BotPublicApi
+
 from .indicator import Indicator
 
 

@@ -1,5 +1,5 @@
 import time
-from zaifbot.tools import get_unique_trade_api
+from zaifbot.utils import get_unique_trade_api
 from zaifbot.currency_pairs import CurrencyPair
 
 
