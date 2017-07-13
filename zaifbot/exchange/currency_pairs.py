@@ -1,5 +1,6 @@
 from threading import Lock
-from .web import BotPublicApi
+
+from zaifbot.exchange.api.http import BotPublicApi
 
 
 class CurrencyPair:

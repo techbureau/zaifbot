@@ -3,8 +3,8 @@ import time
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
-from zaifbot.period import Period
 
+from zaifbot.exchange.period import Period
 from .candle_sticks import CandleSticks
 from .indicator import Indicator
 

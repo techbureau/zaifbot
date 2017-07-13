@@ -1,7 +1,7 @@
-from zaifbot.action import Action
+from zaifbot.api_manage import APIRepository
 from zaifbot.rules.rule import Rule
 from zaifbot.trade import Trade
-from zaifbot.api_manage import APIRepository
+from zaifbot.exchange.action import Action
 
 
 class Entry(Rule):

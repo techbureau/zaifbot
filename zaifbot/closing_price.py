@@ -1,9 +1,11 @@
 from threading import Thread, Event, Lock
+
 from zaifapi.impl import ZaifPublicStreamApi
+
+from zaifbot.api_manage import APIRepository
 from zaifbot.common.errors import ZaifBotError
 from zaifbot.common.logger import bot_logger
-from zaifbot.api_manage import APIRepository
-from .currency_pairs import CurrencyPair
+from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 def latest_closing_price(currency_pair):

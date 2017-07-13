@@ -1,6 +1,7 @@
 import time
-from zaifbot.currency_pairs import CurrencyPair
+
 from zaifbot.api_manage import APIRepository
+from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class Strategy:
