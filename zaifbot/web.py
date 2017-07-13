@@ -4,7 +4,6 @@ import time
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 from zaifbot.common.logger import bot_logger
-from zaifbot.utils import get_keys
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
@@ -28,11 +27,11 @@ def _with_retry(func):
 
 
 class BotTradeApi(ZaifTradeApi):
-    def __init__(self, key=None, secret=None):
-        if key is None and secret is None:
-            key, secret = get_keys()
-        elif type(key) is not type(secret):
-            raise TypeError('only key or secret is set')
+    def __init__(self, key, secret):
+        # if key is None and secret is None:
+        #     key, secret = get_keys()
+        # elif type(key) is not type(secret):
+        #     raise TypeError('only key or secret is set')
 
         super().__init__(key, secret)
 
