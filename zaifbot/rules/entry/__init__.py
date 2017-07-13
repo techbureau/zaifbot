@@ -1,12 +1,13 @@
 from zaifbot.action import Action
 from zaifbot.rules.rule import Rule
 from zaifbot.trade import Trade
+from zaifbot.api_manage import APIRepository
 
 
 class Entry(Rule):
     def __init__(self, amount, action='bid'):
         self.currency_pair = None
-        self.trade_api = None
+        self._trade_api = APIRepository().trade_api
         self._amount = amount
         self._action = Action(action)
 
@@ -15,10 +16,10 @@ class Entry(Rule):
 
     def entry(self):
         price = self.currency_pair.last_price()
-        self.trade_api.trade(currency_pair=self.currency_pair,
-                             amount=self._amount,
-                             price=price,
-                             action=self._action)
+        self._trade_api.trade(currency_pair=self.currency_pair,
+                              amount=self._amount,
+                              price=price,
+                              action=self._action)
 
         trade = Trade()
         trade.entry(currency_pair=self.currency_pair,
