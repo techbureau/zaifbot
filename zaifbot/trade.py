@@ -1,8 +1,9 @@
 from datetime import datetime
-from zaifbot.common.action import Action, Buy, Sell
+
+from zaifbot.action import Action, Buy, Sell
+from zaifbot.common.logger import trade_logger
 from zaifbot.currency_pairs import CurrencyPair
 from zaifbot.dao.trades import TradesDao
-from zaifbot.common.logger import trade_logger
 
 
 class Trade:
