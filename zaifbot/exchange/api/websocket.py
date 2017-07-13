@@ -1,7 +1,9 @@
 from threading import Thread, Event, Lock
+
 from zaifapi.impl import ZaifPublicStreamApi
-from zaifbot.common.logger import bot_logger
+
 from zaifbot.exchange.currency_pairs import CurrencyPair
+from zaifbot.logger import bot_logger
 
 
 class BotStreamApi:

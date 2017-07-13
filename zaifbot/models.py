@@ -1,5 +1,6 @@
-from zaifbot.common.database import Base
 from sqlalchemy import Column, Integer, Float, String, Boolean
+
+from zaifbot.database import Base
 
 
 class Trades(Base):

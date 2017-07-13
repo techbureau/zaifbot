@@ -1,8 +1,10 @@
 import random
 import time
+
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
-from zaifbot.common.logger import bot_logger
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
+
+from zaifbot.logger import bot_logger
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
