@@ -9,6 +9,7 @@ class BotStreamApi:
     _sockets = {}
     _stop_events = {}
     _error_events = {}
+    _instance = None
 
     def __new__(cls):
         with cls._lock:

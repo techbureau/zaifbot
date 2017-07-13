@@ -9,7 +9,7 @@ from zaifbot.exchange.api.http import BotTradeApi
 """
 時間が経ったら売買する取引です。テスト用です。
 
-buy and sell after waiting some time. mainly used for test
+buy and sell after waiting some time. mainly used for tests
 """
 
 preset_keys(key='your_key',
