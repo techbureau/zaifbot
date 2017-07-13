@@ -27,6 +27,8 @@ class BotStreamApi:
             return self._sockets[currency_pair].execute(currency_pair)
         self._run_new_socket(currency_pair)
 
+        return self._sockets[currency_pair].last_receive
+
     def stop(self, currency_pair):
         if self._stop_events.get(currency_pair, None):
             self._sockets[currency_pair].stop()
