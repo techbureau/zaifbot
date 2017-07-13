@@ -1,14 +1,12 @@
 from threading import Thread, Event, Lock
 from zaifapi.impl import ZaifPublicStreamApi
-from zaifbot.api_manage import APIRepository
-from zaifbot.common.errors import ZaifBotError
 from zaifbot.common.logger import bot_logger
 from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class BotStreamApi:
     _lock = Lock()
-    _threads = {}
+    _sockets = {}
     _stop_events = {}
     _error_events = {}
 
@@ -18,21 +16,27 @@ class BotStreamApi:
                 cls._instance = super().__new__(cls)
         return cls._instance
 
-    def latest_price(self, currency_pair):
+    def execute(self, currency_pair):
         if isinstance(currency_pair, CurrencyPair):
             currency_pair = str(currency_pair)
-        if self._threads.get(currency_pair, None):
-            return self._threads[currency_pair].execute(currency_pair)
+        if self._sockets.get(currency_pair, None):
+            return self._sockets[currency_pair].execute(currency_pair)
         self._run_new_socket(currency_pair)
 
+    def stop(self, currency_pair):
+        if self._stop_events.get(currency_pair, None):
+            self._sockets[currency_pair].stop()
+        else:
+            pass
+
     def _run_new_socket(self, currency_pair):
-        if self._threads.get(currency_pair, None):
+        if self._sockets.get(currency_pair, None):
             return
         stop_event = Event()
         error_event = Event()
-        new_thread = _StreamThread(currency_pair, stop_event, error_event)
-        new_thread.start()
-        self._threads[currency_pair] = new_thread
+        new_socket = _StreamThread(currency_pair, stop_event, error_event)
+        new_socket.start()
+        self._sockets[currency_pair] = new_socket
         self._stop_events[currency_pair] = stop_event
         self._error_events[currency_pair] = error_event
 
@@ -66,53 +70,6 @@ class _StreamThread(Thread):
         return self._last_receive
 
 
-#############
-
 # def latest_closing_price(currency_pair):
 #     closing_price = _ClosingPrice()
 #     return closing_price.latest_price(currency_pair)
-
-
-# class _ClosingPrice:
-#     _instance = None
-#     _lock = Lock()
-#     _threads = {}
-#     _stop_events = {}
-#
-#     def __new__(cls):
-#         with cls._lock:
-#             if cls._instance is None:
-#                 cls._instance = super().__new__(cls)
-#         return cls._instance
-#
-#     def latest_price(self, currency_pair):
-#         currency_pair = CurrencyPair(currency_pair)
-#         if currency_pair.is_token:
-#             api = APIRepository().public_api
-#             return api.last_price(currency_pair)['last_price']
-#
-#         receive = self._get_target_thread(currency_pair).last_receive
-#         return receive['last_price']['price']
-#
-#     def close_all_socket(self):
-#         [event.set() for event in self._stop_events.values()]
-#         [thread.join() for thread in self._threads.values()]
-#
-#     def _get_target_thread(self, currency_pair):
-#         def create_stream_thread():
-#             stop_event = Event()
-#             error_event = Event()
-#             thread_obj = _StreamThread(currency_pair, stop_event, error_event)
-#             thread_obj.start()
-#             self._threads[currency_pair] = thread_obj
-#             self._stop_events[currency_pair] = stop_event
-#
-#         if currency_pair not in self._threads:
-#             create_stream_thread()
-#         if self._threads[currency_pair].is_error_happened:
-#             create_stream_thread()
-#         if self._threads[currency_pair].is_alive() is False:
-#             raise ZaifBotError('thread is dead')
-#         return self._threads[currency_pair]
-#
-#
