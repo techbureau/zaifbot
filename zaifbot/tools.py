@@ -23,3 +23,8 @@ def get_unique_trade_api(key=None, secret=None):
 
     trade_api = _create_trade_api()
     return trade_api
+
+
+def set_trade_api(key, secret):
+    preset_keys(key, secret)
+    return get_unique_trade_api()
