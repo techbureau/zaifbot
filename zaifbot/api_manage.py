@@ -1,7 +1,7 @@
 from threading import Lock
 
 
-class APIRegistry:
+class APIRepository:
     _instance = None
     _lock = Lock()
 
