@@ -1,6 +1,6 @@
-from zaifbot.rules.rule import Rule
-from zaifbot.closing_price import latest_closing_price
 from zaifbot.api_manage import APIRepository
+from zaifbot.exchange.latest_price import latest_closing_price
+from zaifbot.rules.rule import Rule
 
 
 class Exit(Rule):

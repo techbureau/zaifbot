@@ -1,5 +1,5 @@
+from zaifbot.exchange.latest_price import latest_closing_price
 from zaifbot.rules.exit import Exit
-from zaifbot.closing_price import latest_closing_price
 
 
 class SellHigherExit(Exit):
