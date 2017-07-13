@@ -1,8 +1,8 @@
+from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.rules.entry.buy_lower_entry import BuyLowerEntry
 from zaifbot.rules.exit.sell_higher_exit import SellHigherExit
-from zaifbot.trading_strategy import Strategy
+from zaifbot.trade_strategy import Strategy
 from zaifbot.utils import preset_keys
-from zaifbot.exchange.api.http import BotTradeApi
 
 """
 値段が低くなったら購入し、高くなったら売るだけの取引です

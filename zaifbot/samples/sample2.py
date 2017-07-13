@@ -1,10 +1,10 @@
 import time
 
+from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.rules.entry import Entry
 from zaifbot.rules.exit import Exit
-from zaifbot.trading_strategy import Strategy
+from zaifbot.trade_strategy import Strategy
 from zaifbot.utils import preset_keys
-from zaifbot.exchange.api.http import BotTradeApi
 
 """
 時間が経ったら売買する取引です。テスト用です。
