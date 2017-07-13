@@ -1,4 +1,4 @@
-from zaifbot.models import Trades
+from zaifbot.db.seed import Trades
 from .base import DaoBase
 
 

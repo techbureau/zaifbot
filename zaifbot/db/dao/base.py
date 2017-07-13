@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from zaifbot.database import Session
+from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
 
 

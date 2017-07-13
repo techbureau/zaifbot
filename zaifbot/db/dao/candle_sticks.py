@@ -1,5 +1,6 @@
 from sqlalchemy import and_
-from zaifbot.models import CandleSticks
+
+from zaifbot.db.seed import CandleSticks
 from .base import DaoBase
 
 
