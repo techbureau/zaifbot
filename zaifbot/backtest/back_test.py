@@ -1,12 +1,14 @@
-from zaifbot.exchange.period import Period
 from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class BackTest:
-    def __init__(self, context, currency_pair, period, entry_rule, exit_rule, stop_rule=None):
+    def __init__(
+            self, context, currency_pair,
+            entry_rule, exit_rule,
+            stop_rule=None):
+
         self._context = context
         self._currency_pair = CurrencyPair(currency_pair)
-        self._period = Period(period)
         self._entry_rule = entry_rule
         self._exit_rule = exit_rule
         self._have_position = False

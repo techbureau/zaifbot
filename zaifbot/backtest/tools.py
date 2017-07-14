@@ -78,7 +78,7 @@ class BTContext:
     def setup_data(self, currency_pair):
         candle_sticks = CandleSticks(currency_pair, self._period)
         count = self._get_data_count()
-        data = DataFrame(candle_sticks.request_data(count, self._to_time))['close', 'time']
+        data = DataFrame(candle_sticks.request_data(count, self._to_time))[['close', 'time']]
         self._times = data['time']
         self._prices = data['close']
         self._size = len(data)
