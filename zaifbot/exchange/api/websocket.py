@@ -76,8 +76,3 @@ class _StreamThread(Thread):
     @property
     def last_receive(self):
         return self._last_receive
-
-
-# def latest_closing_price(currency_pair):
-#     closing_price = _ClosingPrice()
-#     return closing_price.latest_price(currency_pair)

@@ -1,12 +1,11 @@
 import time
-from zaifbot.api_keeper import ApiKeeper
 from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class Strategy:
     # todo: ruleを複数持たせられるようにする
     def __init__(self, currency_pair, entry_rule, exit_rule, stop_rule=None):
-        self._trade_api = ApiKeeper.trade_api
+        self._trade_api = None
         self.currency_pair = CurrencyPair(currency_pair)
         self._entry_rule = entry_rule
         self._exit_rule = exit_rule
