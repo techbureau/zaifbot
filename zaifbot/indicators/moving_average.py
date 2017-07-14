@@ -17,11 +17,12 @@ class MA(Indicator):
     def request_data(self, count, to_epoch_time):
         raise NotImplementedError
 
-    def _calc_price_count(self, count):
+    def _get_adjusted_count(self, count):
+        min(count, self.MAX_COUNT)
         return count + self._length - 1
 
     def _get_ma(self, count, to_epoch_time, name):
-        count = self._calc_price_count(min(count, self.MAX_COUNT))
+        count = self._get_adjusted_count(count)
         to_epoch_time = to_epoch_time or int(time.time())
         candlesticks = DF(CandleSticks(self._currency_pair, self._period).request_data(count, to_epoch_time))
         ma = ab.Function(name)(candlesticks, timeperiod=self._length).rename(name).dropna()

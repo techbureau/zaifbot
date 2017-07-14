@@ -1,10 +1,9 @@
 import time
 
-from zaifbot.dao.candle_sticks import CandleSticksDao
-from zaifbot.period import Period
+from zaifbot.db.dao.candle_sticks import CandleSticksDao
+from zaifbot.exchange.api.http import BotPublicApi
+from zaifbot.exchange.period import Period
 from zaifbot.utils import merge_dict
-from zaifbot.web import BotPublicApi
-
 from .indicator import Indicator
 
 
@@ -17,7 +16,6 @@ class CandleSticks(Indicator):
         self._dao = CandleSticksDao(self._currency_pair, self._period)
 
     def request_data(self, count=100, to_epoch_time=None):
-        # daoにそのう移動させる。
         count = min(count, self.MAX_COUNT)
         to_epoch_time = to_epoch_time or int(time.time())
         end_time_rounded = self._period.truncate_sec(to_epoch_time)
@@ -35,9 +33,8 @@ class CandleSticks(Indicator):
         api_params = {'period': self._period, 'count': count, 'to_epoch_time': to_epoch_time}
         records = public_api.everything('ohlc_data', self._currency_pair, api_params)
         db_records = [merge_dict(record,
-                                 {'currency_pair': self._currency_pair, 'period': self._period})
+                                 {'currency_pair': str(self._currency_pair), 'period': str(self._period)})
                       for record in records]
-
         self._dao.create_multiple(db_records)
         return records
 
@@ -45,7 +42,6 @@ class CandleSticks(Indicator):
         records = list(map(self._row2dict, self._dao.get_by_time_width(start_time, end_time, closed=False)))
         return records
 
-    # todo: もっと汎用的な場所に移動させる
     @staticmethod
     def _row2dict(row):
         dict_row = row.__dict__

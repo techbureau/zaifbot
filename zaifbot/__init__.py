@@ -1,7 +1,8 @@
-import sys
-import subprocess
 import os
-from zaifbot.common.errors import ZaifBotError
+import subprocess
+import sys
+
+from zaifbot.errors import ZaifBotError
 
 
 class ZaifBot:

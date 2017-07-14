@@ -1,18 +1,22 @@
 from abc import ABCMeta, abstractclassmethod
 
 
-def Period(label_or_sec):
+def Period(period):
     for cls in _TradePeriod.__subclasses__():
-        if isinstance(label_or_sec, str):
-            if cls.is_my_label(label_or_sec):
-                return cls(label_or_sec)
+        if isinstance(period, str):
+            if cls.is_my_label(period):
+                return cls(period)
             continue
 
-        if isinstance(label_or_sec, int):
-            if cls.is_my_sec(label_or_sec):
-                return cls(label_or_sec)
+        if isinstance(period, int):
+            if cls.is_my_sec(period):
+                return cls(period)
             continue
-        raise ValueError
+
+        if isinstance(period, _TradePeriod):
+            return period
+
+        raise ValueError('illegal argument received')
 
 
 class _TradePeriod(metaclass=ABCMeta):

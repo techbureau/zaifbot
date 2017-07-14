@@ -1,15 +1,15 @@
 import time
-from zaifbot.trading_strategy import Strategy
-from zaifbot.web import BotTradeApi
-from zaifbot.utils import preset_keys
+
+from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.rules.entry import Entry
 from zaifbot.rules.exit import Exit
-
+from zaifbot.trade_strategy import Strategy
+from zaifbot.utils import preset_keys
 
 """
 時間が経ったら売買する取引です。テスト用です。
 
-buy and sell after waiting some time. mainly used for test
+buy and sell after waiting some time. mainly used for tests
 """
 
 preset_keys(key='your_key',

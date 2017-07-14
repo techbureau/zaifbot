@@ -6,8 +6,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 def __db_path():
     current_dir = os.path.dirname(__file__)
-    parent_dir = os.path.abspath(os.path.join(current_dir, os.path.pardir))
-    return 'sqlite:///{}'.format(os.path.join(parent_dir, 'zaifbot.db'))
+    # parent_dir = os.path.abspath(os.path.join(current_dir, os.path.pardir))
+    return 'sqlite:///{}'.format(os.path.join(current_dir, 'zaifbot.db'))
 
 
 def _get_engine(file_path):

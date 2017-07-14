@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
+
 from sqlalchemy.exc import SQLAlchemyError
-from zaifbot.common.database import Session
-from zaifbot.common.logger import bot_logger
+
+from zaifbot.db.config import Session
+from zaifbot.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):

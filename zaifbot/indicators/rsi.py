@@ -20,10 +20,13 @@ class RSI(Indicator):
         self._length = min(length, self.MAX_LENGTH)
 
     def request_data(self, count=MAX_COUNT, to_epoch_time=None):
-        count = min(count, self.MAX_COUNT)
-        count_needed = count + self._length
+        adjusted_count = self._get_adjusted_count(count)
         candlesticks = CandleSticks(self._currency_pair, self._period)
-        df = DF(candlesticks.request_data(count_needed, to_epoch_time))
+        df = DF(candlesticks.request_data(adjusted_count, to_epoch_time))
         rsi = ab.RSI(df, price=_CLOSE, timeperiod=self._length).rename('rsi')
         rsi = pd.concat([df[_TIME], rsi], axis=1).dropna()
         return rsi.astype(object).to_dict(orient='records')
+
+    def _get_adjusted_count(self, count):
+        count = min(count, self.MAX_COUNT)
+        return count + self._length

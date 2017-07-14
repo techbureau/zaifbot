@@ -19,10 +19,13 @@ class MACD(Indicator):
         self._signal = min(signal, self.MAX_LENGTH)
 
     def request_data(self, count=100, to_epoch_time=None):
-        count = min(count, self.MAX_COUNT)
-        count_needed = count + self._long + self._signal - 2
+        adjusted_count = self._get_adjusted_count(count)
         candlesticks = CandleSticks(self._currency_pair, self._period)
-        df = DF(candlesticks.request_data(count_needed, to_epoch_time))
+        df = DF(candlesticks.request_data(adjusted_count, to_epoch_time))
         macd = ab.MACD(df, price=_CLOSE, fastperiod=self._short, slowperiod=self._long, signalperiod=self._signal)
         macd = pd.concat([df[_TIME], macd], axis=1).dropna()
         return macd.astype(object).to_dict(orient='records')
+
+    def _get_adjusted_count(self, count):
+        count = min(count, self.MAX_COUNT)
+        return count + self._long + self._signal - 2

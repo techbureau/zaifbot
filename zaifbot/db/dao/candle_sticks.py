@@ -1,13 +1,14 @@
 from sqlalchemy import and_
-from zaifbot.models import CandleSticks
+
+from zaifbot.db.seed import CandleSticks
 from .base import DaoBase
 
 
 class CandleSticksDao(DaoBase):
     def __init__(self, currency_pair, period):
         super().__init__()
-        self._currency_pair = currency_pair
-        self._period = period
+        self._currency_pair = str(currency_pair)
+        self._period = str(period)
 
     def _get_model(self):
         return CandleSticks
