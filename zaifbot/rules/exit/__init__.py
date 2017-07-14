@@ -1,11 +1,11 @@
-from zaifbot.api_keeper import ApiKeeper
 from zaifbot.exchange.latest_price import get_latest_price
 from zaifbot.rules.rule import Rule
 
 
 class Exit(Rule):
-    def __init__(self):
-        self._trade_api = ApiKeeper.trade_api
+    def __init__(self, *, mode='normal'):
+        self._trade_api = None
+        self._mode = mode
 
     def can_exit(self, trade):
         raise NotImplementedError

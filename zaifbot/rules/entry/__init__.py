@@ -1,15 +1,15 @@
-from zaifbot.api_keeper import ApiKeeper
 from zaifbot.rules.rule import Rule
 from zaifbot.trade import Trade
 from zaifbot.exchange.action import Action
 
 
 class Entry(Rule):
-    def __init__(self, amount, action='bid'):
+    def __init__(self, amount, action='bid', *, mode='normal'):
         self.currency_pair = None
-        self._trade_api = ApiKeeper.trade_api
+        self._trade_api = None
         self._amount = amount
         self._action = Action(action)
+        self._mode = mode
 
     def can_entry(self, *args, **kwargs):
         raise NotImplementedError

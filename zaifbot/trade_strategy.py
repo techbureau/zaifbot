@@ -13,7 +13,7 @@ class Strategy:
         self._stop_rule = stop_rule
         self._trade = None
         self._have_position = False
-
+        self._alive = False
         self.__initialize_rules()
 
     def _need_stop(self):
@@ -37,8 +37,10 @@ class Strategy:
             self._exit()
 
     def start(self, *, sec_wait=1):
-        self.regular_job()
-        while True:
+        # fixme
+        self._alive = True
+        while self._alive:
+            self.regular_job()
             if self._need_stop():
                 break
             if self._have_position:
@@ -54,3 +56,6 @@ class Strategy:
 
     def regular_job(self):
         pass
+
+    def stop(self):
+        self._alive = False
