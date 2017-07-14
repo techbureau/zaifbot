@@ -5,16 +5,16 @@ class APIRepository:
     _instance = None
     _lock = Lock()
 
-    def __new__(cls, public_api, trade_api, stream_api):
+    def __new__(cls, **kwargs):
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, public_api, trade_api, stream_api):
-        self._public_api = public_api
-        self._trade_api = trade_api
-        self._stream_api = stream_api
+    def __init__(self, **kwargs):
+        self._public_api = kwargs.get('public_api', None)
+        self._trade_api = kwargs.get('trade_api', None)
+        self._stream_api = kwargs.get('stream_api', None)
 
     @property
     def public_api(self):

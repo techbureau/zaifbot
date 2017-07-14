@@ -1,14 +1,14 @@
 from zaifbot.exchange.currency_pairs import CurrencyPair
-from zaifbot.exchange.api.websocket import BotStreamApi
-from zaifbot.exchange.api.http import BotPublicApi
+from zaifbot.api_manage import APIRepository
 
 
 def get_latest_price(currency_pair):
     currency_pair = CurrencyPair(currency_pair)
 
     if currency_pair.is_token:
-        public_api = BotPublicApi()
+        public_api = APIRepository().public_api
+        # todo: ここがNoneになる。
         return public_api.last_price(currency_pair)['last_price']
     else:
-        stream_api = BotStreamApi()
+        stream_api = APIRepository().stream_api
         return stream_api.execute(currency_pair)['last_price']['price']

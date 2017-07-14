@@ -32,11 +32,10 @@ class CandleSticks(Indicator):
     def _fetch_data_from_web(self, count, to_epoch_time):
         public_api = BotPublicApi()
         api_params = {'period': self._period, 'count': count, 'to_epoch_time': to_epoch_time}
-        records = public_api.everything('ohlc_data', self._currency_pair, api_params)
+        records = public_api.everything('ohlc_data', str(self._currency_pair), api_params)
         db_records = [merge_dict(record,
-                                 {'currency_pair': self._currency_pair, 'period': self._period})
+                                 {'currency_pair': str(self._currency_pair), 'period': int(self._period)})
                       for record in records]
-
         self._dao.create_multiple(db_records)
         return records
 

@@ -37,10 +37,13 @@ class BackTest:
         self._currency_pair = self._strategy.currency_pair
         self._price_interval = Period(price_interval)
         self._strategy.regular_task = self._update_context
-        self._public_api = BackTestPublicApi()
-        self._trade_api = BackTestTradeApi()
-        self._stream_api = BackTestStreamApi()
-        self._repository = APIRepository(self._public_api, self._trade_api, self._stream_api)
+        self._context = BackTestContext()
+        self._public_api = BackTestPublicApi(self._context)
+        self._trade_api = BackTestTradeApi(self._context)
+        self._stream_api = BackTestStreamApi(self._context)
+        self._repository = APIRepository(public_api=self._public_api,
+                                         trade_api=self._trade_api,
+                                         stream_api=self._stream_api)
         self._context = BackTestContext()
 
         if from_datetime > datetime.now():
@@ -54,6 +57,7 @@ class BackTest:
 
     def _before_backtest(self):
         # fixme: 分散処理させる
+        self._strategy.regular_job = self._update_context
         self._context.init_price(self._from_datetime, self._to_datetime, self._currency_pair, self._price_interval)
 
     def _update_context(self):

@@ -7,7 +7,7 @@ class Strategy:
     # todo: ruleを複数持たせられるようにする
     def __init__(self, currency_pair, entry_rule, exit_rule, stop_rule=None):
         self._trade_api = APIRepository().trade_api
-        self._currency_pair = CurrencyPair(currency_pair)
+        self.currency_pair = CurrencyPair(currency_pair)
         self._entry_rule = entry_rule
         self._exit_rule = exit_rule
         self._stop_rule = stop_rule
@@ -17,7 +17,8 @@ class Strategy:
         self.__initialize_rules()
 
     def _need_stop(self):
-        return self._stop_rule.need_stop()
+        if self._stop_rule:
+            return self._stop_rule.need_stop()
 
     def _entry(self):
         self._trade = self._entry_rule.entry()
@@ -36,6 +37,7 @@ class Strategy:
             self._exit()
 
     def start(self, *, sec_wait=1):
+        self.regular_job()
         while True:
             if self._need_stop():
                 break
@@ -48,4 +50,7 @@ class Strategy:
             pass
 
     def __initialize_rules(self):
-        self._entry_rule.currency_pair = self._currency_pair
+        self._entry_rule.currency_pair = self.currency_pair
+
+    def regular_job(self):
+        raise Exception('fdfd')
