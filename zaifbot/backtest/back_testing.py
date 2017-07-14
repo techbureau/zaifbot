@@ -4,7 +4,7 @@ from zaifbot.exchange.period import Period
 from zaifbot.indicators.candle_sticks import CandleSticks
 from zaifbot.utils import datetime2timestamp
 from pandas import DataFrame as DF
-from zaifbot.api_management import APIRepository
+from zaifbot.api_keeper import ApiKeeper
 from threading import Lock
 
 
@@ -14,14 +14,10 @@ class BackTest:
         self._currency_pair = self._strategy.currency_pair
         self._price_interval = Period(price_interval)
         self._strategy.regular_task = self._update_context
-        self._context = BackTestContext()
-        self._public_api = BackTestPublicApi(self._context)
-        self._trade_api = BackTestTradeApi(self._context)
-        self._stream_api = BackTestStreamApi(self._context)
-        self._repository = APIRepository(public_api=self._public_api,
-                                         trade_api=self._trade_api,
-                                         stream_api=self._stream_api)
-        self._context = BackTestContext()
+        self._context = Context
+        self._public_api = ApiKeeper.public_api
+        self._trade_api = ApiKeeper.trade_api
+        self._stream_api = ApiKeeper.stream_api
 
         if from_datetime > datetime.now():
             raise ZaifBotError('got illegal datetime range')
@@ -42,7 +38,7 @@ class BackTest:
         self._context.update_time()
 
 
-class BackTestContext:
+class _BackTestContext:
     _instance = None
     _lock = Lock()
     _currency_pairs = None
@@ -68,3 +64,5 @@ class BackTestContext:
 
     def current_time(self):
         return self._data.ix[self._length, 'time']
+
+Context = _BackTestContext()

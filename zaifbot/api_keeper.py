@@ -1,6 +1,4 @@
 from threading import Lock
-from zaifbot.exchange.api.http import BotTradeApi, BotPublicApi
-from zaifbot.backtest.api import BackTestStreamApi, BackTestTradeApi, BackTestPublicApi
 
 
 class _APIKeeper:
@@ -10,19 +8,20 @@ class _APIKeeper:
     _trade_api = None
     _stream_api = None
 
-    def __new__(cls, **kwargs):
+    def __new__(cls):
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, **kwargs):
-        self._public_api = self._public_api or kwargs.get('public_api')
-        self._trade_api = self._trade_api or kwargs.get('trade_api')
-        self._stream_api = self._stream_api or kwargs.get('stream_api')
+    def register_public(self, public_api):
+        self._public_api = public_api
 
-    def register_public(self):
-        pass
+    def register_trade(self, trade_api):
+        self._public_api = trade_api
+
+    def register_stream(self, stream_api):
+        self._stream_api = stream_api
 
     @property
     def public_api(self):
@@ -37,10 +36,16 @@ class _APIKeeper:
         return self._stream_api
 
 
-def api_maker(key, secret, mode='real'):
+def initialize_api(key, secret, mode='real'):
     if mode == 'real':
         pass
     if mode == 'backtest':
-        return _APIKeeper(public_api=BackTestPublicApi(), trade_api=BackTestTradeApi(), stream_api=BackTestStreamApi())
+        api_keeper = _APIKeeper()
+        from zaifbot.backtest.api import BackTestStreamApi, BackTestTradeApi, BackTestPublicApi
+        api_keeper.register_public(BackTestPublicApi())
+        api_keeper.register_trade(BackTestTradeApi())
+        api_keeper.register_stream(BackTestStreamApi())
     else:
         raise ValueError('illegal argument')
+
+ApiKeeper = _APIKeeper()
