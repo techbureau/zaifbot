@@ -1,5 +1,5 @@
 from os import environ as env
-
+import time
 
 # for dict
 def merge_dict(base_dict, *dicts):
@@ -7,6 +7,9 @@ def merge_dict(base_dict, *dicts):
         base_dict.update(dic) or base_dict
     return base_dict
 
+
+def datetime2timestamp(datetime):
+    return int(time.mktime(datetime.timetuple()))
 
 # # for trade_api
 # def preset_keys(key, secret):
