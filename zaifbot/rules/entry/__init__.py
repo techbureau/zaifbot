@@ -4,12 +4,11 @@ from zaifbot.exchange.action import Action
 
 
 class Entry(Rule):
-    def __init__(self, amount, action='bid', *, mode='normal'):
+    def __init__(self, amount, action='bid'):
         self.currency_pair = None
         self._trade_api = None
         self._amount = amount
         self._action = Action(action)
-        self._mode = mode
 
     def can_entry(self, *args, **kwargs):
         raise NotImplementedError

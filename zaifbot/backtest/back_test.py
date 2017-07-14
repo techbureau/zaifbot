@@ -1,10 +1,8 @@
-from zaifbot.trade_strategy import Strategy
-from zaifbot.logger import trade_logger
 from zaifbot.utils import datetime2timestamp
 from zaifbot.exchange.period import Period
 
 
-class BackTest(Strategy):
+class BackTest:
     def __init__(self, from_datetime, to_datetime, currency_pair, period, entry_rule, exit_rule, stop_rule=None):
         self._from_time = datetime2timestamp(from_datetime)
         self._to_time = datetime2timestamp(to_datetime)

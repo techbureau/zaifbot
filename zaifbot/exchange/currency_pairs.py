@@ -1,5 +1,4 @@
 from threading import Lock
-
 from zaifbot.exchange.api.http import BotPublicApi
 
 
@@ -28,23 +27,6 @@ class CurrencyPair:
     @property
     def is_token(self):
         return self._info['is_token']
-    #
-    # def get_round_amount(self, amount):
-    #     rounded_amount = amount - (amount % self._info['item_unit_step'])
-    #     digits = len(str(self._info['item_unit_step'])) - 2
-    #     return round(rounded_amount, digits)
-    #
-    # def get_buyable_amount(self, amount, price):
-    #     buyable_amount = amount / price
-    #     return self.get_round_amount(buyable_amount)
-    #
-    # def get_more_executable_price(self, price, *, is_buy):
-    #     # todo: incorrect processing
-    #     if is_buy:
-    #         return price + (self._info['aux_unit_step'] -
-    #                         (price % self._info['aux_unit_step']))
-    #     else:
-    #         return price - (price % self._info['aux_unit_step'])
 
 
 class _ZaifCurrencyPairsInfo:
