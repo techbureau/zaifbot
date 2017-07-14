@@ -1,4 +1,4 @@
-from zaifbot.api_manage import APIRepository
+from zaifbot.api_management import APIRepository
 from zaifbot.exchange.latest_price import get_latest_price
 from zaifbot.rules.rule import Rule
 

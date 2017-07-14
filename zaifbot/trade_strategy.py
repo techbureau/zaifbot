@@ -1,5 +1,5 @@
 import time
-from zaifbot.api_manage import APIRepository
+from zaifbot.api_management import APIRepository
 from zaifbot.exchange.currency_pairs import CurrencyPair
 
 

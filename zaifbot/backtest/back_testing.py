@@ -4,31 +4,8 @@ from zaifbot.exchange.period import Period
 from zaifbot.indicators.candle_sticks import CandleSticks
 from zaifbot.utils import datetime2timestamp
 from pandas import DataFrame as DF
-from zaifbot.api_manage import APIRepository
+from zaifbot.api_management import APIRepository
 from threading import Lock
-
-class BackTestTradeApi:
-    def __init__(self, context):
-        self._context = context
-
-    def trade(self):
-        print('trade')
-
-
-class BackTestPublicApi:
-    def __init__(self, context):
-        self._context = context
-
-    def last_price(self, currency_pair):
-        return {'last_price': self._context.current_price()}
-
-
-class BackTestStreamApi:
-    def __init__(self, context):
-        self._context = context
-
-    def _execute(self):
-        print('execute')
 
 
 class BackTest:

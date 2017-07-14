@@ -1,5 +1,5 @@
 from zaifbot.exchange.currency_pairs import CurrencyPair
-from zaifbot.api_manage import APIRepository
+from zaifbot.api_management import APIRepository
 
 
 def get_latest_price(currency_pair):

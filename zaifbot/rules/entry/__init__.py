@@ -1,8 +1,7 @@
-from zaifbot.api_manage import APIRepository
+from zaifbot.api_management import APIRepository
 from zaifbot.rules.rule import Rule
 from zaifbot.trade import Trade
 from zaifbot.exchange.action import Action
-from zaifbot.logger import trade_logger
 
 
 class Entry(Rule):
@@ -21,7 +20,6 @@ class Entry(Rule):
                               amount=self._amount,
                               price=price,
                               action=self._action)
-        trade_logger.info('entry')
         trade = Trade()
         trade.entry(currency_pair=self.currency_pair,
                     amount=self._amount,

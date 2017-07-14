@@ -1,7 +1,9 @@
 from threading import Lock
+from zaifbot.exchange.api.http import BotTradeApi, BotPublicApi
+from zaifbot.backtest.api import BackTestStreamApi, BackTestTradeApi, BackTestPublicApi
 
 
-class APIRepository:
+class _APIKeeper:
     _instance = None
     _lock = Lock()
     _public_api = None
@@ -19,6 +21,9 @@ class APIRepository:
         self._trade_api = self._trade_api or kwargs.get('trade_api')
         self._stream_api = self._stream_api or kwargs.get('stream_api')
 
+    def register_public(self):
+        pass
+
     @property
     def public_api(self):
         return self._public_api
@@ -30,3 +35,12 @@ class APIRepository:
     @property
     def stream_api(self):
         return self._stream_api
+
+
+def api_maker(key, secret, mode='real'):
+    if mode == 'real':
+        pass
+    if mode == 'backtest':
+        return _APIKeeper(public_api=BackTestPublicApi(), trade_api=BackTestTradeApi(), stream_api=BackTestStreamApi())
+    else:
+        raise ValueError('illegal argument')
