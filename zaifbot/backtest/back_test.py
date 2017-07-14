@@ -25,11 +25,15 @@ class BackTest:
                 self._check_entry()
 
     def _entry(self):
-        self._entry_rule.entry(self._context.current_time(), self._context.current_price())
+        self._entry_rule.entry(self._context.current_time(),
+                               self._context.current_price())
+
         self._have_position = True
 
     def _exit(self):
-        self._exit_rule.exit(self._context.current_time(), self._context.current_price())
+        self._exit_rule.exit(self._context.current_time(),
+                             self._context.current_price())
+
         self._have_position = False
 
     def _check_entry(self):
@@ -44,6 +48,8 @@ class BackTest:
         self._context.update()
 
     def _beginning_task(self):
+        self._entry_rule.context = self._context
+        self._exit_rule.context = self._context
         self._context.setup_data(self._currency_pair)
 
     def _need_stop(self):

@@ -7,11 +7,21 @@ from zaifbot.logger import trade_logger
 
 
 class BTRule:
-    pass
+    def __init__(self):
+        self._context = None
+
+    @property
+    def context(self):
+        return self.context
+
+    @context.setter
+    def context(self, context):
+        self._context = context
 
 
 class BTEntry(BTRule):
     def __init__(self, amount, action='bid'):
+        super().__init__()
         self._currency_pair = None
         self._amount = amount
         self._action = Action(action)
@@ -24,6 +34,9 @@ class BTEntry(BTRule):
 
 
 class BTExit(BTRule):
+    def __init__(self):
+        super().__init__()
+
     def can_exit(self):
         raise NotImplementedError
 
