@@ -8,27 +8,24 @@ from zaifbot.api_manage import APIRepository
 
 
 class BackTestTradeApi:
-    def __init__(self):
-        self._time = None
-        self._price = None
+    def __init__(self, context):
+        self._context = context
 
     def trade(self):
         print('trade')
 
 
 class BackTestPublicApi:
-    def __init__(self):
-        self._time = None
-        self._price = None
+    def __init__(self, context):
+        self._context = context
 
     def last_price(self, currency_pair):
-        return {'last_price': self._price}
+        return {'last_price': self._context.current_price()}
 
 
 class BackTestStreamApi:
-    def __init__(self):
-        self._time = None
-        self._price = None
+    def __init__(self, context):
+        self._context = context
 
     def _execute(self):
         print('execute')
@@ -44,8 +41,7 @@ class BackTest:
         self._trade_api = BackTestTradeApi()
         self._stream_api = BackTestStreamApi()
         self._repository = APIRepository(self._public_api, self._trade_api, self._stream_api)
-        self._length = 0
-        self._data = None
+        self._context = BackTestContext()
 
         if from_datetime > datetime.now():
             raise ZaifBotError('got illegal datetime range')
@@ -58,17 +54,27 @@ class BackTest:
 
     def _before_backtest(self):
         # fixme: 分散処理させる
-        candle_sticks = CandleSticks(currency_pair=self._currency_pair, period=self._price_interval)
-        self._data = DF(candle_sticks.request_data(1500, datetime2timestamp(self._to_datetime)))[['time', 'close']]
+        self._context.init_price(self._from_datetime, self._to_datetime, self._currency_pair, self._price_interval)
 
     def _update_context(self):
         # fixme: 終了条件
-        self._public_api._time = self._data.ix[self._length, 'time']
-        self._trade_api._time = self._data.ix[self._length, 'time']
-        self._stream_api._time = self._data.ix[self._length, 'time']
+        self._context.update_time()
 
-        self._public_api._price = self._data.ix[self._length, 'price']
-        self._trade_api._price = self._data.ix[self._length, 'price']
-        self._stream_api._price = self._data.ix[self._length, 'price']
 
+class BackTestContext:
+    def __init__(self):
+        self._data = None
+        self._length = 0
+
+    def init_price(self, from_datetime, to_datetime, currency_pair, price_interval):
+        candle_sticks = CandleSticks(currency_pair=currency_pair, period=price_interval)
+        self._data = DF(candle_sticks.request_data(1500, datetime2timestamp(to_datetime)))[['time', 'close']]
+
+    def update_time(self):
         self._length += 1
+
+    def current_price(self):
+        return self._data.ix[self._length, 'close']
+
+    def current_time(self):
+        return self._data.ix[self._length, 'time']

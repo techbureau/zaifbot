@@ -1,4 +1,4 @@
-from zaifbot.exchange.latest_price import latest_closing_price
+from zaifbot.exchange.latest_price import get_latest_price
 from zaifbot.rules.entry import Entry
 
 
@@ -8,4 +8,4 @@ class BuyLowerEntry(Entry):
         self.buy_price = buy_price
 
     def can_entry(self):
-        return latest_closing_price(self.currency_pair) < self.buy_price
+        return get_latest_price(self.currency_pair) < self.buy_price

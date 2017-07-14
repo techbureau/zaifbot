@@ -10,8 +10,9 @@ def _bot_logger():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.ERROR)
 
-    parent = os.path.dirname(os.path.dirname(__file__))
-    target_file = os.path.join(parent, 'logs/zaifbot.log')
+    # parent = os.path.dirname(os.path.dirname(__file__))
+    current_dir = os.path.dirname(__file__)
+    target_file = os.path.join(current_dir, 'logs/zaifbot.log')
     file_handler = logging.handlers.TimedRotatingFileHandler(filename=target_file)
     file_handler.setLevel(logging.INFO)
 
@@ -31,8 +32,9 @@ def _trade_logger():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
 
-    parent = os.path.dirname(os.path.dirname(__file__))
-    target_file = os.path.join(parent, 'logs/trades/bot_trade.log')
+    # parent = os.path.dirname(os.path.dirname(__file__))
+    current_dir = os.path.dirname(__file__)
+    target_file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
     file_handler = logging.handlers.TimedRotatingFileHandler(filename=target_file)
     file_handler.setLevel(logging.INFO)
 

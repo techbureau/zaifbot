@@ -1,4 +1,4 @@
-from zaifbot.exchange.latest_price import latest_closing_price
+from zaifbot.exchange.latest_price import get_latest_price
 from zaifbot.rules.exit import Exit
 
 
@@ -8,4 +8,4 @@ class SellHigherExit(Exit):
         self.exit_price = exit_price
 
     def can_exit(self, trade):
-        return self.exit_price > latest_closing_price(trade.currency_pair)
+        return self.exit_price > get_latest_price(trade.currency_pair)
