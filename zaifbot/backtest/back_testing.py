@@ -4,7 +4,6 @@ from zaifbot.exchange.period import Period
 from zaifbot.indicators.candle_sticks import CandleSticks
 from zaifbot.utils import datetime2timestamp
 from pandas import DataFrame as DF
-from zaifbot.api_keeper import ApiKeeper
 from threading import Lock
 
 
