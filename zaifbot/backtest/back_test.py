@@ -1,30 +1,50 @@
-from zaifbot.utils import datetime2timestamp
 from zaifbot.exchange.period import Period
+from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class BackTest:
-    def __init__(self, from_datetime, to_datetime, currency_pair, period, entry_rule, exit_rule, stop_rule=None):
-        self._from_time = datetime2timestamp(from_datetime)
-        self._to_time = datetime2timestamp(to_datetime)
+    def __init__(self, context, currency_pair, period, entry_rule, exit_rule, stop_rule=None):
+        self._context = context
+        self._currency_pair = CurrencyPair(currency_pair)
         self._period = Period(period)
-        self._index = -1 #初回のupdateで1にしたい
-        self._size = self._period.calc_count(self._from_time, self._to_time)
-        super().__init__(currency_pair, entry_rule, exit_rule, stop_rule)
+        self._entry_rule = entry_rule
+        self._exit_rule = exit_rule
+        self._have_position = False
+        self._stop_rule = stop_rule
 
-    def start(self, **kwargs):
-        super().start(sec_wait=0)
+    def start(self):
+        self._beginning_task()
+        while self._context.is_continue:
+            self._regular_task()
+            if self._need_stop():
+                break
+
+            if self._have_position:
+                self._check_exit()
+            else:
+                self._check_entry()
 
     def _entry(self):
-        pass
+        self._entry_rule.entry(self._context.current_time(), self._context.current_price())
+        self._have_position = True
 
     def _exit(self):
+        self._exit_rule.exit(self._context.current_time(), self._context.current_price())
+        self._have_position = False
+
+    def _check_entry(self):
+        if self._entry_rule.can_entry():
+            self._entry()
+
+    def _check_exit(self):
+        if self._exit_rule.can_exit():
+            self._exit()
+
+    def _regular_task(self):
+        self._context.update()
+
+    def _beginning_task(self):
+        self._context.setup_data(self._currency_pair)
+
+    def _need_stop(self):
         pass
-
-    def regular_job(self):
-        self._update_time()
-
-    def _update_time(self):
-        if self._index >= self._size:
-            self.stop()
-        else:
-            self._index += 1
