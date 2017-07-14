@@ -53,4 +53,4 @@ class Strategy:
         self._entry_rule.currency_pair = self.currency_pair
 
     def regular_job(self):
-        raise Exception('fdfd')
+        pass

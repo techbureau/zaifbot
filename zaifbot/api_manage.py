@@ -4,6 +4,9 @@ from threading import Lock
 class APIRepository:
     _instance = None
     _lock = Lock()
+    _public_api = None
+    _trade_api = None
+    _stream_api = None
 
     def __new__(cls, **kwargs):
         with cls._lock:
@@ -12,9 +15,9 @@ class APIRepository:
         return cls._instance
 
     def __init__(self, **kwargs):
-        self._public_api = kwargs.get('public_api', None)
-        self._trade_api = kwargs.get('trade_api', None)
-        self._stream_api = kwargs.get('stream_api', None)
+        self._public_api = self._public_api or kwargs.get('public_api')
+        self._trade_api = self._trade_api or kwargs.get('trade_api')
+        self._stream_api = self._stream_api or kwargs.get('stream_api')
 
     @property
     def public_api(self):

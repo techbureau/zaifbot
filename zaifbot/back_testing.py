@@ -5,7 +5,7 @@ from zaifbot.indicators.candle_sticks import CandleSticks
 from zaifbot.utils import datetime2timestamp
 from pandas import DataFrame as DF
 from zaifbot.api_manage import APIRepository
-
+from threading import Lock
 
 class BackTestTradeApi:
     def __init__(self, context):
@@ -66,9 +66,17 @@ class BackTest:
 
 
 class BackTestContext:
-    def __init__(self):
-        self._data = None
-        self._length = 0
+    _instance = None
+    _lock = Lock()
+    _currency_pairs = None
+    _data = None
+    _length = 0
+
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+        return cls._instance
 
     def init_price(self, from_datetime, to_datetime, currency_pair, price_interval):
         candle_sticks = CandleSticks(currency_pair=currency_pair, period=price_interval)
@@ -78,6 +86,7 @@ class BackTestContext:
         self._length += 1
 
     def current_price(self):
+        print(self._length)
         return self._data.ix[self._length, 'close']
 
     def current_time(self):

@@ -8,6 +8,7 @@ def get_latest_price(currency_pair):
     if currency_pair.is_token:
         public_api = APIRepository().public_api
         # todo: ここがNoneになる。
+        print(public_api.last_price(currency_pair)['last_price'])
         return public_api.last_price(currency_pair)['last_price']
     else:
         stream_api = APIRepository().stream_api
