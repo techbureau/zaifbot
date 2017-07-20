@@ -3,7 +3,7 @@ from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class Strategy:
-    # todo: ruleを複数持たせられるようにする
+    # todo: able to handle multiple rules
     def __init__(self, currency_pair, entry_rule, exit_rule, stop_rule=None):
         self._trade_api = None
         self.currency_pair = CurrencyPair(currency_pair)
