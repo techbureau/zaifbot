@@ -1,11 +1,9 @@
-import time
-
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.exchange.candle_sticks import CandleSticks
 from zaifbot.exchange.period import Period
-
+from zaifbot.utils import int_time
 from .indicator import Indicator
 
 
@@ -16,7 +14,7 @@ class BBands(Indicator):
         self._length = min(length, self.MAX_LENGTH)
 
     def request_data(self, count=100, lowbd=2, upbd=2, to_epoch_time=None):
-        to_epoch_time = to_epoch_time or int(time.time())
+        to_epoch_time = to_epoch_time or int_time()
         adjusted_count = self._get_adjusted_count(count)
         end_time = self._period.truncate_sec(to_epoch_time)
 
