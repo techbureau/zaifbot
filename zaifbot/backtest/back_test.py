@@ -1,3 +1,7 @@
+"""
+this module is for next version
+"""
+
 # from zaifbot.exchange.currency_pairs import CurrencyPair
 #
 #

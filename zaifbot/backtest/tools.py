@@ -1,3 +1,7 @@
+"""
+this module is for next version
+"""
+
 # from pandas import DataFrame
 # from zaifbot.exchange.action import Action
 # from zaifbot.exchange.candle_sticks import CandleSticks
