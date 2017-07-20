@@ -1,5 +1,5 @@
 """
-this module is not supported now
+this module is obsoleted now
 """
 
 

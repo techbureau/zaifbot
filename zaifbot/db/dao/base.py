@@ -8,7 +8,7 @@ from zaifbot.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):
-    # todo transaction実装を見直す。
+    # todo: review implementation
     def __init__(self):
         self._Model = self._get_model()
 
@@ -57,7 +57,7 @@ class DaoBase(metaclass=ABCMeta):
 
     def find(self, id_):
         with self._session() as s:
-            return s.query(self._Model).filter_by(id=id_).first()
+            return s.query(self._Model).filter_by(id_=id_).first()
 
     def update(self, id_, **kwargs):
         with self._transaction() as s:
