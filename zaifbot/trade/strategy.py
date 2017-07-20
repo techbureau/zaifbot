@@ -26,7 +26,7 @@ class Strategy:
         self._have_position = True
 
     def _exit(self):
-        self._exit_rule.exit(self._trade, self._trade_api)
+        self._exit_rule.exit(self._trade)
         self._have_position = False
 
     def _check_entry(self):

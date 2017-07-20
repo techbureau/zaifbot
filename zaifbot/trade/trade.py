@@ -46,9 +46,14 @@ class Trade:
         trade_logger.info(log_frame.format(self.id, self.currency_pair, self.action,
                                            self.amount, self.entry_price, self.entry_datetime))
 
-    def exit(self, exit_price):
-        self.exit_price = exit_price
+    def exit(self):
+        self.exit_price = last_price(self.currency_pair)
         self.exit_datetime = datetime.now()
+
+        self._trade_api.trade(currency_pair=self.currency_pair,
+                              amount=self.amount,
+                              price=self.exit_price,
+                              action=self.action.opposite_action())
 
         self._dao.update(id_=self.id,
                          exit_price=self.exit_price,
