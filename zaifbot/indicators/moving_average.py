@@ -3,9 +3,9 @@ import time
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
+from zaifbot.exchange.candle_sticks import CandleSticks
 
 from .indicator import Indicator
-from .candle_sticks import CandleSticks
 
 
 class MA(Indicator):
