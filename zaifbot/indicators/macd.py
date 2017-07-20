@@ -1,8 +1,9 @@
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
+from zaifbot.exchange.candle_sticks import CandleSticks
+
 from .indicator import Indicator
-from .candle_sticks import CandleSticks
 
 _HIGH = 'high'
 _LOW = 'low'

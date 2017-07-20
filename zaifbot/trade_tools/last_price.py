@@ -1,5 +1,5 @@
+from zaifbot.exchange.candle_sticks import CandleSticks
 from zaifbot.exchange.latest_price import get_latest_price
-from zaifbot.indicators.candle_sticks import CandleSticks
 
 
 def last_price(currency_pair, *, timestamp=None):

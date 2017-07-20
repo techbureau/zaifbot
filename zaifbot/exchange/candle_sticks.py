@@ -4,10 +4,9 @@ from zaifbot.db.dao.candle_sticks import CandleSticksDao
 from zaifbot.exchange.api.http import BotPublicApi
 from zaifbot.exchange.period import Period
 from zaifbot.utils import merge_dict
-from .indicator import Indicator
 
 
-class CandleSticks(Indicator):
+class CandleSticks:
     MAX_COUNT = 1500
 
     def __init__(self, currency_pair, period):
