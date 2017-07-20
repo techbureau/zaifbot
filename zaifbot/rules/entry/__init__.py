@@ -1,7 +1,7 @@
 from zaifbot.rules.rule import Rule
-from zaifbot.trade import Trade
+from zaifbot.trade.trade import Trade
 from zaifbot.exchange.action import Action
-
+from zaifbot.trade.tools import last_price
 
 class Entry(Rule):
     def __init__(self, amount, action='bid'):
@@ -14,7 +14,7 @@ class Entry(Rule):
         raise NotImplementedError
 
     def entry(self):
-        price = self.currency_pair.last_price()
+        price = last_price(currency_pair=self.currency_pair)
         self._trade_api.trade(currency_pair=self.currency_pair,
                               amount=self._amount,
                               price=price,

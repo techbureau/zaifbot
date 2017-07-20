@@ -1,4 +1,4 @@
-from zaifbot.exchange.latest_price import get_latest_price
+from zaifbot.trade.tools import last_price
 from zaifbot.rules.rule import Rule
 
 
@@ -13,7 +13,7 @@ class Exit(Rule):
         amount = trade.amount
         currency_pair = trade.currency_pair
         action = trade.action.opposite_action()
-        price = get_latest_price(currency_pair)
+        price = last_price(currency_pair)
 
         self._trade_api.trade(currency_pair=currency_pair,
                               amount=amount,

@@ -21,6 +21,10 @@ class CurrencyPair:
         return self._name
 
     @property
+    def name(self):
+        return self._name
+
+    @property
     def info(self):
         return self._info
 
