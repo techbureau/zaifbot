@@ -4,10 +4,13 @@ from zaifbot.db.dao.trades import TradesDao
 from zaifbot.exchange.action import Action, Buy, Sell
 from zaifbot.exchange.currency_pairs import CurrencyPair
 from zaifbot.logger import trade_logger
+from zaifbot.exchange.api.http import BotTradeApi
+from zaifbot.trade.tools import last_price
 
 
 class Trade:
     def __init__(self):
+        self._trade_api = BotTradeApi()
         self.currency_pair = None
         self.entry_datetime = None
         self.entry_price = None
@@ -19,12 +22,17 @@ class Trade:
         self.id = None
         self.closed = False
 
-    def entry(self, currency_pair, amount, entry_price, action):
+    def entry(self, currency_pair, amount, action):
         self.currency_pair = CurrencyPair(currency_pair)
         self.amount = amount
-        self.entry_price = entry_price
+        self.entry_price = last_price(currency_pair=self.currency_pair)
         self.action = Action(action)
         self.entry_datetime = int(time.time())
+
+        self._trade_api.trade(currency_pair=self.currency_pair,
+                              amount=self.amount,
+                              price=self.entry_price,
+                              action=self.action)
 
         trade_obj = self._dao.create(currency_pair=str(self.currency_pair),
                                      amount=self.amount,

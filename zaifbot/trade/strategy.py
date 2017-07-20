@@ -22,7 +22,7 @@ class Strategy:
             return self._stop_rule.need_stop()
 
     def _entry(self):
-        self._trade = self._entry_rule.entry(self._trade_api)
+        self._trade = self._entry_rule.entry()
         self._have_position = True
 
     def _exit(self):
