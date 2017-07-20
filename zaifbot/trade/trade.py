@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import time
 from zaifbot.db.dao.trades import TradesDao
 from zaifbot.exchange.action import Action, Buy, Sell
 from zaifbot.exchange.currency_pairs import CurrencyPair
@@ -15,7 +15,7 @@ class Trade:
         self.action = None
         self.exit_price = None
         self.exit_datetime = None
-        self._dao = TradesDao
+        self._dao = TradesDao()
         self.id = None
         self.closed = False
 
@@ -24,13 +24,14 @@ class Trade:
         self.amount = amount
         self.entry_price = entry_price
         self.action = Action(action)
-        self.entry_datetime = datetime.now()
+        self.entry_datetime = int(time.time())
 
         trade_obj = self._dao.create(currency_pair=str(self.currency_pair),
                                      amount=self.amount,
                                      entry_price=self.entry_price,
                                      action=str(self.action),
-                                     entry_datetime=self.entry_datetime)
+                                     entry_datetime=self.entry_datetime,
+                                     closed=False)
         self.id = trade_obj.id
         log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
                     " amount: {}, entry_price: {}, entry_datetime: {}}}"
@@ -41,7 +42,8 @@ class Trade:
         self.exit_price = exit_price
         self.exit_datetime = datetime.now()
 
-        self._dao.update(exit_price=self.exit_price,
+        self._dao.update(id_=self.id,
+                         exit_price=self.exit_price,
                          exit_datetime=self.exit_datetime,
                          profit=self.profit())
 

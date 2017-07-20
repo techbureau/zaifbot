@@ -5,6 +5,7 @@ from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
 
 from zaifbot.logger import bot_logger
+from zaifbot.config import get_keys
 
 _RETRY_COUNT = 5
 _WAIT_SECOND = 5
@@ -29,7 +30,9 @@ __all__ = ['BotPublicApi', 'BotTradeApi']
 
 
 class BotTradeApi(ZaifTradeApi):
-    def __init__(self, key, secret):
+    def __init__(self, key=None, secret=None):
+        if key is None and secret is None:
+            key, secret = get_keys()
         super().__init__(key, secret)
 
     @_with_retry
@@ -65,7 +68,6 @@ class BotTradeApi(ZaifTradeApi):
         def __params_pre_processing(**kwa):
             kwa['currency_pair'] = str(kwa['currency_pair'])
             kwa['action'] = str(kwa['action'])
-            kwa['period'] = str(kwa['period'])
             return kwa
         kwargs = __params_pre_processing(**kwargs)
         return super().trade(**kwargs)
