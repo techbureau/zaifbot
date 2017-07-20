@@ -27,6 +27,9 @@ class CandleSticks:
         api_records = self._fetch_data_from_web(count, end_time_rounded)
         return api_records
 
+    def last_price(self,  timestamp):
+        return self.request_data(count=1, to_epoch_time=timestamp)[0]['close']
+
     def _fetch_data_from_web(self, count, to_epoch_time):
         public_api = BotPublicApi()
         api_params = {'period': self._period, 'count': count, 'to_epoch_time': to_epoch_time}
