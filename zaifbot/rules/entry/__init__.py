@@ -1,11 +1,12 @@
 from zaifbot.rules.rule import Rule
 from zaifbot.trade.trade import Trade
 from zaifbot.exchange.action import Action
+from zaifbot.exchange.currency_pairs import CurrencyPair
 
 
 class Entry(Rule):
-    def __init__(self, amount, action='bid'):
-        self.currency_pair = None
+    def __init__(self, currency_pair, amount, action='bid'):
+        self._currency_pair = CurrencyPair(currency_pair)
         self._amount = amount
         self._action = Action(action)
 
@@ -14,7 +15,7 @@ class Entry(Rule):
 
     def entry(self):
         trade = Trade()
-        trade.entry(currency_pair=self.currency_pair,
+        trade.entry(currency_pair=self._currency_pair,
                     amount=self._amount,
                     action=self._action)
 

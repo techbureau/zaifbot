@@ -1,21 +1,18 @@
 import time
 from zaifbot.exchange.api.http import BotTradeApi
-from zaifbot.exchange.currency_pairs import CurrencyPair
 from zaifbot.logger import bot_logger
 
 
 class Strategy:
     # todo: able to handle multiple rules
-    def __init__(self, currency_pair, entry_rule, exit_rule, stop_rule=None):
+    def __init__(self, entry_rule, exit_rule, stop_rule=None):
         self._trade_api = BotTradeApi()
-        self.currency_pair = CurrencyPair(currency_pair)
         self._entry_rule = entry_rule
         self._exit_rule = exit_rule
         self._stop_rule = stop_rule
         self._trade = None
         self._have_position = False
         self._alive = False
-        self.__initialize_rules()
 
     def _need_stop(self):
         if self._stop_rule:
@@ -54,9 +51,6 @@ class Strategy:
             time.sleep(sec_wait)
         else:
             pass
-
-    def __initialize_rules(self):
-        self._entry_rule.currency_pair = self.currency_pair
 
     def regular_job(self):
         pass
