@@ -26,7 +26,7 @@ class BotStreamApi:
 
         currency_pair = str(currency_pair)
         if self._sockets.get(currency_pair, None):
-            return self._sockets[currency_pair].execute(currency_pair)
+            return self._sockets[currency_pair].last_receive
         self._run_new_socket(currency_pair)
 
         return self._sockets[currency_pair].last_receive

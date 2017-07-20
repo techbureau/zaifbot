@@ -1,5 +1,6 @@
 import time
 from zaifbot.exchange.currency_pairs import CurrencyPair
+from zaifbot.logger import bot_logger
 
 
 class Strategy:
@@ -39,6 +40,7 @@ class Strategy:
         # fixme
         self._alive = True
         while self._alive:
+            bot_logger.info('test')
             self.regular_job()
             if self._need_stop():
                 break
