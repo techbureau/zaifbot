@@ -1,20 +1,21 @@
-from sqlalchemy import Column, Integer, Float, String, Boolean
+from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
 
 from zaifbot.db.config import Base
+import datetime
 
 
 class Trades(Base):
     __tablename__ = 'trades'
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
+    id_ = Column('id_', Integer, primary_key=True, autoincrement=True)
     currency_pair = Column('currency_pair', String, nullable=False)
     amount = Column('amount', Float, nullable=False)
     action = Column('action', String, nullable=False)
     entry_price = Column('entry_price', Float, nullable=False)
-    entry_datetime = Column('entry_time', Integer)
-    exit_price = Column('exit_price', Float, nullable=True)
-    exit_datetime = Column('exit_time', Integer)
-    profit = Column('profit', Float, nullable=True)
-    closed = Column('closed', Boolean, nullable=False)
+    entry_datetime = Column('entry_time', DateTime, default=datetime.datetime.now(), nullable=False)
+    exit_price = Column('exit_price', Float)
+    exit_datetime = Column('exit_time', DateTime, default=datetime.datetime.now())
+    profit = Column('profit', Float)
+    closed = Column('closed', Boolean, default=False, nullable=False)
 
 
 class CandleSticks(Base):
