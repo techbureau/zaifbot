@@ -1,4 +1,4 @@
-from zaifbot.trade_tools.last_price import last_price
+from zaifbot.trade.tools import last_price
 from zaifbot.rules.entry import Entry
 
 

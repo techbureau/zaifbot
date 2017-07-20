@@ -3,7 +3,7 @@ import time
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.rules.entry import Entry
 from zaifbot.rules.exit import Exit
-from zaifbot.trade_strategy import Strategy
+from zaifbot.trade.strategy import Strategy
 from zaifbot.utils import preset_keys
 
 """
