@@ -10,7 +10,6 @@ from zaifbot.trade.tools import last_price
 
 class Trade:
     def __init__(self):
-        self._trade_api = BotTradeApi()
         self.currency_pair = None
         self.entry_datetime = None
         self.entry_price = None
@@ -18,9 +17,10 @@ class Trade:
         self.action = None
         self.exit_price = None
         self.exit_datetime = None
-        self._dao = TradesDao()
-        self.id = None
+        self.id_ = None
         self.closed = False
+        self._trade_api = BotTradeApi()
+        self._dao = TradesDao()
 
     def entry(self, currency_pair, amount, action):
         self.currency_pair = CurrencyPair(currency_pair)
@@ -40,10 +40,10 @@ class Trade:
                                      action=str(self.action),
                                      entry_datetime=self.entry_datetime,
                                      closed=False)
-        self.id = trade_obj.id
+        self.id_ = trade_obj.id
         log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
                     " amount: {}, entry_price: {}, entry_datetime: {}}}"
-        trade_logger.info(log_frame.format(self.id, self.currency_pair, self.action,
+        trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.action,
                                            self.amount, self.entry_price, self.entry_datetime))
 
     def exit(self):
@@ -55,13 +55,13 @@ class Trade:
                               price=self.exit_price,
                               action=self.action.opposite_action())
 
-        self._dao.update(id_=self.id,
+        self._dao.update(id_=self.id_,
                          exit_price=self.exit_price,
                          exit_datetime=self.exit_datetime,
                          profit=self.profit())
 
         log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
-        trade_logger.info(log_frame.format(self.id, self.currency_pair, self.exit_price, self.exit_datetime))
+        trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime))
 
         self.closed = True
 
