@@ -34,20 +34,22 @@ class Strategy:
             self._entry()
 
     def _check_exit(self):
-        if self._exit_rule.can_exit():
+        if self._exit_rule.can_exit(self._trade):
             self._exit()
 
     def start(self, *, sec_wait=1):
         # fixme
         self._alive = True
         while self._alive:
-            bot_logger.info('test')
+            bot_logger.error('alive')
             self.regular_job()
             if self._need_stop():
                 break
             if self._have_position:
+                bot_logger.error('check exit')
                 self._check_exit()
             else:
+                bot_logger.error('check entry')
                 self._check_entry()
             time.sleep(sec_wait)
         else:

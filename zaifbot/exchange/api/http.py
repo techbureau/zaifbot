@@ -68,7 +68,6 @@ class BotTradeApi(ZaifTradeApi):
         def __params_pre_processing(**kwa):
             kwa['currency_pair'] = str(kwa['currency_pair'])
             kwa['action'] = str(kwa['action'])
-            kwa['period'] = str(kwa['period'])
             return kwa
         kwargs = __params_pre_processing(**kwargs)
         return super().trade(**kwargs)

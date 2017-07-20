@@ -7,7 +7,7 @@ def Action(action):
 
 class _TradeAction:
     def __init__(self, action):
-        self._action = action
+        self._action = str(action)
 
     def __str__(self):
         return self._action
