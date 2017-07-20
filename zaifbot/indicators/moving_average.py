@@ -1,10 +1,8 @@
-import time
-
 import pandas as pd
 from pandas import DataFrame as DF
 from talib import abstract as ab
 from zaifbot.exchange.candle_sticks import CandleSticks
-
+from zaifbot.utils import int_time
 from .indicator import Indicator
 
 
@@ -23,7 +21,7 @@ class MA(Indicator):
 
     def _get_ma(self, count, to_epoch_time, name):
         count = self._get_adjusted_count(count)
-        to_epoch_time = to_epoch_time or int(time.time())
+        to_epoch_time = to_epoch_time or int_time()
         candlesticks = DF(CandleSticks(self._currency_pair, self._period).request_data(count, to_epoch_time))
         ma = ab.Function(name)(candlesticks, timeperiod=self._length).rename(name).dropna()
         formatted_ma = pd.concat([candlesticks['time'], ma], axis=1).dropna().astype(object).to_dict(orient='records')
@@ -39,7 +37,7 @@ class EMA(MA):
 
     # todo: 抽象化
     def is_increasing(self):
-        previous, last = self.request_data(2, int(time.time()))
+        previous, last = self.request_data(2, int_time())
         return last['ema'] > previous['ema']
 
     def is_decreasing(self):
@@ -54,7 +52,7 @@ class SMA(MA):
         return self._get_ma(count, to_epoch_time, 'sma')
 
     def is_increasing(self):
-        previous, last = self.request_data(2, int(time.time()))
+        previous, last = self.request_data(2, int_time())
         return last['sma'] > previous['sma']
 
     def is_decreasing(self):

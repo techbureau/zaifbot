@@ -1,9 +1,7 @@
-import time
-
 from zaifbot.db.dao.candle_sticks import CandleSticksDao
 from zaifbot.exchange.api.http import BotPublicApi
 from zaifbot.exchange.period import Period
-from zaifbot.utils import merge_dict
+from zaifbot.utils import merge_dict, int_time
 
 
 class CandleSticks:
@@ -16,7 +14,7 @@ class CandleSticks:
 
     def request_data(self, count=100, to_epoch_time=None):
         count = min(count, self.MAX_COUNT)
-        to_epoch_time = to_epoch_time or int(time.time())
+        to_epoch_time = to_epoch_time or int_time()
         end_time_rounded = self._period.truncate_sec(to_epoch_time)
         start_time = self._period.calc_start(count, end_time_rounded)
 
