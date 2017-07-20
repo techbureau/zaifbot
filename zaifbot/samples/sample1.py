@@ -1,7 +1,7 @@
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.rules.entry.buy_lower_entry import BuyLowerEntry
 from zaifbot.rules.exit.sell_higher_exit import SellHigherExit
-from zaifbot.trade_strategy import Strategy
+from zaifbot.trade.strategy import Strategy
 from zaifbot.utils import preset_keys
 
 """
