@@ -10,3 +10,7 @@ def merge_dict(base_dict, *dicts):
 
 def datetime2timestamp(datetime):
     return int(time.mktime(datetime.timetuple()))
+
+
+def int_time():
+    return int(time.time())
