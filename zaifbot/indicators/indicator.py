@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from talib import abstract
 
 
 class Indicator(metaclass=ABCMeta):
@@ -8,3 +9,7 @@ class Indicator(metaclass=ABCMeta):
     @abstractmethod
     def request_data(self, *args, **kwargs):
         raise NotImplementedError
+
+    @staticmethod
+    def execute_function(name, *args, **kwargs):
+        return abstract.Function(name, *args, **kwargs)
