@@ -26,3 +26,11 @@ class Indicator(metaclass=ABCMeta):
     @abstractmethod
     def name(self):
         raise NotImplementedError
+
+    @classmethod
+    def _bounded_length(cls, value):
+        return min(max(value, 0), cls._MAX_LENGTH)
+
+    @classmethod
+    def _bounded_count(cls, value):
+        return min(max(value, 0), cls._MAX_COUNT)
