@@ -19,9 +19,8 @@ class Indicator(metaclass=ABCMeta):
     def request_data(self, *args, **kwargs):
         raise NotImplementedError
 
-    @classmethod
-    def _exec_talib_func(cls, *args, **kwargs):
-        return abstract.Function(cls.name)(*args, **kwargs)
+    def _exec_talib_func(self, *args, **kwargs):
+        return abstract.Function(self.name)(*args, **kwargs)
 
     def _get_candlesticks_df(self, count, to_epoch_time):
         required_data_count = self._required_candlesticks_count(count)
