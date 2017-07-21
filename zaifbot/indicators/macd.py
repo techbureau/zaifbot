@@ -31,7 +31,7 @@ class MACD(Indicator):
 
     def _get_adjusted_count(self, count):
         return self._bounded_count(count) + self._long + self._signal - 2
-    
+
     @staticmethod
     def _formatting(time_df, macd):
         macd = pd.concat([time_df, macd], axis=1).dropna()
