@@ -20,7 +20,7 @@ def Period(period):
 
 
 class _TradePeriod(metaclass=ABCMeta):
-    _UTC_JP_DIFF = None
+    _UTC_JP_DIFF = 32400
 
     def __init__(self, a):
         self._label = self.get_label()
