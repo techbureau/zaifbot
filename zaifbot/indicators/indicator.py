@@ -20,4 +20,3 @@ class Indicator(metaclass=ABCMeta):
     def get_candlesticks_df(currency_pair, period, count, to_epoch_time):
         candle_sticks_data = CandleSticks(currency_pair, period).request_data(count, to_epoch_time)
         return DataFrame(candle_sticks_data)
-
