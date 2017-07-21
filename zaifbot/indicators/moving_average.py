@@ -21,7 +21,7 @@ class _MA(Indicator, metaclass=ABCMeta):
                                                     self._period, adjusted_count,
                                                     to_epoch_time)
 
-        ma = self._execute_talib(self.name, candlesticks_df, timeperiod=self._length)
+        ma = self._execute_talib(candlesticks_df, timeperiod=self._length)
         formatted_ma = self._formatting(candlesticks_df['time'], ma)
         return formatted_ma
 

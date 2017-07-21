@@ -13,9 +13,9 @@ class Indicator(metaclass=ABCMeta):
     def request_data(self, *args, **kwargs):
         raise NotImplementedError
 
-    @staticmethod
-    def _execute_talib(name, *args, **kwargs):
-        return abstract.Function(name)(*args, **kwargs)
+    @classmethod
+    def _execute_talib(cls, *args, **kwargs):
+        return abstract.Function(cls.name)(*args, **kwargs)
 
     @staticmethod
     def _get_candlesticks_df(currency_pair, period, count, to_epoch_time):

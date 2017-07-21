@@ -10,6 +10,7 @@ _TIME = 'time'
 
 
 class RSI(Indicator):
+    _NAME = 'rsi'
 
     def __init__(self, currency_pair='btc_jpy', period='1d', length=14):
         self._currency_pair = CurrencyPair(currency_pair)
@@ -23,7 +24,7 @@ class RSI(Indicator):
                                                     adjusted_count,
                                                     to_epoch_time)
 
-        rsi = self._execute_talib('rsi', candlesticks_df, price=_CLOSE, timeperiod=self._length).rename('rsi')
+        rsi = self._execute_talib(candlesticks_df, price=_CLOSE, timeperiod=self._length).rename('rsi')
         formatted_rsi = self._formatting(candlesticks_df[_TIME], rsi)
         return formatted_rsi
 
