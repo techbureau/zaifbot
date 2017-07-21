@@ -11,7 +11,7 @@ class _MA(Indicator, metaclass=ABCMeta):
     def request_data(self, count=100, to_epoch_time=None):
         candlesticks_df = self._get_candlesticks_df(count, to_epoch_time)
         ma = self._exec_talib_func(candlesticks_df, timeperiod=self._length)
-        formatted_ma = self._formatting(candlesticks_df['time'], ma)
+        formatted_ma = self._formatting(candlesticks_df, ma)
         return formatted_ma
 
     def is_increasing(self):
@@ -21,12 +21,15 @@ class _MA(Indicator, metaclass=ABCMeta):
     def is_decreasing(self):
         return not self.is_increasing()
 
+    def _formatting(self, candlesticks, ma):
+        ma.rename(self.name, inplace=True)
+        ma_with_time = pd.concat([candlesticks['time'], ma], axis=1)
+        ma_with_time.dropna(inplace=True)
+        dict_ma = ma_with_time.astype(object).to_dict(orient='records')
+        return dict_ma
+
     def _required_candlesticks_count(self, count):
         return self._bounded_count(count) + self._length - 1
-
-    def _formatting(self, time_df, ma):
-        ma = ma.rename(self.name).dropna()
-        return pd.concat([time_df, ma], axis=1).dropna().astype(object).to_dict(orient='records')
 
 
 class EMA(_MA):

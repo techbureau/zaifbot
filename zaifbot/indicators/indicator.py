@@ -24,8 +24,12 @@ class Indicator(metaclass=ABCMeta):
 
     def _get_candlesticks_df(self, count, to_epoch_time):
         required_data_count = self._required_candlesticks_count(count)
-        candle_sticks_data = CandleSticks(self._currency_pair, self._period).request_data(required_data_count,
-                                                                                          to_epoch_time)
+
+        candle_sticks_data = CandleSticks(
+            self._currency_pair,
+            self._period
+        ).request_data(required_data_count, to_epoch_time)
+
         return DataFrame(candle_sticks_data)
 
     @property
