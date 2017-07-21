@@ -15,14 +15,13 @@ class RSI(Indicator):
         self._length = self._bounded_length(length)
 
     def request_data(self, count=100, to_epoch_time=None):
-        adjusted_count = self._adjust_count(count)
-        candlesticks_df = self._get_candlesticks_df(adjusted_count, to_epoch_time)
+        candlesticks_df = self._get_candlesticks_df(count, to_epoch_time)
 
         rsi = self._exec_talib_func(candlesticks_df, price=_CLOSE, timeperiod=self._length).rename('rsi')
         formatted_rsi = self._formatting(candlesticks_df[_TIME], rsi)
         return formatted_rsi
 
-    def _adjust_count(self, count):
+    def _required_candlesticks_count(self, count):
         return self._bounded_count(count) + self._length
 
     @staticmethod

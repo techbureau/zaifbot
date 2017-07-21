@@ -24,14 +24,14 @@ class Indicator(metaclass=ABCMeta):
         return abstract.Function(cls.name)(*args, **kwargs)
 
     def _get_candlesticks_df(self, count, to_epoch_time):
-        candle_sticks = CandleSticks(self._currency_pair, self._period)
-        candle_sticks_data = candle_sticks.request_data(count, to_epoch_time)
+        required_data_count = self._required_candlesticks_count(count)
+        candle_sticks_data = CandleSticks(self._currency_pair, self._period).request_data(required_data_count,
+                                                                                          to_epoch_time)
         return DataFrame(candle_sticks_data)
 
     @property
-    @abstractmethod
     def name(self):
-        raise NotImplementedError
+        return self._NAME
 
     @classmethod
     def _bounded_length(cls, value):
@@ -40,3 +40,7 @@ class Indicator(metaclass=ABCMeta):
     @classmethod
     def _bounded_count(cls, value):
         return min(max(value, 0), cls._MAX_COUNT)
+
+    @abstractmethod
+    def _required_candlesticks_count(self, count):
+        raise NotImplementedError
