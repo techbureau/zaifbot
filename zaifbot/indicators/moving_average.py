@@ -23,7 +23,7 @@ class MA(Indicator):
         count = self._get_adjusted_count(count)
         to_epoch_time = to_epoch_time or int_time()
         candlesticks = DF(CandleSticks(self._currency_pair, self._period).request_data(count, to_epoch_time))
-        ma = ab.Function(name)(candlesticks, timeperiod=self._length).rename(name).dropna()
+        ma = self.execute_function(name, candlesticks, timeperiod=self._length).rename(name).dropna()
         formatted_ma = pd.concat([candlesticks['time'], ma], axis=1).dropna().astype(object).to_dict(orient='records')
         return formatted_ma
 
