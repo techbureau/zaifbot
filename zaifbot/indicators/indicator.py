@@ -12,4 +12,4 @@ class Indicator(metaclass=ABCMeta):
 
     @staticmethod
     def execute_function(name, *args, **kwargs):
-        return abstract.Function(name, *args, **kwargs)
+        return abstract.Function(name)(*args, **kwargs)
