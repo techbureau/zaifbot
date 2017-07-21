@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 from talib import abstract
 from pandas import DataFrame
 from zaifbot.exchange.candle_sticks import CandleSticks
+from zaifbot.exchange.currency_pairs import CurrencyPair
+from zaifbot.exchange.period import Period
 
 
 class Indicator(metaclass=ABCMeta):
@@ -10,8 +12,8 @@ class Indicator(metaclass=ABCMeta):
     _NAME = None
 
     def __init__(self, currency_pair, period):
-        self._currency_pair = currency_pair
-        self._period = period
+        self._currency_pair = CurrencyPair(currency_pair)
+        self._period = Period(period)
 
     @abstractmethod
     def request_data(self, *args, **kwargs):

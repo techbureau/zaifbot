@@ -1,14 +1,11 @@
 from abc import ABCMeta
 import pandas as pd
 from .indicator import Indicator
-from zaifbot.exchange.currency_pairs import CurrencyPair
-from zaifbot.exchange.period import Period
 
 
 class _MA(Indicator, metaclass=ABCMeta):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=25):
-        self._currency_pair = CurrencyPair(currency_pair)
-        self._period = Period(period)
+        super().__init__(currency_pair, period)
         self._length = self._bounded_length(length)
 
     @property
@@ -17,11 +14,9 @@ class _MA(Indicator, metaclass=ABCMeta):
 
     def request_data(self, count=100, to_epoch_time=None):
         adjusted_count = self._adjust_count(count)
-        candlesticks_df = self._get_candlesticks_df(self._currency_pair,
-                                                    self._period, adjusted_count,
-                                                    to_epoch_time)
+        candlesticks_df = self._get_candlesticks_df(adjusted_count, to_epoch_time)
 
-        ma = self._execute_talib(candlesticks_df, timeperiod=self._length)
+        ma = self._exec_talib_func(candlesticks_df, timeperiod=self._length)
         formatted_ma = self._formatting(candlesticks_df['time'], ma)
         return formatted_ma
 
