@@ -9,17 +9,21 @@ class Indicator(metaclass=ABCMeta):
     _MAX_COUNT = 1000
     _NAME = None
 
+    def __init__(self, currency_pair, period):
+        self._currency_pair = currency_pair
+        self._period = period
+
     @abstractmethod
     def request_data(self, *args, **kwargs):
         raise NotImplementedError
 
     @classmethod
-    def _execute_talib(cls, *args, **kwargs):
+    def _exec_talib_func(cls, *args, **kwargs):
         return abstract.Function(cls.name)(*args, **kwargs)
 
-    @staticmethod
-    def _get_candlesticks_df(currency_pair, period, count, to_epoch_time):
-        candle_sticks_data = CandleSticks(currency_pair, period).request_data(count, to_epoch_time)
+    def _get_candlesticks_df(self, count, to_epoch_time):
+        candle_sticks = CandleSticks(self._currency_pair, self._period)
+        candle_sticks_data = candle_sticks.request_data(count, to_epoch_time)
         return DataFrame(candle_sticks_data)
 
     @property
