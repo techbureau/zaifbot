@@ -21,23 +21,19 @@ setup(
         'License :: OSI Approved :: MIT License'
     ],
     install_requires=[
-        'zaifapi==1.5.3',
-        'numpy==1.12.0',
-        'pandas==0.20.1',
-        'reportlab==3.4.0',
-        'SQLAlchemy==1.1.5',
-        'websocket-client==0.40.0',
-        'slackclient==1.0.5',
-        'plotly==2.0.8',
-        'pytz==2017.2',
+        'zaifapi>=1.5.3',
+        'numpy',
+        'pandas',
+        'SQLAlchemy',
+        'websocket-client',
+        'slackclient',
+        'pytz',
+        'slack_logger',
         'TA-Lib==0.4.10',
-        'slack_logger==0.1.2'
     ],
     entry_points="""\
       [console_scripts]
-      update_assignee_id = zaifbot:main
       init_database = zaifbot.setup:init_database
       install_ta_lib = zaifbot:install_ta_lib
       """,
-    include_package_data=True
 )
