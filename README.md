@@ -1,5 +1,6 @@
 # Zaifbot
 [![PyPI version](https://badge.fury.io/py/zaifbot.svg)](https://badge.fury.io/py/zaifbot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 zaifに対して自動的に取引を行うbot用のライブラリになります。
 
