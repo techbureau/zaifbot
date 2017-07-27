@@ -16,6 +16,7 @@ setup(
     url='https://github.com/techbureau/zaifbot',
     author='AkiraTaniguchi DaikiShiroi Monji',
     author_email='a.taniguchi@techbureau.jp daikishiroi@gmail.com',
+    include_package_data=True,
     packages=find_packages(),
     license='MIT',
     keywords='zaif bit coin btc xem mona jpy virtual currency block chain bot',
