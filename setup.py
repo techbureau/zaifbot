@@ -3,11 +3,16 @@ from zaifbot import install_ta_lib
 
 install_ta_lib()
 
+
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
 setup(
     name='zaifbot',
     version='0.0.4',
-    description='Zaif Bot Library',
-    long_description='https://pypi.python.org/pypi/zaifbot',
+    description='trading bot framework for zaif exchange',
+    long_description='',
     url='https://github.com/techbureau/zaifbot',
     author='AkiraTaniguchi DaikiShiroi Monji',
     author_email='a.taniguchi@techbureau.jp daikishiroi@gmail.com',
@@ -15,13 +20,17 @@ setup(
     license='MIT',
     keywords='zaif bit coin btc xem mona jpy virtual currency block chain bot',
     classifiers=[
-        'Development Status :: 1 - Planning',
-        'Programming Language :: Python',
+        'Programming Language :: Python'
+        'Development Status :: 4 - Beta'
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License'
     ],
     install_requires=[
-        'zaifapi>=1.5.3',
+        'zaifapi',
         'numpy',
         'pandas',
         'SQLAlchemy',
@@ -29,7 +38,7 @@ setup(
         'slackclient',
         'pytz',
         'slack_logger',
-        'TA-Lib==0.4.10',
+        'TA-Lib',
     ],
     entry_points="""\
       [console_scripts]
