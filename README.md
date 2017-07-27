@@ -1,4 +1,5 @@
-# Welcome to Zaifbot!
+# Zaifbot
+[![PyPI version](https://badge.fury.io/py/zaifbot.svg)](https://badge.fury.io/py/zaifbot)
 
 zaifに対して自動的に取引を行うbot用のライブラリになります。
 
