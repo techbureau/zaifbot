@@ -20,8 +20,8 @@ setup(
     license='MIT',
     keywords='zaif bit coin btc xem mona jpy virtual currency block chain bot',
     classifiers=[
-        'Programming Language :: Python'
-        'Development Status :: 4 - Beta'
+        'Programming Language :: Python',
+        'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
