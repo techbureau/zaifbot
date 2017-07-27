@@ -23,8 +23,8 @@ class _TradePeriod(metaclass=ABCMeta):
     _UTC_JP_DIFF = 32400
 
     def __init__(self, a):
-        self._label = self.label()
-        self._sec = self.sec()
+        self._label = self.label
+        self._sec = self.sec
 
     def __str__(self):
         return self._label
@@ -82,6 +82,7 @@ class _OneDay(_TradePeriod):
     def label(self):
         return '1d'
 
+    @property
     def sec(self):
         return 86400
 
@@ -95,9 +96,11 @@ class _OneDay(_TradePeriod):
 
 
 class _TwelveHour(_TradePeriod):
+    @property
     def label(self):
         return '12h'
 
+    @property
     def sec(self):
         return 43200
 
@@ -111,9 +114,11 @@ class _TwelveHour(_TradePeriod):
 
 
 class _EightHour(_TradePeriod):
+    @property
     def label(self):
         return '8h'
 
+    @property
     def sec(self):
         return 28800
 
@@ -127,9 +132,11 @@ class _EightHour(_TradePeriod):
 
 
 class _FourHour(_TradePeriod):
+    @property
     def label(self):
         return '4h'
 
+    @property
     def sec(self):
         return 14400
 
@@ -143,9 +150,11 @@ class _FourHour(_TradePeriod):
 
 
 class _OneHour(_TradePeriod):
+    @property
     def label(self):
         return '1h'
 
+    @property
     def sec(self):
         return 3600
 
@@ -159,9 +168,11 @@ class _OneHour(_TradePeriod):
 
 
 class _ThirtyMinutes(_TradePeriod):
+    @property
     def label(self):
         return '30m'
 
+    @property
     def sec(self):
         return 1800
 
@@ -175,9 +186,11 @@ class _ThirtyMinutes(_TradePeriod):
 
 
 class _FifteenMinutes(_TradePeriod):
+    @property
     def label(self):
         return '15m'
 
+    @property
     def sec(self):
         return 900
 
@@ -191,9 +204,11 @@ class _FifteenMinutes(_TradePeriod):
 
 
 class _FiveMinutes(_TradePeriod):
+    @property
     def label(self):
         return '5m'
 
+    @property
     def sec(self):
         return 300
 
@@ -208,9 +223,11 @@ class _FiveMinutes(_TradePeriod):
 
 
 class _OneMinute(_TradePeriod):
+    @property
     def label(self):
         return '1m'
 
+    @property
     def sec(self):
         return 60
 
