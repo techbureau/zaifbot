@@ -2,7 +2,7 @@ def Action(action):
     for cls in _TradeAction.__subclasses__():
         if cls.is_my_action(action):
             return cls(action)
-    raise ValueError
+    raise ValueError('illegal argument')
 
 
 class _TradeAction:
@@ -29,6 +29,10 @@ class _Buy(_TradeAction):
     def opposite_action():
         return Action('bid')
 
+    @property
+    def name(self):
+        return 'ask'
+
 
 class _Sell(_TradeAction):
     @staticmethod
@@ -38,6 +42,10 @@ class _Sell(_TradeAction):
     @staticmethod
     def opposite_action():
         return Action('ask')
+
+    @property
+    def name(self):
+        return 'bid'
 
 
 Sell = Action('ask')

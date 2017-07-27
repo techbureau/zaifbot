@@ -1,6 +1,6 @@
 from zaifbot.db.dao.candle_sticks import CandleSticksDao
 from zaifbot.exchange.api.http import BotPublicApi
-from zaifbot.exchange.period import Period
+from zaifbot.exchange import Period, CurrencyPair
 from zaifbot.utils import merge_dict, int_time
 
 
@@ -8,7 +8,7 @@ class CandleSticks:
     MAX_COUNT = 1500
 
     def __init__(self, currency_pair, period):
-        self._currency_pair = currency_pair
+        self._currency_pair = CurrencyPair(currency_pair)
         self._period = Period(period)
         self._dao = CandleSticksDao(self._currency_pair, self._period)
 
@@ -33,7 +33,7 @@ class CandleSticks:
         api_params = {'period': self._period, 'count': count, 'to_epoch_time': to_epoch_time}
         records = public_api.everything('ohlc_data', self._currency_pair, api_params)
         db_records = [merge_dict(record,
-                                 {'currency_pair': str(self._currency_pair), 'period': str(self._period)})
+                                 {'currency_pair': self._currency_pair.name, 'period': self._period.label})
                       for record in records]
         self._dao.create_multiple(db_records)
         return records
@@ -43,6 +43,7 @@ class CandleSticks:
         return records
 
     @staticmethod
+    # todo: move to candle_sticks_dao
     def _row2dict(row):
         dict_row = row.__dict__
         dict_row.pop('_sa_instance_state', None)

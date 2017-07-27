@@ -23,8 +23,8 @@ class _TradePeriod(metaclass=ABCMeta):
     _UTC_JP_DIFF = 32400
 
     def __init__(self, a):
-        self._label = self.get_label()
-        self._sec = self.get_sec()
+        self._label = self.label
+        self._sec = self.sec
 
     def __str__(self):
         return self._label
@@ -41,12 +41,14 @@ class _TradePeriod(metaclass=ABCMeta):
             return self._sec == other
         return False
 
+    @property
     @abstractclassmethod
-    def get_label(self):
+    def label(self):
         raise NotImplementedError
 
+    @property
     @abstractclassmethod
-    def get_sec(self):
+    def sec(self):
         raise NotImplementedError
 
     @abstractclassmethod
@@ -58,28 +60,30 @@ class _TradePeriod(metaclass=ABCMeta):
         raise NotImplementedError
 
     def truncate_sec(self, sec):
-        if self.get_sec() > Period('1h').get_sec():
-            return sec - ((sec + self._UTC_JP_DIFF) % self.get_sec())
+        if self.sec() > Period('1h').sec():
+            return sec - ((sec + self._UTC_JP_DIFF) % self.sec())
         else:
-            return sec - (sec % self.get_sec())
+            return sec - (sec % self.sec())
 
     def calc_count(self, start_sec, end_sec):
         round_end_sec = self.truncate_sec(end_sec)
         round_start_sec = self.truncate_sec(start_sec)
-        count = int((round_end_sec - round_start_sec) / self.get_sec())
+        count = int((round_end_sec - round_start_sec) / self.sec())
         return count
 
     def calc_start(self, count, end_sec):
         round_end_sec = self.truncate_sec(end_sec)
-        start_sec = round_end_sec - self.get_sec() * count
+        start_sec = round_end_sec - self.sec() * count
         return start_sec
 
 
 class _OneDay(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '1d'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 86400
 
     @staticmethod
@@ -88,15 +92,16 @@ class _OneDay(_TradePeriod):
 
     @staticmethod
     def is_my_sec(sec):
-        print(sec)
         return sec == 86400
 
 
 class _TwelveHour(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '12h'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 43200
 
     @staticmethod
@@ -109,10 +114,12 @@ class _TwelveHour(_TradePeriod):
 
 
 class _EightHour(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '8h'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 28800
 
     @staticmethod
@@ -125,10 +132,12 @@ class _EightHour(_TradePeriod):
 
 
 class _FourHour(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '4h'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 14400
 
     @staticmethod
@@ -141,10 +150,12 @@ class _FourHour(_TradePeriod):
 
 
 class _OneHour(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '1h'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 3600
 
     @staticmethod
@@ -157,10 +168,12 @@ class _OneHour(_TradePeriod):
 
 
 class _ThirtyMinutes(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '30m'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 1800
 
     @staticmethod
@@ -173,10 +186,12 @@ class _ThirtyMinutes(_TradePeriod):
 
 
 class _FifteenMinutes(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '15m'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 900
 
     @staticmethod
@@ -189,10 +204,12 @@ class _FifteenMinutes(_TradePeriod):
 
 
 class _FiveMinutes(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '5m'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 300
 
     @staticmethod
@@ -206,10 +223,12 @@ class _FiveMinutes(_TradePeriod):
 
 
 class _OneMinute(_TradePeriod):
-    def get_label(self):
+    @property
+    def label(self):
         return '1m'
 
-    def get_sec(self):
+    @property
+    def sec(self):
         return 60
 
     @staticmethod
