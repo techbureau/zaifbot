@@ -1,6 +1,7 @@
 from zaifbot.db.dao.candle_sticks import CandleSticksDao
 from zaifbot.exchange.api.http import BotPublicApi
-from zaifbot.exchange import Period, CurrencyPair
+from zaifbot.exchange.period import Period
+from zaifbot.exchange.currency_pairs import CurrencyPair
 from zaifbot.utils import merge_dict, int_time
 
 
