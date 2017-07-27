@@ -8,7 +8,7 @@ class EntryForTest(Entry):
         return True
 
 
-class TradeForTest:
+class TradeForEntryTest:
     def entry(self):
         pass
 
@@ -20,7 +20,7 @@ class TestEntry(unittest.TestCase):
                              action='bid')
 
         entry._create_new_trade = Mock()
-        trade_mock = Mock(spec=TradeForTest)
+        trade_mock = Mock(spec=TradeForEntryTest)
         entry._create_new_trade.return_value = trade_mock
         entry.entry()
 
