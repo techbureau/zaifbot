@@ -14,9 +14,13 @@ class Entry(Rule):
         raise NotImplementedError
 
     def entry(self):
-        trade = Trade()
+        trade = self._create_new_trade()
         trade.entry(currency_pair=self._currency_pair,
                     amount=self._amount,
                     action=self._action)
 
         return trade
+
+    @staticmethod
+    def _create_new_trade():
+        return Trade()
