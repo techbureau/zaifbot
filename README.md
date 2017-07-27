@@ -1,4 +1,6 @@
 # Zaifbot
+:chart_with_upwards_trend: trading bot for zaif exchange
+
 [![PyPI version](https://badge.fury.io/py/zaifbot.svg)](https://badge.fury.io/py/zaifbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
