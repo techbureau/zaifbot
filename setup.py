@@ -5,14 +5,14 @@ install_ta_lib()
 
 
 def readme():
-    with open('README.rst') as f:
+    with open('README.rst', encoding='utf-8') as f:
         return f.read()
 
 setup(
     name='zaifbot',
-    version='0.0.4',
+    version='0.0.5',
     description='trading bot framework for zaif exchange',
-    long_description='',
+    long_description=readme(),
     url='https://github.com/techbureau/zaifbot',
     author='AkiraTaniguchi DaikiShiroi Monji',
     author_email='a.taniguchi@techbureau.jp daikishiroi@gmail.com',
