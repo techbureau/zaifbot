@@ -1,5 +1,5 @@
 from zaifbot.trade.tools import last_price
-from zaifbot.rules.exit import Exit
+from zaifbot.rules.exit.base import Exit
 
 
 class BuyLowerExit(Exit):
