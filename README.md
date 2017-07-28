@@ -60,7 +60,7 @@ See our [getting started tutorial](https://techbureau.github.io/zaifbot)
 
 the following code implements a simple trading algorithm using zaifbot
 
-```pyhon
+```python
 from zaifbot.trade import Strategy
 from zaifbot.rules import Entry, Exit
 from zaifbot.config import set_keys
