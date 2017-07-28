@@ -23,7 +23,7 @@ class ZaifBot:
 def install_ta_lib():
     if sys.platform.startswith('linux'):
         cwd = os.path.join(os.path.dirname(__file__), './setup')
-        subprocess.call(["./install_ta_lib.sh"], cwd=cwd)
+        subprocess.call(["./install_ta_lib.sh"], cwd=cwd, shell=True)
         return
 
     if sys.platform.startswith('darwin'):
