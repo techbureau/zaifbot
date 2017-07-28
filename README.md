@@ -61,7 +61,38 @@ See our [getting started tutorial](https://techbureau.github.io/zaifbot)
 the following code implements a simple trading algorithm using zaifbot
 
 ```pyhon
-some code
+from zaifbot.trade import Strategy
+from zaifbot.rules import Entry, Exit
+from zaifbot.config import set_keys
+from zaifbot.trade.tools import last_price
+
+# setting your Zaif API key
+set_keys(key='your_key', secret='your_secret')
+
+
+class BuyWhenCheap(Entry):
+    def can_entry(self):
+        if last_price(self._currency_pair.name) < 25000:
+            return True
+        return False
+
+
+class ExitWhenPriceGoUp(Exit):
+    def can_exit(self, trade):
+        current_price = last_price(trade.currency_pair.name)
+        if current_price > trade.entry_price + 5000:
+            return True
+        return False
+
+my_entry = BuyWhenCheap(currency_pair='btc_jpy',
+                        amount=0.01,
+                        action='bid')
+my_exit = ExitWhenPriceGoUp()
+
+my_strategy = Strategy(entry_rule=my_entry,
+                       exit_rule=my_exit)
+
+my_strategy.start(sec_wait=1)
 ```
 
 ## Feedback
