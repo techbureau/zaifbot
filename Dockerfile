@@ -1,34 +1,18 @@
-FROM ubuntu:latest
+FROM python:3.5.3
 MAINTAINER DaikiShiroi <daikishiroi@gmail.com>
 
-RUN apt-get update
+COPY . /zaifbot
 
-RUN apt-get install -y \
-  build-essential \
-  python-setuptools \
-  python-dev \
-  python-pip \
-  gfortran \
-  libopenblas-dev \
-  liblapack-dev \
-  pkg-config \
-  wget \
+WORKDIR /zaifbot
 
-RUN pip install numpy \
-  scipy \
-  pandas \
-  patsy \
-  statsmodels \
+WORKDIR /zaifbot/zaifbot/setup
+RUN tar -xzf ta-lib-0.4.0-src.tar.gz
+WORKDIR ta-lib
+RUN ./configure --prefix=/usr
+RUN make
+RUN make install
 
-# TA-Lib
-RUN cd /tmp; \
-	wget http://sourceforge.net/projects/ta-lib/files/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz; \
-	tar -xzf ta-lib-0.4.0-src.tar.gz; \
-	cd ta-lib; \
-	./configure ; make; make install; \
-	cd ..; \
-	rm ta-lib-0.4.0-src.tar.gz; \
-	rm -rf ta-lib
-RUN pip install TA-Lib
+WORKDIR /zaifbot
+RUN pip install -r requirements.txt
 
-RUN pip install zaifbot==0.0.5
+RUN pip install -e .['talib']

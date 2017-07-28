@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
-from zaifbot import install_ta_lib, __version__
-
-install_ta_lib()
+from zaifbot import __version__
 
 
 def readme():
@@ -31,16 +29,17 @@ setup(
         'License :: OSI Approved :: MIT License'
     ],
     install_requires=[
-        'zaifapi',
-        'numpy',
-        'pandas',
         'SQLAlchemy',
-        'websocket-client',
         'slackclient',
         'pytz',
         'slack_logger',
-        'TA-Lib',
+        'zaifapi',
+        'numpy',
+        'pandas',
     ],
+    extras_require={
+        'talib': ['TA-Lib'],
+    },
     entry_points="""\
       [console_scripts]
       init_database = zaifbot.setup:init_database
