@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from zaifbot import install_ta_lib
+from zaifbot import install_ta_lib, __version__
 
 install_ta_lib()
 
@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name='zaifbot',
-    version='0.0.5',
+    version=__version__,
     description='trading bot framework for zaif exchange',
     long_description=readme(),
     url='https://github.com/techbureau/zaifbot',
