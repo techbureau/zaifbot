@@ -1,5 +1,5 @@
 from zaifbot.trade.tools import last_price
-from zaifbot.rules.entry import Entry
+from zaifbot.rules.entry.base import Entry
 
 
 class SellHigherEntry(Entry):
