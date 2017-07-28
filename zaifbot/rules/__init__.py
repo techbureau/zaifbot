@@ -1,2 +1,2 @@
-from .entry import Entry
+from .entry.base import Entry
 from .exit import Exit
