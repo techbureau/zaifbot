@@ -17,7 +17,6 @@ It is developed using Python 3.5.3 and tested in Python 3.4, 3.5, 3.6.
 * You don't have to prepare market data. Zaifbot internal get data from [zaif API][zaifapi]
 
 To get started with Zaifbot take a look at the [tutorial][wikitutorial] and the [full documentation][wikitop].  
-
 **[ZaifBotドキュメント][wikitop]**
 
 **Note:** ZaifBot is unofficial library of [Tech Bureau, Inc.][techbureau] Please use it at your own risk.  
