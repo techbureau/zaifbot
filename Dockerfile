@@ -3,8 +3,6 @@ MAINTAINER DaikiShiroi <daikishiroi@gmail.com>
 
 COPY . /zaifbot
 
-WORKDIR /zaifbot
-
 WORKDIR /zaifbot/zaifbot/setup
 RUN tar -xzf ta-lib-0.4.0-src.tar.gz
 WORKDIR ta-lib
