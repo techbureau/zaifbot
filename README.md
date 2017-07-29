@@ -16,8 +16,9 @@ It is developed using Python 3.5.3 and tested in Python 3.4, 3.5, 3.6.
 * Technical indicators like SMA, EMA, Bollinger Bands, RSI, ADX
 * You don't have to prepare market data. Zaifbot internal get data from [zaif API][zaifapi]
 
-To get started with Zaifbot take a look at the [tutorial](notyet) and the [full documentation](notyet).  
-[日本語ドキュメントはこちら](notyet)
+To get started with Zaifbot take a look at the [tutorial][wikitutorial] and the [full documentation][wikitop].  
+
+**[ZaifBotドキュメント][wikitop]**
 
 **Note:** ZaifBot is unofficial library of [Tech Bureau, Inc.][techbureau] Please use it at your own risk.  
 
@@ -56,7 +57,7 @@ Your Trade records will be saved in this file.
 
 ## Quick Start
 
-See our [getting started tutorial](https://techbureau.github.io/zaifbot)
+See our [getting started tutorial][wikitutorial]
 
 the following code implements a simple trading algorithm using zaifbot
 
@@ -108,3 +109,5 @@ not yet
 [zaifapi]: http://techbureau-api-document.readthedocs.io/ja/latest/index.html
 [zaifpypi]: https://pypi.python.org/pypi/zaifbot
 [techbureau]: http://techbureau.jp/
+[wikitop]: https://github.com/techbureau/zaifbot/wiki/zaifbot%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95
+[wikitutorial]: https://github.com/techbureau/zaifbot/wiki/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB
