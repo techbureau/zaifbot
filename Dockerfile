@@ -4,13 +4,8 @@ MAINTAINER DaikiShiroi <daikishiroi@gmail.com>
 COPY . /zaifbot
 
 WORKDIR /zaifbot/zaifbot/setup
-RUN tar -xzf ta-lib-0.4.0-src.tar.gz
-WORKDIR ta-lib
-RUN ./configure --prefix=/usr
-RUN make
-RUN make install
+RUN ./install_ta_lib.sh
 
 WORKDIR /zaifbot
 RUN pip install -r requirements.txt
-
-RUN pip install -e .['talib']
+RUN pip install -e .
