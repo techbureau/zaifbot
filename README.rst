@@ -30,6 +30,16 @@ instaling with pip
 
 After activating an isolated Python environment, run
 
+
+.. code:: bass
+
+    $ install_ta_lib
+
+TA-Lib is open-source library of technical analysis indicators that ZaifBot is dependent on.  
+This command install TA-Lib in your operating system.
+
+then,
+
 .. code:: bash
 
     $ pip install zaifbot
