@@ -1,5 +1,5 @@
 # ZaifBot
-:chart_with_upwards_trend: trading bot for zaif exchange
+:chart_with_upwards_trend: algorithmic trading bot for zaif exchange
 
 [![Python version](https://img.shields.io/badge/python-3.4%2C%203.5%2C%203.6-blue.svg)][zaifpypi]
 [![PyPI version](https://badge.fury.io/py/zaifbot.svg)](https://badge.fury.io/py/zaifbot)
