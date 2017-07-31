@@ -1,29 +1,33 @@
-import time
-
 import pandas as pd
-from pandas import DataFrame as DF
-from talib import abstract as ab
-from zaifbot.period import Period
-
-from .candle_sticks import CandleSticks
+from talib import MA_Type
 from .indicator import Indicator
 
 
-class BBands(Indicator):
-    def __init__(self, currency_pair='btc_jpy', period='1d', length=25):
-        self._currency_pair = currency_pair
-        self._period = Period(period)
-        self._length = min(length, self.MAX_LENGTH)
+class BBANDS(Indicator):
+    _NAME = 'bbands'
+
+    def __init__(self, currency_pair='btc_jpy', period='1d', length=25, matype=MA_Type.EMA):
+        super().__init__(currency_pair, period)
+        self._length = self._bounded_length(length)
+        self._matype = matype
 
     def request_data(self, count=100, lowbd=2, upbd=2, to_epoch_time=None):
-        to_epoch_time = to_epoch_time or int(time.time())
-        count = self._calc_price_count(min(count, self.MAX_COUNT))
-        end_time = self._period.truncate_sec(to_epoch_time)
-        candlesticks = DF(CandleSticks(self._currency_pair, self._period).request_data(count, end_time))
-        bbands = ab.BBANDS(candlesticks, timeperiod=self._length, nbdevup=upbd, nbdevdn=lowbd, matype=0).dropna()
-        formatted_bbands = pd.concat([candlesticks['time'], bbands[['lowerband', 'upperband']]], axis=1).dropna().\
-            astype(object).to_dict(orient='records')
+        candlesticks_df = self._get_candlesticks_df(count, to_epoch_time)
+        bbands = self._exec_talib_func(candlesticks_df,
+                                       timeperiod=self._length,
+                                       nbdevup=upbd,
+                                       nbdevdn=lowbd,
+                                       matype=self._matype)
+
+        formatted_bbands = self._formatting(candlesticks_df, bbands)
         return formatted_bbands
 
-    def _calc_price_count(self, count):
-        return self._length + count - 1
+    def _required_candlesticks_count(self, count):
+        return self._length + self._bounded_count(count) - 1
+
+    @staticmethod
+    def _formatting(candlesticks_df, bbands):
+        bbands_with_time = pd.concat([candlesticks_df['time'], bbands[['lowerband', 'upperband']]], axis=1)
+        bbands_with_time.dropna(inplace=True)
+        dict_bands = bbands_with_time.astype(object).to_dict(orient='records')
+        return dict_bands

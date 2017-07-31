@@ -95,6 +95,6 @@ ENV/
 *.db
 
 # for empty directory
-!.gitkeep
+!.keep
 
 test.py

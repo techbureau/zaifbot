@@ -1,60 +1,40 @@
-import time
-
+from abc import ABCMeta
 import pandas as pd
-from pandas import DataFrame as DF
-from talib import abstract as ab
-
 from .indicator import Indicator
-from .candle_sticks import CandleSticks
 
 
-class MA(Indicator):
+class _MA(Indicator, metaclass=ABCMeta):
     def __init__(self, currency_pair='btc_jpy', period='1d', length=25):
-        self._currency_pair = currency_pair
-        self._period = period
-        self._length = min(length, self.MAX_LENGTH)
+        super().__init__(currency_pair, period)
+        self._length = self._bounded_length(length)
 
-    def request_data(self, count, to_epoch_time):
-        raise NotImplementedError
-
-    def _calc_price_count(self, count):
-        return count + self._length - 1
-
-    def _get_ma(self, count, to_epoch_time, name):
-        count = self._calc_price_count(min(count, self.MAX_COUNT))
-        to_epoch_time = to_epoch_time or int(time.time())
-        candlesticks = DF(CandleSticks(self._currency_pair, self._period).request_data(count, to_epoch_time))
-        ma = ab.Function(name)(candlesticks, timeperiod=self._length).rename(name).dropna()
-        formatted_ma = pd.concat([candlesticks['time'], ma], axis=1).dropna().astype(object).to_dict(orient='records')
+    def request_data(self, count=100, to_epoch_time=None):
+        candlesticks_df = self._get_candlesticks_df(count, to_epoch_time)
+        ma = self._exec_talib_func(candlesticks_df, timeperiod=self._length)
+        formatted_ma = self._formatting(candlesticks_df, ma)
         return formatted_ma
 
-
-class EMA(MA):
-    def __init__(self, currency_pair='btc_jpy', period='1d', length=25):
-        super().__init__(currency_pair, period, length)
-
-    def request_data(self, count=100, to_epoch_time=None):
-        return self._get_ma(count, to_epoch_time, 'ema')
-
-    # todo: 抽象化
     def is_increasing(self):
-        previous, last = self.request_data(2, int(time.time()))
-        return last['ema'] > previous['ema']
+        previous, last = self.request_data(count=2)
+        return last[self.name] > previous[self.name]
 
     def is_decreasing(self):
         return not self.is_increasing()
 
+    def _formatting(self, candlesticks, ma):
+        ma.rename(self.name, inplace=True)
+        ma_with_time = pd.concat([candlesticks['time'], ma], axis=1)
+        ma_with_time.dropna(inplace=True)
+        dict_ma = ma_with_time.astype(object).to_dict(orient='records')
+        return dict_ma
 
-class SMA(MA):
-    def __init__(self, currency_pair='btc_jpy', period='1d', length=25):
-        super().__init__(currency_pair, period, length)
+    def _required_candlesticks_count(self, count):
+        return self._bounded_count(count) + self._length - 1
 
-    def request_data(self, count=100, to_epoch_time=None):
-        return self._get_ma(count, to_epoch_time, 'sma')
 
-    def is_increasing(self):
-        previous, last = self.request_data(2, int(time.time()))
-        return last['sma'] > previous['sma']
+class EMA(_MA):
+    _NAME = 'ema'
 
-    def is_decreasing(self):
-        return not self.is_increasing()
+
+class SMA(_MA):
+    _NAME = 'sma'

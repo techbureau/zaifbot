@@ -1,29 +1,27 @@
 import pandas as pd
-from pandas import DataFrame as DF
-from talib import abstract as ab
 from .indicator import Indicator
-from .candle_sticks import CandleSticks
-
-_HIGH = 'high'
-_LOW = 'low'
-_CLOSE = 'close'
-_TIME = 'time'
 
 
 class RSI(Indicator):
-    MAX_LENGTH = 100
-    MAX_COUNT = 1000
+    _NAME = 'rsi'
 
     def __init__(self, currency_pair='btc_jpy', period='1d', length=14):
-        self._currency_pair = currency_pair
-        self._period = period
-        self._length = min(length, self.MAX_LENGTH)
+        super().__init__(currency_pair, period)
+        self._length = self._bounded_length(length)
 
-    def request_data(self, count=MAX_COUNT, to_epoch_time=None):
-        count = min(count, self.MAX_COUNT)
-        count_needed = count + self._length
-        candlesticks = CandleSticks(self._currency_pair, self._period)
-        df = DF(candlesticks.request_data(count_needed, to_epoch_time))
-        rsi = ab.RSI(df, price=_CLOSE, timeperiod=self._length).rename('rsi')
-        rsi = pd.concat([df[_TIME], rsi], axis=1).dropna()
-        return rsi.astype(object).to_dict(orient='records')
+    def request_data(self, count=100, to_epoch_time=None):
+        candlesticks_df = self._get_candlesticks_df(count, to_epoch_time)
+
+        rsi = self._exec_talib_func(candlesticks_df, price='close', timeperiod=self._length)
+        formatted_rsi = self._formatting(candlesticks_df, rsi)
+        return formatted_rsi
+
+    def _required_candlesticks_count(self, count):
+        return self._bounded_count(count) + self._length
+
+    def _formatting(self, candlesticks, rsi):
+        rsi.rename(self.name, inplace=True)
+        rsi_with_time = pd.concat([candlesticks['time'], rsi], axis=1)
+        rsi_with_time.dropna(inplace=True)
+        dict_rsi = rsi_with_time.astype(object).to_dict(orient='records')
+        return dict_rsi

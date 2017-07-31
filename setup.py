@@ -1,43 +1,50 @@
 from setuptools import setup, find_packages
-from zaifbot import install_ta_lib
+from zaifbot import __version__
 
-install_ta_lib()
+
+def readme():
+    with open('README.rst', encoding='utf-8') as f:
+        return f.read()
 
 setup(
     name='zaifbot',
-    version='0.0.4',
-    description='Zaif Bot Library',
-    long_description='https://pypi.python.org/pypi/zaifbot',
-    url='https://github.com/Akira-Taniguchi/zaifbot',
-    author='AkiraTaniguchi Monji',
+    version=__version__,
+    description='trading bot framework for zaif exchange',
+    long_description=readme(),
+    url='https://github.com/techbureau/zaifbot',
+    author='AkiraTaniguchi DaikiShiroi Monji',
     author_email='a.taniguchi@techbureau.jp daikishiroi@gmail.com',
+    include_package_data=True,
     packages=find_packages(),
     license='MIT',
     keywords='zaif bit coin btc xem mona jpy virtual currency block chain bot',
     classifiers=[
-        'Development Status :: 1 - Planning',
         'Programming Language :: Python',
+        'Development Status :: 4 - Beta',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License'
     ],
     install_requires=[
+        'SQLAlchemy',
+        'slackclient',
+        'pytz',
+        'requests==2.13.0',
+        'slack_logger',
         'zaifapi==1.5.3',
-        'numpy==1.12.0',
-        'pandas==0.20.1',
-        'reportlab==3.4.0',
-        'SQLAlchemy==1.1.5',
-        'websocket-client==0.40.0',
-        'slackclient==1.0.5',
-        'plotly==2.0.8',
-        'pytz==2017.2',
-        'TA-Lib==0.4.10',
-        'slack_logger==0.1.2'
+        'numpy',
+        'pandas',
+        'websocket-client==0.40.0'
     ],
+    extras_require={
+        'ta-lib': ['TA-Lib']
+    },
     entry_points="""\
       [console_scripts]
-      update_assignee_id = zaifbot:main
       init_database = zaifbot.setup:init_database
       install_ta_lib = zaifbot:install_ta_lib
       """,
-    include_package_data=True
 )
