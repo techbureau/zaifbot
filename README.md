@@ -46,7 +46,7 @@ After installing Zaifbot, run
 ```bash
 $ install_ta_lib
 ```
-TA-Lib is open-source library of technical analysis indicators that ZaifBot is dependent on.  
+TA-Lib is open-source library of technical analysis indicators that ZaifBot is depending on.  
 This command install TA-Lib in your operating system.
 
 then, 

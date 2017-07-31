@@ -36,9 +36,9 @@ class Trade:
         trade_obj = self._dao.create(currency_pair=self.currency_pair.name,
                                      amount=self.amount,
                                      entry_price=self.entry_price,
-                                     action=self.action.label)
+                                     action=self.action.name)
 
-        self.id_ = trade_obj.id
+        self.id_ = trade_obj.id_
         log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
                     " amount: {}, entry_price: {}, entry_datetime: {}}}"
         trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.action,

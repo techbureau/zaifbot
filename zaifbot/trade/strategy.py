@@ -38,15 +38,16 @@ class Strategy:
         # fixme
         self._alive = True
         while self._alive:
-            bot_logger.error('alive')
+            # fixme: output to console too
+            bot_logger.info('alive')
             self.regular_job()
             if self._need_stop():
                 break
             if self._have_position:
-                bot_logger.error('check exit')
+                bot_logger.info('check exit')
                 self._check_exit()
             else:
-                bot_logger.error('check entry')
+                bot_logger.info('check entry')
                 self._check_entry()
             time.sleep(sec_wait)
         else:
