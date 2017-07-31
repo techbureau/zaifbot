@@ -29,10 +29,12 @@ def install_ta_lib():
         subprocess.call(['./configure', '--prefix=/usr'], cwd=talib_path, shell=True)
         subprocess.call(['make'], cwd=talib_path, shell=True)
         subprocess.call(['sudo', 'make', 'install'], cwd=talib_path)
+        subprocess.call(['pip', 'install', 'TA-Lib'])
         return
 
     if sys.platform.startswith('darwin'):
         subprocess.call(["brew", "install", "ta-lib"])
+        subprocess.call(['pip', 'install', 'TA-Lib'])
         return
 
     if sys.platform.startswith('win'):
