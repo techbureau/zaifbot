@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
-from zaifbot import __version__, install_ta_lib
-
-install_ta_lib()
+from zaifbot import __version__
 
 
 def readme():
@@ -38,8 +36,10 @@ setup(
         'zaifapi',
         'numpy',
         'pandas',
-        'TA-Lib'
     ],
+    extras_require={
+        'ta-lib': ['TA-Lib']
+    },
     entry_points="""\
       [console_scripts]
       init_database = zaifbot.setup:init_database
