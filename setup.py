@@ -32,10 +32,12 @@ setup(
         'SQLAlchemy',
         'slackclient',
         'pytz',
+        'requests==2.13.0',
         'slack_logger',
-        'zaifapi',
+        'zaifapi==1.5.3',
         'numpy',
         'pandas',
+        'websocket-client==0.40.0'
     ],
     extras_require={
         'ta-lib': ['TA-Lib']

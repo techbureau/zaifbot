@@ -22,8 +22,13 @@ class ZaifBot:
 
 def install_ta_lib():
     if sys.platform.startswith('linux'):
-        cwd = os.path.join(os.path.dirname(__file__), './setup')
-        subprocess.call(["./install_ta_lib.sh"], cwd=cwd, shell=True)
+        # fixme
+        cwd = os.path.join(os.path.dirname(__file__), 'setup')
+        subprocess.call(['tar', '-xzf', 'ta-lib-0.4.0-src.tar.gz'], cwd=cwd)
+        talib_path = os.path.join(cwd, 'ta-lib')
+        subprocess.call(['./configure', '--prefix=/usr'], cwd=talib_path, shell=True)
+        subprocess.call(['make'], cwd=talib_path, shell=True)
+        subprocess.call(['sudo', 'make', 'install'], cwd=talib_path)
         return
 
     if sys.platform.startswith('darwin'):
