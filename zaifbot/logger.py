@@ -8,7 +8,7 @@ def _bot_logger():
     logger.setLevel(logging.INFO)
 
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.ERROR)
+    console_handler.setLevel(logging.INFO)
 
     # parent = os.path.dirname(os.path.dirname(__file__))
     current_dir = os.path.dirname(__file__)
