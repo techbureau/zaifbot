@@ -12,5 +12,7 @@ def datetime2timestamp(datetime):
     return int(time.mktime(datetime.timetuple()))
 
 
-def int_time():
-    return int(time.time())
+def int_epoch_time(t=None):
+    if not t:
+        return int(time.time())
+    return int(t)
