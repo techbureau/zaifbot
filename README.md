@@ -123,5 +123,5 @@ Please contribute by following the steps below.
 [zaifapi]: http://techbureau-api-document.readthedocs.io/ja/latest/index.html
 [zaifpypi]: https://pypi.python.org/pypi/zaifbot
 [techbureau]: http://techbureau.jp/
-[wikitop]: https://github.com/techbureau/zaifbot/wiki/zaifbot%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95
+[wikitop]: https://github.com/techbureau/zaifbot
 [wikitutorial]: https://github.com/techbureau/zaifbot/wiki/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB
