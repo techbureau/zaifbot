@@ -1,5 +1,5 @@
 from zaifbot.db.dao.candle_sticks import CandleSticksDao
-from zaifbot.exchange.api.http import BotPublicApi
+from zaifbot.exchange.api.http import BotChartApi
 from zaifbot.exchange.period import Period
 from zaifbot.exchange.currency_pairs import CurrencyPair
 from zaifbot.utils import merge_dict, int_epoch_time
@@ -23,15 +23,15 @@ class CandleSticks:
         if len(db_records) >= count:
             return db_records
 
-        api_records = self._fetch_data_from_web(count, end_time_rounded)
+        api_records = self._fetch_data_from_web(start_time, end_time_rounded)
         return api_records
 
     def last_price(self,  timestamp):
         return self.request_data(count=1, to_epoch_time=timestamp)[0]['close']
 
-    def _fetch_data_from_web(self, count, to_epoch_time):
-        public_api = BotPublicApi()
-        records = public_api.candle_sticks(self._currency_pair, self._period, count, to_epoch_time)
+    def _fetch_data_from_web(self, start_time, to_epoch_time):
+        chart_api = BotChartApi()
+        records = chart_api.history(self._currency_pair, self._period, start_time, to_epoch_time)
         self._save_records(records)
         return records
 
