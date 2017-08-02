@@ -121,10 +121,6 @@ class BotPublicApi(ZaifPublicApi):
             params['period'] = str(params['period'])
         return super().everything(func_name, currency_pair, params)
 
-    def candle_sticks(self, currency_pair, period, count, to_epoch_time):
-        api_params = {'period': period, 'count': count, 'to_epoch_time': to_epoch_time}
-        return self.everything('ohlc_data', currency_pair, api_params)
-
 
 class BotChartApi:
     _API_URL = 'https://zaif.jp/zaif_chart_api/v1/{}'
