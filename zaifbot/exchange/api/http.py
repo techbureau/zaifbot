@@ -130,6 +130,10 @@ class BotChartApi:
     _API_URL = 'https://zaif.jp/zaif_chart_api/v1/{}'
 
     def history(self, currency_pair, period, from_sec, to_sec):
+        # ensure 'str' type
+        currency_pair = str(currency_pair)
+        period = str(period)
+
         self._validate_int(from_sec)
         self._validate_int(to_sec)
 
@@ -147,7 +151,7 @@ class BotChartApi:
         response = requests.get(url, params=params)
         if response.status_code != 200:
             raise Exception('return status code is {}'.format(response.status_code))
-        return json.loads(json.loads(response.text))
+        return json.loads(json.loads(response.text))['ohlc_data']
 
     @staticmethod
     def _period_to_resolution(period):

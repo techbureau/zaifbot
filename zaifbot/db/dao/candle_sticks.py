@@ -17,7 +17,7 @@ class CandleSticksDao(DaoBase):
         with self._session() as s:
             result = s.query(self._Model).filter(
                 and_(self._Model.time <= end_time,
-                     self._Model.time > start_time,
+                     self._Model.time >= start_time,
                      self._Model.currency_pair == self._currency_pair,
                      self._Model.period == self._period,
                      self._Model.closed == int(closed)

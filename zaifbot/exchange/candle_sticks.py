@@ -36,13 +36,17 @@ class CandleSticks:
         return records
 
     def _save_records(self, records):
-        new_records = [merge_dict(record,
-                                 {'currency_pair': self._currency_pair.name, 'period': self._period.label})
-                      for record in records]
+        new_records = [
+            merge_dict(record, {'currency_pair': self._currency_pair.name,
+                                'period': self._period.label,
+                                'closed': True}
+                       )
+            for record in records
+            ]
         self._dao.create_multiple(new_records)
 
     def _fetch_data_from_db(self, start_time, end_time):
-        records = list(map(self._row2dict, self._dao.get_by_time_width(start_time, end_time, closed=False)))
+        records = list(map(self._row2dict, self._dao.get_by_time_width(start_time, end_time, closed=True)))
         return records
 
     @staticmethod
