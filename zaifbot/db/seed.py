@@ -36,10 +36,10 @@ class CandleSticks(Base):
 def init_database():
     db = os.path.join(os.path.dirname(__file__), 'zaifbot.db')
     if os.path.exists(db):
-        print('you already have database')
+        print('Database already exists')
         return
     Base.metadata.create_all()
-    print('database created')
+    print('Database was created, successfully ')
 
 
 def clear_database():
@@ -48,10 +48,10 @@ def clear_database():
         print("you haven't created db yet, run init_database")
         return
 
-    answer = input('really want to clear db? All trade data will lost [y/n]')
+    answer = input('Really want to clear db? All trade data will lost [y/n]')
     if answer in ('y', 'yes'):
         os.remove(db)
-        print('database was deleted')
+        print('Database was deleted, successfully')
         return True
     print('canceled')
     return False
