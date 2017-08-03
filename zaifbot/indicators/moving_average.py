@@ -19,7 +19,8 @@ class _MA(Indicator, metaclass=ABCMeta):
         return last[self.name] > previous[self.name]
 
     def is_decreasing(self):
-        return not self.is_increasing()
+        previous, last = self.request_data(count=2)
+        return last[self.name] < previous[self.name]
 
     def _formatting(self, candlesticks, ma):
         ma.rename(self.name, inplace=True)
