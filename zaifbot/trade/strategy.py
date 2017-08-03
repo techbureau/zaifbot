@@ -48,7 +48,7 @@ class Strategy:
 
                 trade_logger.info('process alive')
                 self.regular_job()
-                # fixme: output to console too
+                
                 if self._have_position:
                     trade_logger.info('check exit')
                     self._check_exit()
