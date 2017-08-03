@@ -1,2 +1,3 @@
-recursive-include zaifbot setup/*
+recursive-include zaifbot/setup *
+recursive-include zaifbot/logs .keep
 include LICENSE.txt
