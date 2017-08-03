@@ -8,17 +8,18 @@ def _bot_logger():
     logger.setLevel(logging.INFO)
 
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.ERROR)
+    console_handler.setLevel(logging.INFO)
 
-    # parent = os.path.dirname(os.path.dirname(__file__))
     current_dir = os.path.dirname(__file__)
     target_file = os.path.join(current_dir, 'logs/zaifbot.log')
     file_handler = logging.handlers.TimedRotatingFileHandler(filename=target_file)
     file_handler.setLevel(logging.INFO)
 
-    formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
-    console_handler.setFormatter(formatter)
-    file_handler.setFormatter(formatter)
+    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    file_formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
+
+    console_handler.setFormatter(console_formatter)
+    file_handler.setFormatter(file_formatter)
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
@@ -32,15 +33,15 @@ def _trade_logger():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
 
-    # parent = os.path.dirname(os.path.dirname(__file__))
     current_dir = os.path.dirname(__file__)
     target_file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
     file_handler = logging.handlers.TimedRotatingFileHandler(filename=target_file)
     file_handler.setLevel(logging.INFO)
 
-    formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
-    console_handler.setFormatter(formatter)
-    file_handler.setFormatter(formatter)
+    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    file_formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
+    console_handler.setFormatter(console_formatter)
+    file_handler.setFormatter(file_formatter)
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)

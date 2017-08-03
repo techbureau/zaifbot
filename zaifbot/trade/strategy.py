@@ -1,6 +1,6 @@
 import time
 from zaifbot.exchange.api.http import BotTradeApi
-from zaifbot.logger import bot_logger
+from zaifbot.logger import trade_logger
 
 
 class Strategy:
@@ -16,7 +16,8 @@ class Strategy:
 
     def _need_stop(self):
         if self._stop_rule:
-            return self._stop_rule.need_stop()
+            trade_logger.info('check stop')
+            return self._stop_rule.need_stop(self._trade)
 
     def _entry(self):
         self._trade = self._entry_rule.entry()
@@ -24,6 +25,7 @@ class Strategy:
 
     def _exit(self):
         self._exit_rule.exit(self._trade)
+        self._trade = None
         self._have_position = False
 
     def _check_entry(self):
@@ -35,23 +37,30 @@ class Strategy:
             self._exit()
 
     def start(self, *, sec_wait=1):
-        # fixme
         self._alive = True
-        while self._alive:
-            # fixme: output to console too
-            bot_logger.info('alive')
-            self.regular_job()
-            if self._need_stop():
-                break
-            if self._have_position:
-                bot_logger.info('check exit')
-                self._check_exit()
+        trade_logger.info('process started')
+
+        try:
+            while self._alive:
+                if self._need_stop():
+                    self.stop()
+                    continue
+
+                trade_logger.info('process alive')
+                self.regular_job()
+                
+                if self._have_position:
+                    trade_logger.info('check exit')
+                    self._check_exit()
+                else:
+                    trade_logger.info('check entry')
+                    self._check_entry()
+                time.sleep(sec_wait)
             else:
-                bot_logger.info('check entry')
-                self._check_entry()
-            time.sleep(sec_wait)
-        else:
-            pass
+                trade_logger.info('process will stop')
+        finally:
+            # todo: deal in the case of forced termination
+            trade_logger.info('process stopped')
 
     def regular_job(self):
         pass

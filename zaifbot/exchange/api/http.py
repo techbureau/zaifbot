@@ -1,5 +1,8 @@
 import random
 import time
+import requests
+import json
+import inspect
 
 from zaifapi.api_error import ZaifApiNonceError, ZaifApiError
 from zaifapi.impl import ZaifTradeApi, ZaifPublicApi
@@ -118,6 +121,54 @@ class BotPublicApi(ZaifPublicApi):
             params['period'] = str(params['period'])
         return super().everything(func_name, currency_pair, params)
 
-    def candle_sticks(self, currency_pair, period, count, to_epoch_time):
-        api_params = {'period': period, 'count': count, 'to_epoch_time': to_epoch_time}
-        return self.everything('ohlc_data', currency_pair, api_params)
+
+class BotChartApi:
+    _API_URL = 'https://zaif.jp/zaif_chart_api/v1/{}'
+
+    def history(self, currency_pair, period, from_sec, to_sec):
+        # ensure 'str' type
+        currency_pair = str(currency_pair)
+        period = str(period)
+
+        self._validate_int(from_sec)
+        self._validate_int(to_sec)
+
+        resolution = self._period_to_resolution(period)
+        params = {
+            'symbol': currency_pair,
+            'resolution': resolution,
+            'from': from_sec,
+            'to': to_sec
+        }
+        return self._execute_api(inspect.currentframe().f_code.co_name, params)
+
+    def _execute_api(self, func_name, params=None):
+        url = self._API_URL.format(func_name)
+        response = requests.get(url, params=params)
+        if response.status_code != 200:
+            raise Exception('return status code is {}'.format(response.status_code))
+        return json.loads(json.loads(response.text))['ohlc_data']
+
+    @staticmethod
+    def _period_to_resolution(period):
+        conversion_table = {
+            '1m': '1',
+            '5m': '5',
+            '15m': '15',
+            '30m': '30',
+            '1h': '60',
+            '4h': '240',
+            '8h': '480',
+            '12h': '720',
+            '1d': 'D',
+        }
+        resolution = conversion_table.get(period, None)
+        if not resolution:
+            raise ValueError('error: Unexpected period')
+        return resolution
+
+    @staticmethod
+    def _validate_int(sec):
+        if not isinstance(sec, int):
+            raise TypeError("Only 'int' is acceptable")
+        return

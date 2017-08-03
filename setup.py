@@ -44,7 +44,9 @@ setup(
     },
     entry_points="""\
       [console_scripts]
-      init_database = zaifbot.setup:init_database
+      init_database = zaifbot.db.seed:init_database
+      clear_database = zaifbot.db.seed:clear_database
+      refresh_database = zaifbot.db.seed:refresh_database
       install_ta_lib = zaifbot:install_ta_lib
       """,
 )

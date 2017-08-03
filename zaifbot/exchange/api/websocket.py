@@ -40,6 +40,7 @@ class BotStreamApi:
     def _run_new_socket(self, currency_pair):
         if self._sockets.get(currency_pair, None):
             return
+        bot_logger.info('creating new socket for {}'.format(currency_pair))
         stop_event = Event()
         error_event = Event()
         new_socket = _StreamThread(currency_pair, stop_event, error_event)

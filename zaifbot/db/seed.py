@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
 
 from zaifbot.db.config import Base
 import datetime
+import os
 
 
 class Trades(Base):
@@ -33,4 +34,29 @@ class CandleSticks(Base):
 
 
 def init_database():
+    db = os.path.join(os.path.dirname(__file__), 'zaifbot.db')
+    if os.path.exists(db):
+        print('Database already exists')
+        return
     Base.metadata.create_all()
+    print('Database was created, successfully ')
+
+
+def clear_database():
+    db = os.path.join(os.path.dirname(__file__), 'zaifbot.db')
+    if not os.path.exists(db):
+        print("you haven't created db yet, run init_database")
+        return
+
+    answer = input('Really want to clear db? All trade data will lost [y/n]')
+    if answer in ('y', 'yes'):
+        os.remove(db)
+        print('Database was deleted, successfully')
+        return True
+    print('canceled')
+    return False
+
+
+def refresh_database():
+    if clear_database():
+        init_database()

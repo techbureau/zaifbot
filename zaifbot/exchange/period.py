@@ -16,7 +16,7 @@ def Period(period):
         if isinstance(period, _TradePeriod):
             return period
 
-        raise ValueError('illegal argument received')
+    raise ValueError('illegal argument received')
 
 
 class _TradePeriod(metaclass=ABCMeta):
@@ -60,20 +60,20 @@ class _TradePeriod(metaclass=ABCMeta):
         raise NotImplementedError
 
     def truncate_sec(self, sec):
-        if self.sec() > Period('1h').sec():
-            return sec - ((sec + self._UTC_JP_DIFF) % self.sec())
+        if self.sec > Period('1h').sec:
+            return sec - ((sec + self._UTC_JP_DIFF) % self.sec)
         else:
-            return sec - (sec % self.sec())
+            return sec - (sec % self.sec)
 
     def calc_count(self, start_sec, end_sec):
         round_end_sec = self.truncate_sec(end_sec)
         round_start_sec = self.truncate_sec(start_sec)
-        count = int((round_end_sec - round_start_sec) / self.sec())
+        count = int((round_end_sec - round_start_sec) / self.sec)
         return count
 
     def calc_start(self, count, end_sec):
         round_end_sec = self.truncate_sec(end_sec)
-        start_sec = round_end_sec - self.sec() * count
+        start_sec = round_end_sec - self.sec * (count -1)
         return start_sec
 
 
