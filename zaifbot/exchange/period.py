@@ -16,7 +16,7 @@ def Period(period):
         if isinstance(period, _TradePeriod):
             return period
 
-        raise ValueError('illegal argument received')
+    raise ValueError('illegal argument received')
 
 
 class _TradePeriod(metaclass=ABCMeta):
