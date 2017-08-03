@@ -37,26 +37,30 @@ class Strategy:
             self._exit()
 
     def start(self, *, sec_wait=1):
-        # fixme
         self._alive = True
-        while self._alive:
+        trade_logger.info('process started')
 
-            if self._need_stop():
-                self.stop()
-                continue
+        try:
+            while self._alive:
+                if self._need_stop():
+                    self.stop()
+                    continue
 
-            trade_logger.info('process alive')
-            self.regular_job()
-            # fixme: output to console too
-            if self._have_position:
-                trade_logger.info('check exit')
-                self._check_exit()
+                trade_logger.info('process alive')
+                self.regular_job()
+                # fixme: output to console too
+                if self._have_position:
+                    trade_logger.info('check exit')
+                    self._check_exit()
+                else:
+                    trade_logger.info('check entry')
+                    self._check_entry()
+                time.sleep(sec_wait)
             else:
-                trade_logger.info('check entry')
-                self._check_entry()
-            time.sleep(sec_wait)
-        else:
-            trade_logger.info('process will stop')
+                trade_logger.info('process will stop')
+        finally:
+            # todo: deal in the case of forced termination
+            trade_logger.info('process stopped')
 
     def regular_job(self):
         pass
