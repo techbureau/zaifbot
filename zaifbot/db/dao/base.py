@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
+from zaifbot.utils import is_float
 
 
 class DaoBase(metaclass=ABCMeta):
@@ -86,3 +87,12 @@ class DaoBase(metaclass=ABCMeta):
     @classmethod
     def rows2dicts(cls, rows):
         return [cls.row2dict(row) for row in rows]
+
+    def _custom_filters(self, q, params):
+        for key, value in params.items():
+            operator, boundary = value.split()
+            if is_float(boundary)is False:
+                boundary = "'" + boundary + "'"
+            source = "self._Model.{} {} {}".format(key, operator, boundary)
+            q = q.filter(eval(source))
+        return q
