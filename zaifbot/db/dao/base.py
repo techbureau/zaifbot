@@ -88,8 +88,8 @@ class DaoBase(metaclass=ABCMeta):
     def rows2dicts(cls, rows):
         return [cls.row2dict(row) for row in rows]
 
-    def _custom_filters(self, q, params):
-        for key, value in params.items():
+    def _custom_filters(self, q, filters):
+        for key, value in filters.items():
             operator, boundary = value.split()
             if is_float(boundary)is False:
                 boundary = "'" + boundary + "'"
