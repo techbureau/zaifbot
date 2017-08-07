@@ -16,3 +16,11 @@ def int_epoch_time(t=None):
     if not t:
         return int(time.time())
     return int(t)
+
+
+def is_float(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
