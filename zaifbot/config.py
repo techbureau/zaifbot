@@ -1,3 +1,5 @@
+import os
+import configparser
 from os import environ as env
 from zaifbot.errors import ZaifBotError
 
@@ -9,6 +11,14 @@ def set_keys(key, secret):
 
 
 def get_keys():
-    if not env.get('ZAIFBOT_KEY') or not env.get('ZAIFBOT_SECRET'):
-        raise ZaifBotError('api keys are not set')
-    return env['ZAIFBOT_KEY'], env['ZAIFBOT_SECRET']
+    if env.get('ZAIFBOT_KEY') and env.get('ZAIFBOT_SECRET'):
+        return env['ZAIFBOT_KEY'], env['ZAIFBOT_SECRET']
+
+    home = os.path.expanduser('~')
+    config_file = os.path.join(home, '.zaifbot')
+    if os.path.isfile(config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        return config['api_keys']['key'], config['api_keys']['secret']
+
+    raise ZaifBotError('api keys are not set')
