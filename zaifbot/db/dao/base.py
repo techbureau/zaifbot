@@ -5,10 +5,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
+from zaifbot.utils import is_float
 
 
 class DaoBase(metaclass=ABCMeta):
-    # todo: review implementation
     def __init__(self):
         self._Model = self._get_model()
 
@@ -77,3 +77,22 @@ class DaoBase(metaclass=ABCMeta):
             s.commit()
             s.refresh(item)
             return item
+
+    @staticmethod
+    def row2dict(row):
+        dict_row = row.__dict__
+        dict_row.pop('_sa_instance_state', None)
+        return dict_row
+
+    @classmethod
+    def rows2dicts(cls, rows):
+        return [cls.row2dict(row) for row in rows]
+
+    def _custom_filters(self, q, params):
+        for key, value in params.items():
+            operator, boundary = value.split()
+            if is_float(boundary)is False:
+                boundary = "'" + boundary + "'"
+            source = "self._Model.{} {} {}".format(key, operator, boundary)
+            q = q.filter(eval(source))
+        return q

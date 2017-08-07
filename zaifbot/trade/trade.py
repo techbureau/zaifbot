@@ -53,15 +53,16 @@ class Trade:
                               price=self.exit_price,
                               action=self.action.opposite_action())
 
+        self.closed = True
+
         self._dao.update(id_=self.id_,
                          exit_price=self.exit_price,
                          exit_datetime=self.exit_datetime,
-                         profit=self.profit())
+                         profit=self.profit(),
+                         closed=self.closed)
 
         log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
         trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime))
-
-        self.closed = True
 
     def profit(self):
         if self.action == Buy:
