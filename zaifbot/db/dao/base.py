@@ -8,7 +8,6 @@ from zaifbot.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):
-    # todo: review implementation
     def __init__(self):
         self._Model = self._get_model()
 
@@ -77,3 +76,13 @@ class DaoBase(metaclass=ABCMeta):
             s.commit()
             s.refresh(item)
             return item
+
+    @staticmethod
+    def row2dict(row):
+        dict_row = row.__dict__
+        dict_row.pop('_sa_instance_state', None)
+        return dict_row
+
+    @classmethod
+    def rows2dicts(cls, rows):
+        return [cls.row2dict(row) for row in rows]
