@@ -46,6 +46,5 @@ class CandleSticks:
         self._dao.create_multiple(new_records)
 
     def _fetch_data_from_db(self, start_time, end_time):
-        # todo: use rows2dict in dao
-        records = list(map(self._dao.row2dict, self._dao.get_by_time_width(start_time, end_time, closed=True)))
-        return records
+        records = self._dao.get_by_time_width(start_time, end_time, closed=True)
+        return self._dao.rows2dicts(records)
