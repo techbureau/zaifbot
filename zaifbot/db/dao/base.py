@@ -90,7 +90,11 @@ class DaoBase(metaclass=ABCMeta):
 
     def _custom_filters(self, q, filters):
         for key, value in filters.items():
-            operator, boundary = value.split()
+            try:
+                operator, boundary = value.replace(",", " ").split()
+            except ValueError:
+                operator, boundary = '==', value
+
             if is_float(boundary)is False:
                 boundary = "'" + boundary + "'"
             source = "self._Model.{} {} {}".format(key, operator, boundary)
