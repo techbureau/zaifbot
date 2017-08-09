@@ -1,4 +1,5 @@
 from zaifbot.db.dao.trades import TradesDao
+from pandas import DataFrame
 
 
 class TradeResult:
@@ -14,6 +15,7 @@ class TradeResult:
 
     def gross_profit(self, from_datetime=None, to_datetime=None, filters=None):
         pass
+
 
     def gross_loss(self, from_datetime=None, to_datetime=None, filters=None):
         pass
