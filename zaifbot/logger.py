@@ -38,7 +38,7 @@ def _bot_logger():
 
 
 def _trade_logger():
-    logger = logging.getLogger('BotTrade')
+    logger = logging.getLogger('Trade')
     logger.setLevel(logging.INFO)
 
     console_handler = _bot_console_handler()
