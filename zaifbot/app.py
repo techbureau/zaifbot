@@ -24,8 +24,8 @@ class ZaifBot(Flask, Observer):
             trade_thread.start()
             self._trade_threads[strategy.id_] = trade_thread
 
-        # 子スレッドが死んだら全部殺す。
-        # サーバーが止まったらスレッドを殺す。
+        # stop server when all thread is gone
+        # stop all thread when server has some problem
         super().run(host, port, debug, **options)
 
     @property
