@@ -1,5 +1,4 @@
 import time
-import uuid
 from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.logger import trade_logger

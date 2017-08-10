@@ -3,8 +3,8 @@ from zaifbot.rules.entry.base import Entry
 
 
 class SellHigherEntry(Entry):
-    def __init__(self, currency_pair, amount, sell_price):
-        super().__init__(currency_pair=currency_pair, amount=amount, action='ask')
+    def __init__(self, currency_pair, amount, sell_price, name=None):
+        super().__init__(currency_pair=currency_pair, amount=amount, action='ask', name=name)
         self.sell_price = sell_price
 
     def can_entry(self):
