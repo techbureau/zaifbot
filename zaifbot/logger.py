@@ -3,7 +3,7 @@ import logging.handlers
 from slack_logger import SlackHandler, SlackFormatter
 
 
-def bot_console_handler():
+def _bot_console_handler():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
@@ -11,7 +11,7 @@ def bot_console_handler():
     return console_handler
 
 
-def bot_file_handler(file=None):
+def _bot_file_handler(file=None):
     if file is None:
         current_dir = os.path.dirname(__file__)
         file = os.path.join(current_dir, 'logs/zaifbot.log')
@@ -28,8 +28,8 @@ def _bot_logger():
     logger = logging.getLogger('zaif_bot_logger')
     logger.setLevel(logging.INFO)
 
-    console_handler = bot_console_handler()
-    file_handler = bot_file_handler()
+    console_handler = _bot_console_handler()
+    file_handler = _bot_file_handler()
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
@@ -41,11 +41,11 @@ def _trade_logger():
     logger = logging.getLogger('trade_logger')
     logger.setLevel(logging.INFO)
 
-    console_handler = bot_console_handler()
+    console_handler = _bot_console_handler()
 
     current_dir = os.path.dirname(__file__)
     file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
-    file_handler = bot_file_handler(file=file)
+    file_handler = _bot_file_handler(file=file)
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
@@ -54,6 +54,8 @@ def _trade_logger():
 
 bot_logger = _bot_logger()
 trade_logger = _trade_logger()
+bot_file_handler = _bot_file_handler()
+bot_console_handler = _bot_console_handler()
 
 
 def add_logging_directions(webhook_url=None, email={}):
