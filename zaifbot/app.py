@@ -1,8 +1,7 @@
 from flask import Flask
 from zaifbot.utils.observer import Observer
-from multiprocessing import Process, Lock
+from threading import Thread, Lock
 from zaifbot.logger import bot_logger
-from threading import Thread
 
 
 class ZaifBot(Flask, Observer):
