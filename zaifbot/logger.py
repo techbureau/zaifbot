@@ -3,26 +3,37 @@ import logging.handlers
 from slack_logger import SlackHandler, SlackFormatter
 
 
+def bot_console_handler():
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    console_handler.setFormatter(console_formatter)
+    return console_handler
+
+
+def bot_file_handler(file=None):
+    if file is None:
+        current_dir = os.path.dirname(__file__)
+        file = os.path.join(current_dir, 'logs/zaifbot.log')
+
+    file_handler = logging.handlers.TimedRotatingFileHandler(filename=file)
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
+    file_handler.setFormatter(file_formatter)
+
+    return file_handler
+
+
 def _bot_logger():
     logger = logging.getLogger('zaif_bot_logger')
     logger.setLevel(logging.INFO)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-
-    current_dir = os.path.dirname(__file__)
-    target_file = os.path.join(current_dir, 'logs/zaifbot.log')
-    file_handler = logging.handlers.TimedRotatingFileHandler(filename=target_file)
-    file_handler.setLevel(logging.INFO)
-
-    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
-    file_formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
-
-    console_handler.setFormatter(console_formatter)
-    file_handler.setFormatter(file_formatter)
+    console_handler = bot_console_handler()
+    file_handler = bot_file_handler()
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+
     return logger
 
 
@@ -30,18 +41,11 @@ def _trade_logger():
     logger = logging.getLogger('trade_logger')
     logger.setLevel(logging.INFO)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
+    console_handler = bot_console_handler()
 
     current_dir = os.path.dirname(__file__)
-    target_file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
-    file_handler = logging.handlers.TimedRotatingFileHandler(filename=target_file)
-    file_handler.setLevel(logging.INFO)
-
-    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
-    file_formatter = logging.Formatter('[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
-    console_handler.setFormatter(console_formatter)
-    file_handler.setFormatter(file_formatter)
+    file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
+    file_handler = bot_file_handler(file=file)
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)

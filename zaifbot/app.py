@@ -1,4 +1,5 @@
 import uuid
+import logging
 from collections import OrderedDict
 import itertools
 from flask import Flask, jsonify
@@ -75,11 +76,10 @@ class ZaifBot(Flask, Observer):
 
 app = ZaifBot(__name__)
 app.config['JSON_SORT_KEYS'] = False
+app.logger.addHandler()
 
 
 @app.route('/', methods=['GET'])
 def info():
     res = jsonify(app.trading_info)
     return res
-
-
