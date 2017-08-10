@@ -1,4 +1,5 @@
 import time
+import uuid
 from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.logger import trade_logger
@@ -6,7 +7,7 @@ from zaifbot.logger import trade_logger
 
 class Strategy(Observable):
     # todo: able to handle multiple rules
-    def __init__(self, entry_rule, exit_rule, stop_rule=None):
+    def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
         self._trade_api = BotTradeApi()
         self.entry_rule = entry_rule
@@ -15,7 +16,8 @@ class Strategy(Observable):
         self._trade = None
         self._have_position = False
         self._alive = False
-        self.id_ = '3'
+        self.name = name or self.__class__.__name__
+        self.id_ = None
 
     def _need_stop(self):
         if self.stop_rule:
@@ -39,8 +41,11 @@ class Strategy(Observable):
         if self.exit_rule.can_exit(self._trade):
             self._exit()
 
-    def start(self, *, sec_wait=1):
-        self.alive = True
+    def start(self, *, sec_wait=1, **options):
+        self._before_start(**options)
+
+        self._alive = True
+
         trade_logger.info('process started')
 
         try:
@@ -88,3 +93,7 @@ class Strategy(Observable):
     def alive(self, boolean):
         self._alive = boolean
         self.notify_observers()
+
+    def _before_start(self, **options):
+        if options.get('id_', None):
+            self.id_ = options['id_']
