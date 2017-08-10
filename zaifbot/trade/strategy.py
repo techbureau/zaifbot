@@ -15,6 +15,7 @@ class Strategy(Observable):
         self._trade = None
         self._have_position = False
         self._alive = False
+        self.id_ = '3'
 
     def _need_stop(self):
         if self.stop_rule:
