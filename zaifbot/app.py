@@ -4,7 +4,6 @@ import itertools
 from flask import Flask, jsonify
 from zaifbot.utils.observer import Observer
 from threading import Thread, RLock
-from zaifbot.logger import bot_logger
 
 
 class ActiveStrategiesInfo:
@@ -19,18 +18,15 @@ class ActiveStrategiesInfo:
 
     def update(self, strategy):
         id_ = strategy.id_
-        bot_logger.info(id_)
-        bot_logger.info(self._strategies_info)
         target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._strategies_info))[0]
-        bot_logger.info(target)
         target['position'] = strategy.have_position
         target['alive'] = strategy.alive
 
     def append(self, strategy):
         strategy_info = OrderedDict()
         strategy_info['id_'] = strategy.id_
-        strategy_info['entry_rule'] = strategy.entry_rule._action.name
-        strategy_info['exit_rule'] = 'fsfsfsf'
+        strategy_info['entry_rule'] = strategy.entry_rule.name
+        strategy_info['exit_rule'] = strategy.exit_rule.name
         self._strategies_info.append(strategy_info)
 
 
