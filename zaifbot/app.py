@@ -1,4 +1,5 @@
 import uuid
+from collections import OrderedDict
 import itertools
 from flask import Flask, jsonify
 from zaifbot.utils.observer import Observer
@@ -6,12 +7,39 @@ from threading import Thread, RLock
 from zaifbot.logger import bot_logger
 
 
+class ActiveStrategiesInfo:
+    def __init__(self):
+        self._value = OrderedDict()
+        self._strategies_info = list()
+        self._value['active_strategies'] = self._strategies_info
+
+    @property
+    def value(self):
+        return self._value
+
+    def update(self, strategy):
+        id_ = strategy.id_
+        bot_logger.info(id_)
+        bot_logger.info(self._strategies_info)
+        target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._strategies_info))[0]
+        bot_logger.info(target)
+        target['position'] = strategy.have_position
+        target['alive'] = strategy.alive
+
+    def append(self, strategy):
+        strategy_info = OrderedDict()
+        strategy_info['id_'] = strategy.id_
+        strategy_info['entry_rule'] = strategy.entry_rule._action.name
+        strategy_info['exit_rule'] = 'fsfsfsf'
+        self._strategies_info.append(strategy_info)
+
+
 class ZaifBot(Flask, Observer):
     def __init__(self, import_name):
         super().__init__(import_name)
         self._strategies = []
         self._trade_threads = dict()
-        self._trading_info = dict()
+        self._trading_info = ActiveStrategiesInfo()
         self._lock = RLock()
 
     def register_strategies(self, strategy, **strategies):
@@ -23,12 +51,14 @@ class ZaifBot(Flask, Observer):
             strategy.register_observers(self)
 
             strategy_id = self._get_id()
+            strategy.id_ = strategy_id
             trade_thread = Thread(target=strategy.start,
-                                  kwargs={'sec_wait': sec_wait, 'id_': strategy_id})
+                                  kwargs={'sec_wait': sec_wait})
             trade_thread.daemon = True
-            trade_thread.start()
-
             self._trade_threads[strategy_id] = trade_thread
+            self._trading_info.append(strategy)
+
+            trade_thread.start()
 
         # stop server when all thread is gone
         # stop all thread when server has some problem
@@ -37,17 +67,18 @@ class ZaifBot(Flask, Observer):
     @property
     def trading_info(self):
         with self._lock:
-            return self._trading_info
+            return self._trading_info.value
 
     def update(self, active_strategy):
         with self._lock:
-            self.trading_info[active_strategy.id_] = active_strategy.have_position
+            self._trading_info.update(active_strategy)
 
     @staticmethod
     def _get_id():
         return uuid.uuid4().hex
 
 app = ZaifBot(__name__)
+app.config['JSON_SORT_KEYS'] = False
 
 
 @app.route('/', methods=['GET'])

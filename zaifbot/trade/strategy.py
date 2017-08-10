@@ -44,7 +44,7 @@ class Strategy(Observable):
     def start(self, *, sec_wait=1, **options):
         self._before_start(**options)
 
-        self._alive = True
+        self.alive = True
 
         trade_logger.info('process started')
 
@@ -95,5 +95,4 @@ class Strategy(Observable):
         self.notify_observers()
 
     def _before_start(self, **options):
-        if options.get('id_', None):
-            self.id_ = options['id_']
+        pass
