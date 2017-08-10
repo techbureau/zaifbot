@@ -6,7 +6,7 @@ from slack_logger import SlackHandler, SlackFormatter
 def _bot_console_handler():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    console_formatter = logging.Formatter('[%(levelname)s][%(name)s] %(message)s')
     console_handler.setFormatter(console_formatter)
     return console_handler
 
@@ -25,7 +25,7 @@ def _bot_file_handler(file=None):
 
 
 def _bot_logger():
-    logger = logging.getLogger('zaif_bot_logger')
+    logger = logging.getLogger('Bot')
     logger.setLevel(logging.INFO)
 
     console_handler = _bot_console_handler()
@@ -38,7 +38,7 @@ def _bot_logger():
 
 
 def _trade_logger():
-    logger = logging.getLogger('trade_logger')
+    logger = logging.getLogger('BotTrade')
     logger.setLevel(logging.INFO)
 
     console_handler = _bot_console_handler()
