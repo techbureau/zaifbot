@@ -13,6 +13,6 @@ class Observable:
     def remove_observers(self, observer):
         self.__observers.discard(observer)
 
-    def observers_notify(self):
+    def notify_observers(self):
         for observer in self.__observers:
             observer.update(self)

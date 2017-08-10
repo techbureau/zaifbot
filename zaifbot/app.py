@@ -1,12 +1,13 @@
 from flask import Flask
-from multiprocessing import Process, Manager, Lock
+from zaifbot.utils.observer import Observer
+from multiprocessing import Process, Lock
 
 
-class ZaifBot(Flask):
+class ZaifBot(Flask, Observer):
     def __init__(self, import_name):
         super().__init__(import_name)
         self._strategies = []
-        self._process_info = Manager().dict()
+        self._process_info = dict()
         self._lock = Lock()
 
     def register_strategy(self, strategy):
@@ -14,7 +15,9 @@ class ZaifBot(Flask):
 
     def start(self, host=None, port=None, debug=None, **options):
         for strategy in self._strategies:
-            p = Process(target=strategy.start, args=(self.process_info,))
+            strategy.register_observers(self)
+
+            p = Process(target=strategy.start, args=(self._process_info,))
             p.daemon = True
             p.start()
 
@@ -25,16 +28,16 @@ class ZaifBot(Flask):
         with self._lock:
             return self._process_info
 
-    def update_process_info(self, key, value):
+    def update(self, strategy, *args, **kwargs):
         with self._lock:
-            self._process_info[key] = value
+            pass
 
 app = ZaifBot(__name__)
 
 
 @app.route('/', methods=['GET'])
 def info():
-    return app.process_info
+    return app._process_info
 
 if __name__ == '__main__':
     app.register_strategy()
