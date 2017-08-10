@@ -1,6 +1,8 @@
 from flask import Flask
 from zaifbot.utils.observer import Observer
 from multiprocessing import Process, Lock
+from zaifbot.logger import bot_logger
+from threading import Thread
 
 
 class ZaifBot(Flask, Observer):
@@ -13,11 +15,11 @@ class ZaifBot(Flask, Observer):
     def register_strategy(self, strategy):
         self._strategies.append(strategy)
 
-    def start(self, host=None, port=None, debug=None, **options):
+    def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
         for strategy in self._strategies:
             strategy.register_observers(self)
 
-            p = Process(target=strategy.start, args=(self._process_info,))
+            p = Thread(target=strategy.start, kwargs={'sec_wait': sec_wait})
             p.daemon = True
             p.start()
 
@@ -30,7 +32,8 @@ class ZaifBot(Flask, Observer):
 
     def update(self, strategy, *args, **kwargs):
         with self._lock:
-            pass
+            bot_logger.info(strategy.have_position)
+            bot_logger.info('updateeeeeeeeeeeeeeeeeeeeee')
 
 app = ZaifBot(__name__)
 
@@ -39,6 +42,4 @@ app = ZaifBot(__name__)
 def info():
     return app._process_info
 
-if __name__ == '__main__':
-    app.register_strategy()
-    app.run()
+

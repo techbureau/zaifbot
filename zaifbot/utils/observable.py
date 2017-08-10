@@ -8,7 +8,7 @@ class Observable:
     def register_observers(self, observer, *observers):
         for observer in itertools.chain((observer, ), observers):
             self.__observers.add(observer)
-            observer.update()
+            observer.update(self)
 
     def remove_observers(self, observer):
         self.__observers.discard(observer)

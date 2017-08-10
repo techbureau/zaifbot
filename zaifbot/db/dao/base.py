@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
-from zaifbot.utils import is_float
+from zaifbot.utils.utils import is_float
 
 
 class DaoBase(metaclass=ABCMeta):

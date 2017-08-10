@@ -9,33 +9,33 @@ class Strategy(Observable):
     def __init__(self, entry_rule, exit_rule, stop_rule=None):
         super().__init__()
         self._trade_api = BotTradeApi()
-        self._entry_rule = entry_rule
-        self._exit_rule = exit_rule
-        self._stop_rule = stop_rule
+        self.entry_rule = entry_rule
+        self.exit_rule = exit_rule
+        self.stop_rule = stop_rule
         self._trade = None
         self._have_position = False
         self._alive = False
 
     def _need_stop(self):
-        if self._stop_rule:
+        if self.stop_rule:
             trade_logger.info('check stop')
-            return self._stop_rule.need_stop(self._trade)
+            return self.stop_rule.need_stop(self._trade)
 
     def _entry(self):
-        self._trade = self._entry_rule.entry()
+        self._trade = self.entry_rule.entry()
         self.have_position = True
 
     def _exit(self):
-        self._exit_rule.exit(self._trade)
+        self.exit_rule.exit(self._trade)
         self._trade = None
         self.have_position = False
 
     def _check_entry(self):
-        if self._entry_rule.can_entry():
+        if self.entry_rule.can_entry():
             self._entry()
 
     def _check_exit(self):
-        if self._exit_rule.can_exit(self._trade):
+        if self.exit_rule.can_exit(self._trade):
             self._exit()
 
     def start(self, *, sec_wait=1):
