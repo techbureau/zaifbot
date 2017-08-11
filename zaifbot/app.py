@@ -6,6 +6,7 @@ from zaifbot.utils.observer import Observer
 from threading import Thread, RLock
 import datetime
 
+
 class _ActiveTradesInfo:
     def __init__(self):
         self._value = OrderedDict()
@@ -34,6 +35,9 @@ class _ActiveTradesInfo:
         strategy_info['started'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         strategy_info['strategy'] = OrderedDict()
         strategy_info['strategy']['name'] = strategy.name
+        strategy_info['strategy']['currency_pair'] = strategy.entry_rule.currency_pair.name
+        strategy_info['strategy']['action'] = strategy.entry_rule.action.name
+        strategy_info['strategy']['amount'] = strategy.entry_rule.amount
         strategy_info['strategy']['entry_rule'] = strategy.entry_rule.name
         strategy_info['strategy']['exit_rule'] = strategy.exit_rule.name
         self._active_trades_info.append(strategy_info)

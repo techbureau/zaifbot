@@ -19,3 +19,16 @@ class Entry(Rule):
                     action=self._action)
 
         return trade
+
+    # todo: use public property
+    @property
+    def currency_pair(self):
+        return self._currency_pair
+
+    @property
+    def action(self):
+        return self._action
+
+    @property
+    def amount(self):
+        return self._amount
