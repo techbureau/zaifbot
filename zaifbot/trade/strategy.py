@@ -65,6 +65,9 @@ class Strategy(Observable):
                 time.sleep(sec_wait)
             else:
                 trade_logger.info('process will stop')
+        except Exception as e:
+            trade_logger.exception(e)
+            self.stop()
         finally:
             # todo: deal in the case of forced termination
             trade_logger.info('process stopped')
