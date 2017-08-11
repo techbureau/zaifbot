@@ -5,6 +5,7 @@ from zaifbot.logger import trade_logger
 
 
 class Strategy(Observable):
+
     # todo: able to handle multiple rules
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
@@ -15,12 +16,12 @@ class Strategy(Observable):
         self._trade = None
         self._have_position = False
         self._alive = False
-        self.name = name or self.__class__.__name__
+        self.name = name
         self.id_ = None
 
     def _need_stop(self):
         if self.stop_rule:
-            trade_logger.info('check stop')
+            trade_logger.info('check stop', extra={'strategy_ident': self._id_for_log()})
             return self.stop_rule.need_stop(self._trade)
 
     def _entry(self):
@@ -45,7 +46,7 @@ class Strategy(Observable):
 
         self.alive = True
 
-        trade_logger.info('process started')
+        trade_logger.info('process started', extra={'strategy_ident': self._id_for_log()})
 
         try:
             while self.alive:
@@ -53,25 +54,25 @@ class Strategy(Observable):
                     self.stop()
                     continue
 
-                trade_logger.info('process alive')
+                trade_logger.info('process alive', extra={'strategy_ident': self._id_for_log()})
                 self.regular_job()
                 
                 if self.have_position:
-                    trade_logger.info('check exit')
+                    trade_logger.info('check exit', extra={'strategy_ident': self._id_for_log()})
                     self._check_exit()
                 else:
-                    trade_logger.info('check entry')
+                    trade_logger.info('check entry', extra={'strategy_ident': self._id_for_log()})
                     self._check_entry()
                 time.sleep(sec_wait)
             else:
-                trade_logger.info('process will stop')
+                trade_logger.info('process will stop', extra={'strategy_ident': self._id_for_log()})
         except Exception as e:
             trade_logger.exception(e)
-            trade_logger.info('exception occurred, process will stop')
+            trade_logger.info('exception occurred, process will stop', extra={'strategy_ident': self._id_for_log()})
             self.stop()
         finally:
             # todo: deal in the case of forced termination
-            trade_logger.info('process stopped')
+            trade_logger.info('process stopped', extra={'strategy_ident': self._id_for_log()})
 
     def regular_job(self):
         pass
@@ -99,3 +100,10 @@ class Strategy(Observable):
 
     def _before_start(self, **options):
         pass
+
+    def _id_for_log(self):
+        if self.name:
+            return self.name
+        if self.id_:
+            return self.id_[:12]
+        return ''

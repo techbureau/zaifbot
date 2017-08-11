@@ -1,5 +1,4 @@
 import uuid
-import logging
 from collections import OrderedDict
 import itertools
 from flask import Flask, jsonify
