@@ -24,21 +24,21 @@ class Strategy(Observable):
     def start(self, *, sec_wait=1, **options):
         self._before_start(**options)
         self.alive = True
-        trade_logger.info('process started', extra={'strategy_ident': self._descriptor()})
+        trade_logger.info('process started', extra={'strategyid': self._descriptor()})
 
         try:
             self._main_loop(sec_wait)
         except Exception as e:
-            trade_logger.exception(e, extra={'strategy_ident': self._descriptor()})
-            trade_logger.error('exception occurred, process will stop', extra={'strategy_ident': self._descriptor()})
+            trade_logger.exception(e, extra={'strategyid': self._descriptor()})
+            trade_logger.error('exception occurred, process will stop', extra={'strategyid': self._descriptor()})
             self.stop()
         finally:
-            trade_logger.info('process stopped', extra={'strategy_ident': self._descriptor()})
+            trade_logger.info('process stopped', extra={'strategyid': self._descriptor()})
 
     def _main_loop(self, sec_wait):
         while self.alive:
             self._check_stop()
-            trade_logger.info('process alive', extra={'strategy_ident': self._descriptor()})
+            trade_logger.info('process alive', extra={'strategyid': self._descriptor()})
 
             self.before_trading_routine()
             self._trading_routine()
@@ -46,7 +46,7 @@ class Strategy(Observable):
 
             time.sleep(sec_wait)
         else:
-            trade_logger.info('process will stop', extra={'strategy_ident': self._descriptor()})
+            trade_logger.info('process will stop', extra={'strategyid': self._descriptor()})
 
     def _check_entry(self):
         if self.entry_rule.can_entry():
@@ -59,7 +59,7 @@ class Strategy(Observable):
     def _check_stop(self):
         if self.stop_rule is None:
             return
-        trade_logger.info('check stop', extra={'strategy_ident': self._descriptor()})
+        trade_logger.info('check stop', extra={'strategyid': self._descriptor()})
         if self.stop_rule.need_stop(self._trade):
             self.stop()
 
@@ -77,11 +77,11 @@ class Strategy(Observable):
 
     def _trading_routine(self):
         if self.have_position:
-            trade_logger.info('check exit', extra={'strategy_ident': self._descriptor()})
+            trade_logger.info('check exit', extra={'strategyid': self._descriptor()})
             self._check_exit()
             return
 
-        trade_logger.info('check entry', extra={'strategy_ident': self._descriptor()})
+        trade_logger.info('check entry', extra={'strategyid': self._descriptor()})
         self._check_entry()
 
     def before_trading_routine(self):

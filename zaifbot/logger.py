@@ -46,7 +46,7 @@ def _trade_logger():
     current_dir = os.path.dirname(__file__)
     file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
     file_handler = _bot_file_handler(file=file)
-    ffmt = logging.Formatter('[%(asctime)s][%(strategy_ident)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
+    ffmt = logging.Formatter('[%(asctime)s][%(strategyid)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
     file_handler.setFormatter(ffmt)
 
     logger.addHandler(console_handler)
