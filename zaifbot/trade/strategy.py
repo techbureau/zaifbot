@@ -6,39 +6,47 @@ from zaifbot.logger import trade_logger
 
 
 class Strategy(Observable):
-
-    # todo: able to handle multiple rules
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
-        self._trade_api = BotTradeApi()
         self.entry_rule = entry_rule
         self.exit_rule = exit_rule
         self.stop_rule = stop_rule
-        self._trade = None
-        self._have_position = False
-        self._alive = False
         self.name = name
         self.id_ = None
-        # fixme: should hold in another class
         self.total_profit = 0
         self.total_trades_counts = 0
 
-    def _need_stop(self):
-        if self.stop_rule:
-            trade_logger.info('check stop', extra={'strategy_ident': self._id_for_log()})
-            return self.stop_rule.need_stop(self._trade)
-
-    def _entry(self):
-        new_trade = self._create_new_trade(self.id_, self.name)
-        self._trade = self.entry_rule.entry(new_trade)
-        self.have_position = True
-
-    def _exit(self):
-        self.exit_rule.exit(self._trade)
-        self.add_profit(self._trade.profit())
-        self.count_up_trade()
+        self._trade_api = BotTradeApi()
         self._trade = None
-        self.have_position = False
+        self._have_position = False
+        self._alive = False
+
+    def start(self, *, sec_wait=1, **options):
+        self._before_start(**options)
+        self.alive = True
+        trade_logger.info('process started', extra={'strategy_ident': self._descriptor()})
+
+        try:
+            self._main_loop(sec_wait)
+        except Exception as e:
+            trade_logger.exception(e, extra={'strategy_ident': self._descriptor()})
+            trade_logger.error('exception occurred, process will stop', extra={'strategy_ident': self._descriptor()})
+            self.stop()
+        finally:
+            trade_logger.info('process stopped', extra={'strategy_ident': self._descriptor()})
+
+    def _main_loop(self, sec_wait):
+        while self.alive:
+            self._check_stop()
+            trade_logger.info('process alive', extra={'strategy_ident': self._descriptor()})
+
+            self.before_trading_routine()
+            self._trading_routine()
+            self.after_trading_routine()
+
+            time.sleep(sec_wait)
+        else:
+            trade_logger.info('process will stop', extra={'strategy_ident': self._descriptor()})
 
     def _check_entry(self):
         if self.entry_rule.can_entry():
@@ -48,40 +56,40 @@ class Strategy(Observable):
         if self.exit_rule.can_exit(self._trade):
             self._exit()
 
-    def start(self, *, sec_wait=1, **options):
-        self._before_start(**options)
-
-        self.alive = True
-
-        trade_logger.info('process started', extra={'strategy_ident': self._id_for_log()})
-
-        try:
-            while self.alive:
-                if self._need_stop():
-                    self.stop()
-                    continue
-
-                trade_logger.info('process alive', extra={'strategy_ident': self._id_for_log()})
-                self.regular_job()
-                
-                if self.have_position:
-                    trade_logger.info('check exit', extra={'strategy_ident': self._id_for_log()})
-                    self._check_exit()
-                else:
-                    trade_logger.info('check entry', extra={'strategy_ident': self._id_for_log()})
-                    self._check_entry()
-                time.sleep(sec_wait)
-            else:
-                trade_logger.info('process will stop', extra={'strategy_ident': self._id_for_log()})
-        except Exception as e:
-            trade_logger.exception(e)
-            trade_logger.info('exception occurred, process will stop', extra={'strategy_ident': self._id_for_log()})
+    def _check_stop(self):
+        if self.stop_rule is None:
+            return
+        trade_logger.info('check stop', extra={'strategy_ident': self._descriptor()})
+        if self.stop_rule.need_stop(self._trade):
             self.stop()
-        finally:
-            # todo: deal in the case of forced termination
-            trade_logger.info('process stopped', extra={'strategy_ident': self._id_for_log()})
 
-    def regular_job(self):
+    def _entry(self):
+        new_trade = self._new_trade()
+        self._trade = self.entry_rule.entry(new_trade)
+        self.have_position = True
+
+    def _exit(self):
+        self.exit_rule.exit(self._trade)
+        self._add_latest_profit(self._trade.profit())
+        self._increase_trade_count()
+        self._trade = None
+        self.have_position = False
+
+    def _trading_routine(self):
+        if self.have_position:
+            trade_logger.info('check exit', extra={'strategy_ident': self._descriptor()})
+            self._check_exit()
+            return
+
+        trade_logger.info('check entry', extra={'strategy_ident': self._descriptor()})
+        self._check_entry()
+
+    def before_trading_routine(self):
+        # for user customize
+        pass
+
+    def after_trading_routine(self):
+        # for user customize
         pass
 
     def stop(self):
@@ -105,27 +113,22 @@ class Strategy(Observable):
         self._alive = boolean
         self.notify_observers()
 
-    def add_profit(self, profit):
+    def _add_latest_profit(self, profit):
         self.total_profit += profit
         self.notify_observers()
 
-    def count_up_trade(self):
+    def _increase_trade_count(self):
         self.total_trades_counts += 1
         self.notify_observers()
 
     def _before_start(self, **options):
         pass
 
-    def _id_for_log(self):
-        if self.name:
-            return self.name
-        if self.id_:
-            return self.id_[:12]
-        return ''
+    def _descriptor(self):
+        return self.name or self.id_[:12] or ''
 
-    @staticmethod
-    def _create_new_trade(id_, name):
+    def _new_trade(self):
         new_trade = Trade()
-        new_trade.strategy_name = name
-        new_trade.process_id = id_
+        new_trade.strategy_name = self.name
+        new_trade.process_id = self.id_
         return new_trade
