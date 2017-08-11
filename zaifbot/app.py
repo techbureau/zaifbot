@@ -4,7 +4,7 @@ import itertools
 from flask import Flask, jsonify
 from zaifbot.utils.observer import Observer
 from threading import Thread, RLock
-
+import datetime
 
 class _ActiveTradesInfo:
     def __init__(self):
@@ -21,12 +21,17 @@ class _ActiveTradesInfo:
         target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_trades_info))[0]
         target['alive'] = strategy.alive
         target['position'] = strategy.have_position
-        target['total_trades_counts'] = strategy.total_trades_counts
+        target['trade_counts'] = strategy.total_trades_counts
         target['total_profit'] = strategy.total_profit
 
     def append(self, strategy):
         strategy_info = OrderedDict()
         strategy_info['id_'] = strategy.id_
+        strategy_info['alive'] = strategy.alive
+        strategy_info['position'] = strategy.have_position
+        strategy_info['trade_counts'] = strategy.total_trades_counts
+        strategy_info['total_profit'] = strategy.total_profit
+        strategy_info['started'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         strategy_info['strategy'] = OrderedDict()
         strategy_info['strategy']['name'] = strategy.name
         strategy_info['strategy']['entry_rule'] = strategy.entry_rule.name
