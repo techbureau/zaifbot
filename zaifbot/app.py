@@ -6,7 +6,7 @@ from zaifbot.utils.observer import Observer
 from threading import Thread, RLock
 
 
-class ActiveStrategiesInfo:
+class _ActiveTradesInfo:
     def __init__(self):
         self._value = OrderedDict()
         self._active_trades_info = list()
@@ -32,12 +32,12 @@ class ActiveStrategiesInfo:
         self._active_trades_info.append(strategy_info)
 
 
-class ZaifBot(Flask, Observer):
+class _ZaifBotApp(Flask, Observer):
     def __init__(self, import_name):
         super().__init__(import_name)
         self._strategies = []
         self._trade_threads = dict()
-        self._trading_info = ActiveStrategiesInfo()
+        self._trading_info = _ActiveTradesInfo()
         self._lock = RLock()
 
     def register_strategies(self, strategy, *strategies):
@@ -75,11 +75,14 @@ class ZaifBot(Flask, Observer):
     def _get_id():
         return uuid.uuid4().hex
 
-app = ZaifBot(__name__)
-app.config['JSON_SORT_KEYS'] = False
 
+def zaifbot(import_name):
+    app = _ZaifBotApp(import_name)
+    app.config['JSON_SORT_KEYS'] = False
 
-@app.route('/', methods=['GET'])
-def info():
-    res = jsonify(app.trading_info)
-    return res
+    @app.route('/', methods=['GET'])
+    def info():
+        res = jsonify(app.trading_info)
+        return res
+
+    return app
