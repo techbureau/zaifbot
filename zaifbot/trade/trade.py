@@ -20,6 +20,8 @@ class Trade:
         self.closed = False
         self._trade_api = BotTradeApi()
         self._dao = TradesDao()
+        self.strategy_name = None
+        self.process_id = None
 
     def entry(self, currency_pair, amount, action):
         self.currency_pair = CurrencyPair(currency_pair)
@@ -36,13 +38,16 @@ class Trade:
         trade_obj = self._dao.create(currency_pair=self.currency_pair.name,
                                      amount=self.amount,
                                      entry_price=self.entry_price,
-                                     action=self.action.name)
+                                     action=self.action.name,
+                                     strategy_name=self.strategy_name,
+                                     process_id=self.process_id)
 
         self.id_ = trade_obj.id_
         log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
                     " amount: {}, entry_price: {}, entry_datetime: {}}}"
         trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.action,
-                                           self.amount, self.entry_price, self.entry_datetime))
+                                           self.amount, self.entry_price, self.entry_datetime),
+                          extra={'strategy_ident': self._id_for_log()})
 
     def exit(self):
         self.exit_price = last_price(self.currency_pair)
@@ -62,7 +67,8 @@ class Trade:
                          closed=self.closed)
 
         log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
-        trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime))
+        trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime),
+                          extra={'strategy_ident': self._id_for_log()})
 
     def profit(self):
         if self.action == Buy:
@@ -81,3 +87,10 @@ class Trade:
     @property
     def is_closed(self):
         return self.closed
+
+    def _id_for_log(self):
+        if self.strategy_name:
+            return self.strategy_name
+        if self.process_id:
+            return self.process_id[:12]
+        return ''

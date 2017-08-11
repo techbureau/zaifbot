@@ -1,5 +1,4 @@
 from zaifbot.rules.rule import Rule
-from zaifbot.trade.trade import Trade
 from zaifbot.exchange.action import Action
 from zaifbot.exchange.currency_pairs import CurrencyPair
 
@@ -14,14 +13,9 @@ class Entry(Rule):
     def can_entry(self, *args, **kwargs):
         raise NotImplementedError
 
-    def entry(self):
-        trade = self._create_new_trade()
+    def entry(self, trade):
         trade.entry(currency_pair=self._currency_pair,
                     amount=self._amount,
                     action=self._action)
 
         return trade
-
-    @staticmethod
-    def _create_new_trade():
-        return Trade()

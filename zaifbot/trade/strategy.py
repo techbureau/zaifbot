@@ -1,6 +1,7 @@
 import time
 from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
+from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
 
 
@@ -25,7 +26,8 @@ class Strategy(Observable):
             return self.stop_rule.need_stop(self._trade)
 
     def _entry(self):
-        self._trade = self.entry_rule.entry()
+        new_trade = self._create_new_trade(self.id_, self.name)
+        self._trade = self.entry_rule.entry(new_trade)
         self.have_position = True
 
     def _exit(self):
@@ -107,3 +109,10 @@ class Strategy(Observable):
         if self.id_:
             return self.id_[:12]
         return ''
+
+    @staticmethod
+    def _create_new_trade(id_, name):
+        new_trade = Trade()
+        new_trade.strategy_name = name
+        new_trade.process_id = id_
+        return new_trade
