@@ -67,6 +67,7 @@ class Strategy(Observable):
                 trade_logger.info('process will stop')
         except Exception as e:
             trade_logger.exception(e)
+            trade_logger.info('exception occurred, process will stop')
             self.stop()
         finally:
             # todo: deal in the case of forced termination
