@@ -19,6 +19,9 @@ class Strategy(Observable):
         self._alive = False
         self.name = name
         self.id_ = None
+        # fixme: should hold in another class
+        self.total_profit = 0
+        self.total_trades_counts = 0
 
     def _need_stop(self):
         if self.stop_rule:
@@ -32,6 +35,8 @@ class Strategy(Observable):
 
     def _exit(self):
         self.exit_rule.exit(self._trade)
+        self.add_profit(self._trade.profit())
+        self.count_up_trade()
         self._trade = None
         self.have_position = False
 
@@ -98,6 +103,14 @@ class Strategy(Observable):
     @alive.setter
     def alive(self, boolean):
         self._alive = boolean
+        self.notify_observers()
+
+    def add_profit(self, profit):
+        self.total_profit += profit
+        self.notify_observers()
+
+    def count_up_trade(self):
+        self.total_trades_counts += 1
         self.notify_observers()
 
     def _before_start(self, **options):

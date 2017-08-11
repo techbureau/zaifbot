@@ -19,8 +19,10 @@ class _ActiveTradesInfo:
     def update(self, strategy):
         id_ = strategy.id_
         target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_trades_info))[0]
-        target['position'] = strategy.have_position
         target['alive'] = strategy.alive
+        target['position'] = strategy.have_position
+        target['total_trades_counts'] = strategy.total_trades_counts
+        target['total_profit'] = strategy.total_profit
 
     def append(self, strategy):
         strategy_info = OrderedDict()
