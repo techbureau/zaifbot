@@ -39,7 +39,7 @@ class ZaifBot(Flask, Observer):
         self._trading_info = ActiveStrategiesInfo()
         self._lock = RLock()
 
-    def register_strategies(self, strategy, **strategies):
+    def register_strategies(self, strategy, *strategies):
         for strategy in itertools.chain((strategy, ), strategies):
             self._strategies.append(strategy)
 
