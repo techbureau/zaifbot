@@ -9,8 +9,8 @@ from threading import Thread, RLock
 class ActiveStrategiesInfo:
     def __init__(self):
         self._value = OrderedDict()
-        self._strategies_info = list()
-        self._value['active_strategies'] = self._strategies_info
+        self._active_trades_info = list()
+        self._value['active_trades'] = self._active_trades_info
 
     @property
     def value(self):
@@ -18,16 +18,18 @@ class ActiveStrategiesInfo:
 
     def update(self, strategy):
         id_ = strategy.id_
-        target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._strategies_info))[0]
+        target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_trades_info))[0]
         target['position'] = strategy.have_position
         target['alive'] = strategy.alive
 
     def append(self, strategy):
         strategy_info = OrderedDict()
         strategy_info['id_'] = strategy.id_
-        strategy_info['entry_rule'] = strategy.entry_rule.name
-        strategy_info['exit_rule'] = strategy.exit_rule.name
-        self._strategies_info.append(strategy_info)
+        strategy_info['strategy'] = OrderedDict()
+        strategy_info['strategy']['name'] = strategy.name
+        strategy_info['strategy']['entry_rule'] = strategy.entry_rule.name
+        strategy_info['strategy']['exit_rule'] = strategy.exit_rule.name
+        self._active_trades_info.append(strategy_info)
 
 
 class ZaifBot(Flask, Observer):
