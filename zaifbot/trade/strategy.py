@@ -1,6 +1,7 @@
 import time
 import uuid
 from zaifbot.utils.observable import Observable
+from zaifbot.utils.observer import Observer
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
@@ -23,7 +24,7 @@ class Strategy(Observable):
         self._alive = False
 
     def start(self, *, sec_wait=1, **options):
-        self._before_start(**options)
+        self._on_start(**options)
         self.alive = True
         trade_logger.info('process started',
                           extra={'strategyid': self._descriptor()})
@@ -87,11 +88,10 @@ class Strategy(Observable):
             trade_logger.info('check exit',
                               extra={'strategyid': self._descriptor()})
             self._check_exit()
-            return
-
-        trade_logger.info('check entry',
-                          extra={'strategyid': self._descriptor()})
-        self._check_entry()
+        else:
+            trade_logger.info('check entry',
+                              extra={'strategyid': self._descriptor()})
+            self._check_entry()
 
     def before_trading_routine(self):
         # for user customize
@@ -130,7 +130,7 @@ class Strategy(Observable):
         self.total_trades_counts += 1
         self.notify_observers()
 
-    def _before_start(self, **options):
+    def _on_start(self, **options):
         pass
 
     def _descriptor(self):
@@ -145,3 +145,13 @@ class Strategy(Observable):
     @staticmethod
     def _get_id():
         return uuid.uuid4().hex
+
+#
+# class ActiveStrategyInfo(Observer):
+#     def __init__(self, strategy):
+#         self.strategy = strategy
+#         self.info = {}
+#
+#     def
+#     def update(self, *args, **kwargs):
+#         pass

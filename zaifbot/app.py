@@ -6,23 +6,26 @@ from threading import Thread, RLock
 import datetime
 
 
-class _ActiveTradesInfo:
+class _ActiveTradesInfo(Observer):
     def __init__(self):
+        self._lock = RLock()
         self._value = OrderedDict()
         self._active_trades_info = list()
         self._value['active_trades'] = self._active_trades_info
 
     @property
     def value(self):
-        return self._value
+        with self._lock:
+            return self._value
 
     def update(self, strategy):
-        id_ = strategy.id_
-        target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_trades_info))[0]
-        target['alive'] = strategy.alive
-        target['position'] = strategy.have_position
-        target['trade_counts'] = strategy.total_trades_counts
-        target['total_profit'] = strategy.total_profit
+        with self._lock:
+            id_ = strategy.id_
+            target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_trades_info))[0]
+            target['alive'] = strategy.alive
+            target['position'] = strategy.have_position
+            target['trade_counts'] = strategy.total_trades_counts
+            target['total_profit'] = strategy.total_profit
 
     def append(self, strategy):
         strategy_info = OrderedDict()
@@ -42,13 +45,12 @@ class _ActiveTradesInfo:
         self._active_trades_info.append(strategy_info)
 
 
-class _ZaifBotApp(Flask, Observer):
+class _ZaifBotApp(Flask):
     def __init__(self, import_name):
         super().__init__(import_name)
         self._strategies = []
         self._trade_threads = dict()
         self._trading_info = _ActiveTradesInfo()
-        self._lock = RLock()
 
     def register_strategies(self, strategy, *strategies):
         for strategy in itertools.chain((strategy, ), strategies):
@@ -56,7 +58,7 @@ class _ZaifBotApp(Flask, Observer):
 
     def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
         for strategy in self._strategies:
-            strategy.register_observers(self)
+            strategy.register_observers(self._trading_info)
 
             trade_thread = Thread(target=strategy.start,
                                   kwargs={'sec_wait': sec_wait})
@@ -73,12 +75,10 @@ class _ZaifBotApp(Flask, Observer):
 
     @property
     def trading_info(self):
-        with self._lock:
-            return self._trading_info.value
+        return self._trading_info.value
 
     def update(self, active_strategy):
-        with self._lock:
-            self._trading_info.update(active_strategy)
+        self._trading_info.update(active_strategy)
 
 
 def zaifbot(import_name):
