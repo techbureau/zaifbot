@@ -1,4 +1,3 @@
-import uuid
 from collections import OrderedDict
 import itertools
 from flask import Flask, jsonify
@@ -59,12 +58,11 @@ class _ZaifBotApp(Flask, Observer):
         for strategy in self._strategies:
             strategy.register_observers(self)
 
-            strategy_id = self._get_id()
-            strategy.id_ = strategy_id
             trade_thread = Thread(target=strategy.start,
                                   kwargs={'sec_wait': sec_wait})
             trade_thread.daemon = True
-            self._trade_threads[strategy_id] = trade_thread
+
+            self._trade_threads[strategy.id_] = trade_thread
             self._trading_info.append(strategy)
 
             trade_thread.start()
@@ -81,10 +79,6 @@ class _ZaifBotApp(Flask, Observer):
     def update(self, active_strategy):
         with self._lock:
             self._trading_info.update(active_strategy)
-
-    @staticmethod
-    def _get_id():
-        return uuid.uuid4().hex
 
 
 def zaifbot(import_name):

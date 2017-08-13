@@ -1,4 +1,5 @@
 import time
+import uuid
 from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
@@ -12,7 +13,7 @@ class Strategy(Observable):
         self.exit_rule = exit_rule
         self.stop_rule = stop_rule
         self.name = name
-        self.id_ = None
+        self.id_ = self._get_id()
         self.total_profit = 0
         self.total_trades_counts = 0
 
@@ -140,3 +141,7 @@ class Strategy(Observable):
         new_trade.strategy_name = self.name
         new_trade.process_id = self.id_
         return new_trade
+
+    @staticmethod
+    def _get_id():
+        return uuid.uuid4().hex
