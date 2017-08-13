@@ -1,7 +1,6 @@
 import time
 import uuid
 from zaifbot.utils.observable import Observable
-from zaifbot.utils.observer import Observer
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
@@ -145,13 +144,3 @@ class Strategy(Observable):
     @staticmethod
     def _get_id():
         return uuid.uuid4().hex
-
-#
-# class ActiveStrategyInfo(Observer):
-#     def __init__(self, strategy):
-#         self.strategy = strategy
-#         self.info = {}
-#
-#     def
-#     def update(self, *args, **kwargs):
-#         pass

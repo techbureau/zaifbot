@@ -6,43 +6,58 @@ from threading import Thread, RLock
 import datetime
 
 
-class _ActiveTradesInfo(Observer):
-    def __init__(self):
-        self._lock = RLock()
-        self._value = OrderedDict()
-        self._active_trades_info = list()
-        self._value['active_trades'] = self._active_trades_info
+class ActiveStrategyInfo:
+    def __init__(self, strategy):
+        self._started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self._strategy = strategy
+        self._info = OrderedDict()
+
+    def update(self):
+        self._info['alive'] = self._strategy.alive
+        self._info['position'] = self._strategy.have_position
+        self._info['trade_counts'] = self._strategy.total_trades_counts
+        self._info['total_profit'] = self._strategy.total_profit
 
     @property
-    def value(self):
+    def info(self):
+        self._info['id_'] = self._strategy.id_
+        self._info['name'] = self._strategy.name
+        self._info['started'] = self._started
+        self._info['alive'] = self._strategy.alive
+        self._info['action'] = self._strategy.entry_rule.action.name
+        self._info['amount'] = self._strategy.entry_rule.amount
+        self._info['entry_rule'] = self._strategy.entry_rule.name
+        self._info['exit_rule'] = self._strategy.exit_rule.name
+        self._info['position'] = self._strategy.have_position
+        self._info['trade_counts'] = self._strategy.total_trades_counts
+        self._info['profit'] = self._strategy.total_profit
+        return self.info
+
+
+class _ActiveTradesObserver(Observer):
+    def __init__(self):
+        self._lock = RLock()
+        self._info = OrderedDict()
+        self._active_strategies_list = list()
+        self._info['active_trades'] = self._active_strategies_list
+
+    @property
+    def info(self):
         with self._lock:
-            return self._value
+            return self._info
 
     def update(self, strategy):
         with self._lock:
-            id_ = strategy.id_
-            target = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_trades_info))[0]
-            target['alive'] = strategy.alive
-            target['position'] = strategy.have_position
-            target['trade_counts'] = strategy.total_trades_counts
-            target['total_profit'] = strategy.total_profit
+            target = self._find_strategy_info(strategy.id_)
+            target.update()
 
-    def append(self, strategy):
-        strategy_info = OrderedDict()
-        strategy_info['id_'] = strategy.id_
-        strategy_info['alive'] = strategy.alive
-        strategy_info['position'] = strategy.have_position
-        strategy_info['trade_counts'] = strategy.total_trades_counts
-        strategy_info['total_profit'] = strategy.total_profit
-        strategy_info['started'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        strategy_info['strategy'] = OrderedDict()
-        strategy_info['strategy']['name'] = strategy.name
-        strategy_info['strategy']['currency_pair'] = strategy.entry_rule.currency_pair.name
-        strategy_info['strategy']['action'] = strategy.entry_rule.action.name
-        strategy_info['strategy']['amount'] = strategy.entry_rule.amount
-        strategy_info['strategy']['entry_rule'] = strategy.entry_rule.name
-        strategy_info['strategy']['exit_rule'] = strategy.exit_rule.name
-        self._active_trades_info.append(strategy_info)
+    def add_strategy(self, strategy):
+        active_strategy = ActiveStrategyInfo(strategy)
+        self._active_strategies_list.append(active_strategy)
+
+    def _find_strategy_info(self, id_):
+        strategy = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_strategies_list))[0]
+        return strategy
 
 
 class _ZaifBotApp(Flask):
@@ -50,23 +65,21 @@ class _ZaifBotApp(Flask):
         super().__init__(import_name)
         self._strategies = []
         self._trade_threads = dict()
-        self._trading_info = _ActiveTradesInfo()
+        self._trades_observer = _ActiveTradesObserver()
 
     def register_strategies(self, strategy, *strategies):
-        for strategy in itertools.chain((strategy, ), strategies):
+        for strategy in itertools.chain((strategy,), strategies):
             self._strategies.append(strategy)
 
     def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
         for strategy in self._strategies:
-            strategy.register_observers(self._trading_info)
+            strategy.register_observers(self._trades_observer)
 
             trade_thread = Thread(target=strategy.start,
                                   kwargs={'sec_wait': sec_wait})
             trade_thread.daemon = True
-
             self._trade_threads[strategy.id_] = trade_thread
-            self._trading_info.append(strategy)
-
+            self._trades_observer.add_strategy(strategy)
             trade_thread.start()
 
         # stop server when all thread is gone
@@ -75,10 +88,10 @@ class _ZaifBotApp(Flask):
 
     @property
     def trading_info(self):
-        return self._trading_info.value
+        return self._trades_observer.info
 
     def update(self, active_strategy):
-        self._trading_info.update(active_strategy)
+        self._trades_observer.update(active_strategy)
 
 
 def zaifbot(import_name):
