@@ -86,15 +86,13 @@ class Trade:
         log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
                     " amount: {}, entry_price: {}, entry_datetime: {}}}"
         log_msg = log_frame.format(self.id_, self.currency_pair, self.action,
-                                   self.amount, self.entry_price, self.entry_datetime,
-                                   extra={'strategyid': self._strategy_descriptor()})
-        trade_logger.info(log_msg)
+                                   self.amount, self.entry_price, self.entry_datetime)
+        trade_logger.info(log_msg, extra={'strategyid': self._strategy_descriptor()})
 
     def _logging_exit(self):
         log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
-        log_msg = log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime,
-                                   extra={'strategyid': self._strategy_descriptor()})
-        trade_logger.info(log_msg)
+        log_msg = log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime)
+        trade_logger.info(log_msg, extra={'strategyid': self._strategy_descriptor()})
 
     def _strategy_descriptor(self):
         return self.strategy_name or self.process_id[:12] or ''
