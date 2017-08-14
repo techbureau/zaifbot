@@ -22,35 +22,30 @@ class Portfolio:
             self._running_threads[strategy] = trade_thread
 
     def get_progress(self):
-        return self._progress.get_progress(self._running_threads)
+        return self._progress(self._running_threads)
 
 
 class _TradesProgress:
     def __init__(self):
         self._progress = OrderedDict()
-        self._total_profit = 0
-        self._total_trade_count = 0
-        self._strategies_info = OrderedDict()
 
-    def get_progress(self, running_threads):
-        self._progress['running_strategies'] = self._aggregate_strategies_progress(running_threads)
-        self._progress['total_trade_count'] = self._total_trade_count
-        self._progress['total_profit'] = self._total_profit
+    def __call__(self, running_threads):
+        aggregated = self._aggregate_strategies_progress(running_threads)
+        self._progress['running_strategies'] = aggregated['info']
+        self._progress['total_trade_count'] = aggregated['count']
+        self._progress['total_profit'] = aggregated['profit']
         return self._progress
 
-    def _aggregate_strategies_progress(self, running_threads):
-        progresses = list()
+    @staticmethod
+    def _aggregate_strategies_progress(running_threads):
+        info_list = list()
+        count = 0
+        profit = 0
 
         for running_strategy in running_threads.keys():
             info = running_strategy.get_info()
-            progresses.append(info)
+            info_list.append(info)
 
-            self._add_trade_count(info['trade_count'])
-            self._add_profit(info['profit'])
-        return progresses
-
-    def _add_trade_count(self, count):
-        self._total_trade_count += count
-
-    def _add_profit(self, profit):
-        self._total_profit += profit
+            count += info['trade_count']
+            profit += info['profit']
+        return {'count': count, 'profit': profit, 'info': info_list}

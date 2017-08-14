@@ -133,6 +133,7 @@ class Strategy:
         info['name'] = self.name
         info['started'] = self.started
         info['alive'] = self.alive
+        info['currency_pair'] = self.entry_rule.currency_pair.name
         info['action'] = self.entry_rule.action.name
         info['amount'] = self.entry_rule.amount
         info['entry_rule'] = self.entry_rule.name
