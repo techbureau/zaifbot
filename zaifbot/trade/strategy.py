@@ -7,7 +7,6 @@ from zaifbot.logger import trade_logger
 from collections import OrderedDict
 
 
-# unit of process
 class Strategy:
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
