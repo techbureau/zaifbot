@@ -8,4 +8,4 @@ class SellHigherEntry(Entry):
         self.sell_price = sell_price
 
     def can_entry(self):
-        return last_price(self._currency_pair) > self.sell_price
+        return last_price(self.currency_pair) > self.sell_price

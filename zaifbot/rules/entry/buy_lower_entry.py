@@ -8,4 +8,4 @@ class BuyLowerEntry(Entry):
         self.buy_price = buy_price
 
     def can_entry(self):
-        return last_price(self._currency_pair) < self.buy_price
+        return last_price(self.currency_pair) < self.buy_price

@@ -42,11 +42,11 @@ def _trade_logger():
     logger.setLevel(logging.INFO)
 
     console_handler = _bot_console_handler()
-    console_handler.setFormatter(logging.Formatter('[%(name)s][%(strategy_ident)s][%(levelname)s] %(message)s'))
+    console_handler.setFormatter(logging.Formatter('[%(name)s][%(strategyid)s][%(levelname)s] %(message)s'))
     current_dir = os.path.dirname(__file__)
     file = os.path.join(current_dir, 'logs/trades/bot_trade.log')
     file_handler = _bot_file_handler(file=file)
-    ffmt = logging.Formatter('[%(asctime)s][%(strategy_ident)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
+    ffmt = logging.Formatter('[%(asctime)s][%(strategyid)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
     file_handler.setFormatter(ffmt)
 
     logger.addHandler(console_handler)
