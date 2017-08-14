@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from zaifbot.trade.portfolio import Portfolio
 
 
@@ -12,9 +12,14 @@ class ZaifBot(Flask):
 
     def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
         self.portfolio.start(sec_wait=sec_wait)
-        # stop server when all thread is gone
-        # stop all thread when server has some problem
         super().run(host, port, debug, **options)
+
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
 
 def zaifbot(import_name):
@@ -25,5 +30,10 @@ def zaifbot(import_name):
     def info():
         res = jsonify(app.portfolio.get_progress())
         return res
+
+    @app.route('/shutdown', methods=['GET'])
+    def shutdown():
+        shutdown_server()
+        return 'true'
 
     return app
