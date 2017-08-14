@@ -1,7 +1,6 @@
 import time
 import uuid
 import datetime
-from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
@@ -9,7 +8,7 @@ from collections import OrderedDict
 
 
 # unit of process
-class Strategy(Observable):
+class Strategy:
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
         self.entry_rule = entry_rule
@@ -20,17 +19,17 @@ class Strategy(Observable):
         self.total_profit = 0
         self.total_trades_counts = 0
         self.started = None
+        self.have_position = False
+        self.alive = False
 
         self._trade_api = BotTradeApi()
         self._trade = None
-        self._have_position = False
-        self._alive = False
 
-    def start(self, *, sec_wait=1, **options):
+    def start(self, *, sec_wait=1):
         self.generate_id()
         self.started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.alive = True
-        self._on_start(**options)
+        self._on_start()
         trade_logger.info('process started',
                           extra={'strategyid': self._descriptor()})
 
@@ -106,33 +105,13 @@ class Strategy(Observable):
     def stop(self):
         self.alive = False
 
-    @property
-    def have_position(self):
-        return self._have_position
-
-    @have_position.setter
-    def have_position(self, boolean):
-        self._have_position = boolean
-        self.notify_observers()
-
-    @property
-    def alive(self):
-        return self._alive
-
-    @alive.setter
-    def alive(self, boolean):
-        self._alive = boolean
-        self.notify_observers()
-
     def _add_latest_profit(self, profit):
         self.total_profit += profit
-        self.notify_observers()
 
     def _increase_trade_count(self):
         self.total_trades_counts += 1
-        self.notify_observers()
 
-    def _on_start(self, **options):
+    def _on_start(self):
         pass
 
     def _descriptor(self):
@@ -160,5 +139,6 @@ class Strategy(Observable):
         info['entry_rule'] = self.entry_rule.name
         info['exit_rule'] = self.exit_rule.name
         info['position'] = self.have_position
-        info['trade_counts'] = self.total_trades_counts
+        info['trade_count'] = self.total_trades_counts
         info['profit'] = self.total_profit
+        return info

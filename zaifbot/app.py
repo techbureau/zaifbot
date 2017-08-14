@@ -1,81 +1,84 @@
-from collections import OrderedDict
 import itertools
+from collections import OrderedDict
 from flask import Flask, jsonify
-from zaifbot.utils.observer import Observer
-from threading import Thread, RLock
+from threading import Thread
 
 
-# class _ActiveTradesObserver(Observer):
-#     def __init__(self):
-#         self._lock = RLock()
-#         self._info = OrderedDict()
-#         self._active_strategies_list = list()
-#         self._info['active_trades'] = self._active_strategies_list
-#
-#     @property
-#     def info(self):
-#         with self._lock:
-#             return self._info
-#
-#     def update(self, strategy):
-#         with self._lock:
-#             target = self._find_strategy_info(strategy.id_)
-#             target.update()
-#
-#     def add_strategy(self, strategy):
-#         active_strategy = ActiveStrategyInfo(strategy)
-#         self._active_strategies_list.append(active_strategy)
-#
-#     def _find_strategy_info(self, id_):
-#         strategy = list(filter(lambda strategy_info: strategy_info['id_'] == id_, self._active_strategies_list))[0]
-#         return strategy
-
-
-class _ZaifBotApp(Flask):
-    def __init__(self, import_name):
-        super().__init__(import_name)
+class Portfolio:
+    def __init__(self):
         self._strategies = []
-        self._active_trades = dict()
-        # self._trades_observer = _ActiveTradesObserver()
+        self._running_threads = dict()
+        self._progress = _TradingProgress()
 
     def register_strategies(self, strategy, *strategies):
         for strategy in itertools.chain((strategy,), strategies):
             self._strategies.append(strategy)
 
-    def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
+    def start(self, *, sec_wait=1):
         for strategy in self._strategies:
-            # strategy.register_observers(self._trades_observer)
-
-            # can accept options
             trade_thread = Thread(target=strategy.start,
                                   kwargs={'sec_wait': sec_wait},
                                   daemon=True)
-            strategy_id_ = strategy.generate_id()
             trade_thread.start()
-            self._active_trades[strategy_id_] = trade_thread
+            self._running_threads[strategy] = trade_thread
 
+    def get_progress(self):
+        return self._progress.get_progress(self._running_threads)
+
+
+class _TradingProgress:
+    def __init__(self):
+        self._progress = OrderedDict()
+        self._total_profit = 0
+        self._total_trade_count = 0
+        self._strategies_info = OrderedDict()
+
+    def get_progress(self, running_threads):
+        self._progress['running_strategies'] = self._aggregate_strategies_progress(running_threads)
+        self._progress['total_trade_count'] = self._total_trade_count
+        self._progress['total_profit'] = self._total_profit
+        return self._progress
+
+    def _aggregate_strategies_progress(self, running_threads):
+        progresses = list()
+
+        for running_strategy in running_threads.keys():
+            info = running_strategy.get_info()
+            progresses.append(info)
+
+            self._add_trade_count(info['trade_count'])
+            self._add_profit(info['profit'])
+        return progresses
+
+    def _add_trade_count(self, count):
+        self._total_trade_count += count
+
+    def _add_profit(self, profit):
+        self._total_profit += profit
+
+
+class ZaifBot(Flask):
+    def __init__(self, import_name):
+        super().__init__(import_name)
+        self.portfolio = Portfolio()
+
+    def register_strategies(self, strategy, *strategies):
+        self.portfolio.register_strategies(strategy, *strategies)
+
+    def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
+        self.portfolio.start(sec_wait=sec_wait)
         # stop server when all thread is gone
         # stop all thread when server has some problem
         super().run(host, port, debug, **options)
 
-    @property
-    def trading_info(self):
-        info = []
-        for strategy in self._strategies:
-            info.append(strategy.get_info())
-        return info
-    #
-    # def update(self, active_strategy):
-    #     self._trades_observer.update(active_strategy)
-
 
 def zaifbot(import_name):
-    app = _ZaifBotApp(import_name)
+    app = ZaifBot(import_name)
     app.config['JSON_SORT_KEYS'] = False
 
     @app.route('/', methods=['GET'])
     def info():
-        res = jsonify(app.trading_info)
+        res = jsonify(app.portfolio.get_progress())
         return res
 
     return app
