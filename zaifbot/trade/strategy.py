@@ -6,6 +6,7 @@ from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
 
 
+# unit of process
 class Strategy(Observable):
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
@@ -13,7 +14,7 @@ class Strategy(Observable):
         self.exit_rule = exit_rule
         self.stop_rule = stop_rule
         self.name = name
-        self.id_ = self._get_id()
+        self.id_ = None
         self.total_profit = 0
         self.total_trades_counts = 0
 
@@ -23,6 +24,7 @@ class Strategy(Observable):
         self._alive = False
 
     def start(self, *, sec_wait=1, **options):
+        self.id_ = self._get_id()
         self._on_start(**options)
         self.alive = True
         trade_logger.info('process started',
