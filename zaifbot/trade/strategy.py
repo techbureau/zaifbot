@@ -1,9 +1,11 @@
 import time
 import uuid
+import datetime
 from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
+from collections import OrderedDict
 
 
 # unit of process
@@ -17,6 +19,7 @@ class Strategy(Observable):
         self.id_ = None
         self.total_profit = 0
         self.total_trades_counts = 0
+        self.started = None
 
         self._trade_api = BotTradeApi()
         self._trade = None
@@ -25,8 +28,9 @@ class Strategy(Observable):
 
     def start(self, *, sec_wait=1, **options):
         self.id_ = self._get_id()
-        self._on_start(**options)
+        self.started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.alive = True
+        self._on_start(**options)
         trade_logger.info('process started',
                           extra={'strategyid': self._descriptor()})
 
@@ -146,3 +150,17 @@ class Strategy(Observable):
     @staticmethod
     def _get_id():
         return uuid.uuid4().hex
+
+    def get_info(self):
+        info = OrderedDict()
+        info['id_'] = self.id_
+        info['name'] = self.name
+        info['started'] = self.started
+        info['alive'] = self.alive
+        info['action'] = self.entry_rule.action.name
+        info['amount'] = self.entry_rule.amount
+        info['entry_rule'] = self.entry_rule.name
+        info['exit_rule'] = self.exit_rule.name
+        info['position'] = self.have_position
+        info['trade_counts'] = self.total_trades_counts
+        info['profit'] = self.total_profit

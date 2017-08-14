@@ -3,35 +3,6 @@ import itertools
 from flask import Flask, jsonify
 from zaifbot.utils.observer import Observer
 from threading import Thread, RLock
-import datetime
-
-
-class ActiveStrategyInfo:
-    def __init__(self, strategy):
-        self._started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self._strategy = strategy
-        self._info = OrderedDict()
-
-    def update(self):
-        self._info['alive'] = self._strategy.alive
-        self._info['position'] = self._strategy.have_position
-        self._info['trade_counts'] = self._strategy.total_trades_counts
-        self._info['total_profit'] = self._strategy.total_profit
-
-    @property
-    def info(self):
-        self._info['id_'] = self._strategy.id_
-        self._info['name'] = self._strategy.name
-        self._info['started'] = self._started
-        self._info['alive'] = self._strategy.alive
-        self._info['action'] = self._strategy.entry_rule.action.name
-        self._info['amount'] = self._strategy.entry_rule.amount
-        self._info['entry_rule'] = self._strategy.entry_rule.name
-        self._info['exit_rule'] = self._strategy.exit_rule.name
-        self._info['position'] = self._strategy.have_position
-        self._info['trade_counts'] = self._strategy.total_trades_counts
-        self._info['profit'] = self._strategy.total_profit
-        return self.info
 
 
 class _ActiveTradesObserver(Observer):
