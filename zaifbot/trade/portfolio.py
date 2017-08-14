@@ -2,7 +2,6 @@ import itertools
 from zaifbot.utils.observer import Observer
 from collections import OrderedDict
 from threading import Thread, RLock
-from zaifbot.logger import bot_logger
 
 
 class Portfolio(Observer):
@@ -24,11 +23,6 @@ class Portfolio(Observer):
                                   daemon=True)
             trade_thread.start()
             self.running_threads[strategy] = trade_thread
-        import time
-        time.sleep(3)
-
-        for thread in self.running_threads.keys():
-            thread.stop()
 
     def get_progress(self):
         return self._progress(self.running_threads)
