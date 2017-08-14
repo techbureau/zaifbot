@@ -27,7 +27,7 @@ class Strategy(Observable):
         self._alive = False
 
     def start(self, *, sec_wait=1, **options):
-        self.id_ = self._get_id()
+        self.generate_id()
         self.started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.alive = True
         self._on_start(**options)
@@ -61,10 +61,14 @@ class Strategy(Observable):
                               extra={'strategyid': self._descriptor()})
 
     def _check_entry(self):
+        trade_logger.info('check entry',
+                          extra={'strategyid': self._descriptor()})
         if self.entry_rule.can_entry():
             self._entry()
 
     def _check_exit(self):
+        trade_logger.info('check exit',
+                          extra={'strategyid': self._descriptor()})
         if self.exit_rule.can_exit(self._trade):
             self._exit()
 
@@ -89,14 +93,7 @@ class Strategy(Observable):
         self.have_position = False
 
     def _trading_routine(self):
-        if self.have_position:
-            trade_logger.info('check exit',
-                              extra={'strategyid': self._descriptor()})
-            self._check_exit()
-        else:
-            trade_logger.info('check entry',
-                              extra={'strategyid': self._descriptor()})
-            self._check_entry()
+        self._check_exit() if self.have_position else self._check_entry()
 
     def before_trading_routine(self):
         # for user customize
@@ -147,9 +144,10 @@ class Strategy(Observable):
         new_trade.process_id = self.id_
         return new_trade
 
-    @staticmethod
-    def _get_id():
-        return uuid.uuid4().hex
+    def generate_id(self):
+        id_ = uuid.uuid4().hex
+        self.id_ = id_
+        return id_
 
     def get_info(self):
         info = OrderedDict()
