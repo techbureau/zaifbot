@@ -2,7 +2,7 @@ from zaifbot.db.dao.candle_sticks import CandleSticksDao
 from zaifbot.exchange.api.http import BotChartApi
 from zaifbot.exchange.period import Period
 from zaifbot.exchange.currency_pairs import CurrencyPair
-from zaifbot.utils import merge_dict, int_epoch_time
+from zaifbot.utils.utils import merge_dict, int_epoch_time
 
 
 class CandleSticks:
