@@ -1,13 +1,14 @@
 import time
 import uuid
 import datetime
+from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
 from collections import OrderedDict
 
 
-class Strategy:
+class Strategy(Observable):
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
         self.entry_rule = entry_rule
@@ -40,6 +41,7 @@ class Strategy:
                                extra={'strategyid': self._descriptor()})
             self.stop()
         finally:
+            self.notify_observers()
             trade_logger.info('process stopped',
                               extra={'strategyid': self._descriptor()})
 
