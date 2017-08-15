@@ -1,7 +1,7 @@
 import itertools
 from zaifbot.utils.observer import Observer
 from collections import OrderedDict
-from threading import Thread, RLock
+from threading import Thread, Lock
 
 
 class Portfolio(Observer):
@@ -9,7 +9,7 @@ class Portfolio(Observer):
         self._strategies = []
         self._running_threads = dict()
         self._progress = _TradesProgress()
-        self._lock = RLock()
+        self._lock = Lock()
 
     def register_strategies(self, strategy, *strategies):
         for strategy in itertools.chain((strategy,), strategies):
@@ -22,18 +22,15 @@ class Portfolio(Observer):
                                   kwargs={'sec_wait': sec_wait},
                                   daemon=True)
             trade_thread.start()
-            self.running_threads[strategy] = trade_thread
+            self._running_threads[strategy] = trade_thread
 
     def get_progress(self):
-        return self._progress(self.running_threads)
-
-    @property
-    def running_threads(self):
         with self._lock:
-            return self._running_threads
+            return self._progress(self._running_threads)
 
     def update(self, strategy):
-        del self.running_threads[strategy]
+        with self._lock:
+            del self._running_threads[strategy]
 
 
 class _TradesProgress:
