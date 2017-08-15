@@ -108,7 +108,10 @@ class Strategy(_AliveObservableMixIn):
         pass
 
     def stop(self):
-        self.alive = False
+        if self.alive:
+            self.alive = False
+            trade_logger.info('stop operation executed, process will soon stop',
+                              extra={'strategyid': self._descriptor()})
 
     def _add_latest_profit(self, profit):
         self.total_profit += profit
