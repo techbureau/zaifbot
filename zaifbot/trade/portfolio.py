@@ -1,6 +1,5 @@
 import itertools
 from zaifbot.utils.observer import Observer
-from collections import OrderedDict
 from threading import Thread
 
 
@@ -23,7 +22,7 @@ class Portfolio(_AliveObserverMixIn):
             strategy.register_observers(self)
 
     def start(self, *, sec_wait=1):
-        strategies = self._gather_strategies()
+        strategies = self.collect_strategies()
 
         for strategy in strategies:
             thread = Thread(target=strategy.start,
@@ -31,24 +30,6 @@ class Portfolio(_AliveObserverMixIn):
                             daemon=True)
             thread.start()
             self._strategies[strategy.id_]['thread'] = thread
-
-    # fixme: move to api
-    def index(self):
-        info_list = list()
-        count = 0
-        profit = 0
-        index = OrderedDict()
-
-        for strategy in self._gather_strategies():
-            info = strategy.get_info()
-            info_list.append(info)
-            count += info['trade_count']
-            profit += info['profit']
-
-        index['running_strategies'] = info_list
-        index['total_trade_count'] = count
-        index['total_profit'] = profit
-        return index
 
     def find_strategy(self, id_):
         strategy = self._strategies.get(id_, None)
@@ -62,12 +43,12 @@ class Portfolio(_AliveObserverMixIn):
             return None
         return strategy['thread']
 
+    def collect_strategies(self):
+        return [strategy['strategy'] for strategy in self._strategies.values()]
+
+    def collect_threads(self):
+        return [strategy['thread'] for strategy in self._strategies.values()]
+
     def _remove(self, id_):
         if id_ in self._strategies:
             del self._strategies[id_]
-
-    def _gather_strategies(self):
-        return [strategy['strategy'] for strategy in self._strategies.values()]
-
-    def _gather_threads(self):
-        return [strategy['thread'] for strategy in self._strategies.values()]

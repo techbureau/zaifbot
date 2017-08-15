@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from flask import Blueprint, jsonify
 from flask import current_app as app
 from zaifbot.errors import InvalidRequest
@@ -7,13 +8,24 @@ resource = Blueprint('strategies', __name__, url_prefix='/strategies')
 
 @resource.route('/', methods=['GET'])
 def index():
-    res = jsonify(app.portfolio.index())
+    strategy_list = list()
+    trade_count = 0
+    total_profit = 0
+    rv = OrderedDict()
+
+    strategies = app.portfolio.collect_strategies()
+    for strategy in strategies:
+        info = strategy.get_info()
+        strategy_list.append(info)
+        trade_count += info['trade_count']
+        total_profit += info['profit']
+
+    rv['running_strategies'] = strategy_list
+    rv['total_trade_count'] = trade_count
+    rv['total_profit'] = total_profit
+
+    res = jsonify(rv)
     return res
-
-
-@resource.route('/', methods=['POST'])
-def create():
-    pass
 
 
 @resource.route('/<id_>', methods=['GET'])
@@ -23,6 +35,11 @@ def show(id_):
         res = jsonify(strategy.get_info())
         return res
     raise InvalidRequest('strategy not found', status_code=404)
+
+
+@resource.route('/', methods=['POST'])
+def create():
+    pass
 
 
 @resource.route('/<id_>', methods=['DELETE'])
