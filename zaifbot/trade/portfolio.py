@@ -32,6 +32,7 @@ class Portfolio(_AliveObserverMixIn):
             thread.start()
             self._strategies[strategy.id_]['thread'] = thread
 
+    # fixme: move to api
     def index(self):
         info_list = list()
         count = 0
@@ -49,22 +50,6 @@ class Portfolio(_AliveObserverMixIn):
         index['total_profit'] = profit
         return index
 
-    def show(self, id_):
-        strategy = self.find_strategy(id_)
-        if strategy:
-            return strategy.get_info()
-        return dict()
-
-    def suspend(self):
-        pass
-
-    def stop(self, id_):
-        pass
-
-    def _remove(self, id_):
-        if id_ in self._strategies:
-            del self._strategies[id_]
-
     def find_strategy(self, id_):
         strategy = self._strategies.get(id_, None)
         if strategy is None:
@@ -76,6 +61,10 @@ class Portfolio(_AliveObserverMixIn):
         if strategy is None:
             return None
         return strategy['thread']
+
+    def _remove(self, id_):
+        if id_ in self._strategies:
+            del self._strategies[id_]
 
     def _gather_strategies(self):
         return [strategy['strategy'] for strategy in self._strategies.values()]

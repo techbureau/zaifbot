@@ -1,5 +1,5 @@
 from zaifbot.trade.portfolio import Portfolio
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from zaifbot.web.resources import strategies
 from zaifbot.errors import InvalidRequest
 
@@ -37,6 +37,10 @@ def zaifbot(import_name):
     resources = [strategies.resource]
     for resource in resources:
         app.register_blueprint(resource)
+
+    @app.route('/')
+    def root():
+        return redirect('/strategies/', code=303)
 
     @app.route('/shutdown', methods=['GET'])
     def shutdown():
