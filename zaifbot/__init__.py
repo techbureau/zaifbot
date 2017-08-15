@@ -1,25 +1,37 @@
-import os, sys, subprocess
-
-from zaifbot.errors import ZaifBotError
+import os
+import sys
+import subprocess
+from flask import jsonify, redirect
+from zaifbot.web.app import ZaifBot
+from zaifbot.web.resources import strategies
+from zaifbot.errors import ZaifBotError, InvalidRequest
 
 
 __version__ = '0.0.6'
 
 
-class ZaifBot:
-    _process = []
+def zaifbot(import_name):
+    app = ZaifBot(import_name)
+    app.config['JSON_SORT_KEYS'] = False
 
-    def add_running_process(self, auto_trade_process):
-        self._process.append(auto_trade_process)
+    @app.errorhandler(InvalidRequest)
+    def handle_invalid_usage(error):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return response
 
-    def start(self):
-        running_processes = []
-        for process in self._process:
-            process.start()
-            running_processes.append(process)
-        [x.join() for x in running_processes]
+    resources = [strategies.resource]
+    for resource in resources:
+        app.register_blueprint(resource)
+
+    @app.route('/')
+    def root():
+        return redirect('/strategies/', code=303)
+
+    return app
 
 
+# fixme: move to other place
 def install_ta_lib():
     if sys.platform.startswith('linux'):
         # fixme
