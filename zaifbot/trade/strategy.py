@@ -15,7 +15,7 @@ class Strategy(Observable):
         self.exit_rule = exit_rule
         self.stop_rule = stop_rule
         self.name = name
-        self.id_ = None
+        self.id_ = self.generate_id()
         self.total_profit = 0
         self.total_trades_counts = 0
         self.started = None
@@ -26,7 +26,6 @@ class Strategy(Observable):
         self._trade = None
 
     def start(self, *, sec_wait=1):
-        self.generate_id()
         self.started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.alive = True
         self._on_start()
@@ -124,9 +123,9 @@ class Strategy(Observable):
         new_trade.process_id = self.id_
         return new_trade
 
-    def generate_id(self):
+    @staticmethod
+    def generate_id():
         id_ = uuid.uuid4().hex
-        self.id_ = id_
         return id_
 
     def get_info(self):
