@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
 from flask import current_app as app
 from zaifbot.errors import InvalidRequest
 
@@ -37,16 +37,16 @@ def show(id_):
     raise InvalidRequest('strategy not found', status_code=404)
 
 
-@resource.route('/', methods=['POST'])
-def create():
-    pass
-
-
 @resource.route('/<id_>', methods=['DELETE'])
 def stop(id_):
     strategy = app.portfolio.find_strategy(id_)
     if strategy is None:
         raise InvalidRequest('strategy not found', status_code=404)
+
+    strategy.stop()
+    res = Response()
+    res.status_code = 204
+    return res
 
 
 @resource.route('/<id_>/suspend', methods=['PATCH'])
