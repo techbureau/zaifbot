@@ -45,7 +45,6 @@ class Strategy(_AliveObservableMixIn):
                                extra={'strategyid': self._descriptor()})
             self.stop()
         finally:
-            self.notify_observers()
             trade_logger.info('process stopped',
                               extra={'strategyid': self._descriptor()})
 
@@ -110,6 +109,7 @@ class Strategy(_AliveObservableMixIn):
     def stop(self):
         if self.alive:
             self.alive = False
+            self.notify_observers()
             trade_logger.info('stop operation executed, process will soon stop',
                               extra={'strategyid': self._descriptor()})
 

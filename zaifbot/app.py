@@ -1,6 +1,7 @@
 from zaifbot.trade.portfolio import Portfolio
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from zaifbot.web.resources import strategies
+from zaifbot.errors import InvalidRequest
 
 
 def shutdown_server():
@@ -26,6 +27,12 @@ class ZaifBot(Flask):
 def zaifbot(import_name):
     app = ZaifBot(import_name)
     app.config['JSON_SORT_KEYS'] = False
+
+    @app.errorhandler(InvalidRequest)
+    def handle_invalid_usage(error):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return response
 
     resources = [strategies.resource]
     for resource in resources:

@@ -50,7 +50,7 @@ class Portfolio(_AliveObserverMixIn):
         return index
 
     def show(self, id_):
-        strategy = self._find_strategy(id_)
+        strategy = self.find_strategy(id_)
         if strategy:
             return strategy.get_info()
         return dict()
@@ -58,20 +58,20 @@ class Portfolio(_AliveObserverMixIn):
     def suspend(self):
         pass
 
-    def stop(self):
+    def stop(self, id_):
         pass
 
     def _remove(self, id_):
         if id_ in self._strategies:
             del self._strategies[id_]
 
-    def _find_strategy(self, id_):
+    def find_strategy(self, id_):
         strategy = self._strategies.get(id_, None)
         if strategy is None:
             return None
         return strategy['strategy']
 
-    def _find_thread(self, id_):
+    def find_thread(self, id_):
         strategy = self._strategies.get(id_, None)
         if strategy is None:
             return None
