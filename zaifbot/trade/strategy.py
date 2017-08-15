@@ -8,7 +8,11 @@ from zaifbot.logger import trade_logger
 from collections import OrderedDict
 
 
-class Strategy(Observable):
+class _AliveObservableMixIn(Observable):
+    pass
+
+
+class Strategy(_AliveObservableMixIn):
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
         self.entry_rule = entry_rule
@@ -21,6 +25,7 @@ class Strategy(Observable):
         self.started = None
         self.have_position = False
         self.alive = False
+        self.pid = None
 
         self._trade_api = BotTradeApi()
         self._trade = None
