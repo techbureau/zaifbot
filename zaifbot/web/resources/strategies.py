@@ -55,7 +55,7 @@ def remove(id_):
     if strategy is None:
         raise InvalidRequest('strategy not found', status_code=404)
 
-    if strategy.status.is_alive():
+    if strategy.is_alive():
         raise InvalidRequest('still strategy is alive', status_code=409)
 
     app.portfolio.remove(id_)

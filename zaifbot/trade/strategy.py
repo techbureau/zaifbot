@@ -75,6 +75,9 @@ class Strategy:
         trade_logger.info('process restarted', extra={'strategyid': self._descriptor()})
         self._wake_up_and_next_loop()
 
+    def is_alive(self):
+        return self._status.is_alive()
+
     def _main_loop(self, sec_wait):
         try:
             while self._status.is_alive():
