@@ -29,6 +29,10 @@ class Portfolio:
         strategy = self._strategies.get(id_, {})
         return strategy.get('thread', None)
 
+    def remove(self, id_):
+        if id_ in self._strategies:
+            del self._strategies[id_]
+
     def collect_strategies(self):
         return [strategy['strategy'] for strategy in self._strategies.values()]
 

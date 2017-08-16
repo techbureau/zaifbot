@@ -37,7 +37,7 @@ def show(id_):
     raise InvalidRequest('strategy not found', status_code=404)
 
 
-@resource.route('/<id_>/stop', methods=['GET'])
+@resource.route('/<id_>', methods=['PATCH'])
 def stop(id_):
     strategy = app.portfolio.find_strategy(id_)
     if strategy is None:
@@ -49,13 +49,39 @@ def stop(id_):
     return res
 
 
-@resource.route('/<id_>/suspend', methods=['GET'])
+@resource.route('/<id_>', methods=['DELETE'])
+def remove(id_):
+    strategy = app.portfolio.find_strategy(id_)
+    if strategy is None:
+        raise InvalidRequest('strategy not found', status_code=404)
+
+    if strategy.status.is_alive():
+        raise InvalidRequest('still strategy is alive', status_code=409)
+
+    app.portfolio.remove(id_)
+    res = Response()
+    res.status_code = 204
+    return res
+
+
+@resource.route('/<id_>/suspend', methods=['PUT'])
 def suspend(id_):
     strategy = app.portfolio.find_strategy(id_)
     if strategy is None:
         raise InvalidRequest('strategy not found', status_code=404)
 
     strategy.pause()
+    res = Response()
+    res.status_code = 204
+    return res
+
+
+@resource.route('/<id_>/suspend', methods=['DELETE'])
+def restart(id_):
+    strategy = app.portfolio.find_strategy(id_)
+    if strategy is None:
+        raise InvalidRequest('strategy not found', status_code=404)
+    strategy.restart()
     res = Response()
     res.status_code = 204
     return res
