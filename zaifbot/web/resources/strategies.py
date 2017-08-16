@@ -20,8 +20,8 @@ def index():
         trade_count += info['trade_count']
         total_profit += info['profit']
 
-    rv['running_strategies'] = strategy_list
-    rv['total_trade_count'] = trade_count
+    rv['strategies'] = strategy_list
+    rv['total_trades'] = trade_count
     rv['total_profit'] = total_profit
 
     res = jsonify(rv)
