@@ -22,16 +22,12 @@ class Portfolio:
             self._strategies[strategy.id_]['thread'] = thread
 
     def find_strategy(self, id_):
-        strategy = self._strategies.get(id_, None)
-        if strategy is None:
-            return None
-        return strategy['strategy']
+        strategy = self._strategies.get(id_, {})
+        return strategy.get('strategy', None)
 
     def find_thread(self, id_):
-        strategy = self._strategies.get(id_, None)
-        if strategy is None:
-            return None
-        return strategy['thread']
+        strategy = self._strategies.get(id_, {})
+        return strategy.get('thread', None)
 
     def collect_strategies(self):
         return [strategy['strategy'] for strategy in self._strategies.values()]

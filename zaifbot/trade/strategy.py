@@ -1,8 +1,7 @@
-import time
 import uuid
 import datetime
 from collections import OrderedDict
-from threading import Event
+from threading import Event, Condition
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
@@ -10,12 +9,11 @@ from zaifbot.logger import trade_logger
 
 class Strategy:
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
-        super().__init__()
         self.entry_rule = entry_rule
         self.exit_rule = exit_rule
         self.stop_rule = stop_rule
         self.name = name
-        self.id_ = self.generate_id()
+        self.id_ = _generate_id()
         self.total_profit = 0
         self.total_trades_counts = 0
         self.started = None
@@ -24,6 +22,7 @@ class Strategy:
         self._have_position = Event()
         self._trade_api = BotTradeApi()
         self._trade = None
+        self._cv = Condition()
 
     @property
     def have_position(self):
@@ -41,10 +40,11 @@ class Strategy:
         self._main_loop(sec_wait=sec_wait)
 
     def get_info(self):
+        # much of position
         info = OrderedDict()
         info['id_'] = self.id_
         info['name'] = self.name
-        info['started'] = self.started
+        info['started'] =  self.started
         info['status'] = self.status
         info['currency_pair'] = self.entry_rule.currency_pair.name
         info['action'] = self.entry_rule.action.name
@@ -54,17 +54,26 @@ class Strategy:
         info['position'] = self.have_position
         info['trade_count'] = self.total_trades_counts
         info['profit'] = self.total_profit
+        info['id_'] = self.id_
+        info['id_'] = self.id_
         return info
 
     def stop(self):
-        trade_logger.info('stop request accepted, process will soon stop',
-                          extra={'strategyid': self._descriptor()})
+        trade_logger.info('stop request accepted', extra={'strategyid': self._descriptor()})
         self._status.to_stopped()
+        self._wake_up_and_next_loop()
 
     def pause(self):
-        trade_logger.info('pause request accepted, process will soon be paused',
-                          extra={'strategyid': self._descriptor()})
+        trade_logger.info('pause request accepted', extra={'strategyid': self._descriptor()})
         self._status.to_paused()
+        trade_logger.info('process paused', extra={'strategyid': self._descriptor()})
+        self._wake_up_and_next_loop()
+
+    def restart(self):
+        trade_logger.info('restart request accepted', extra={'strategyid': self._descriptor()})
+        self._status.to_running()
+        trade_logger.info('process restarted', extra={'strategyid': self._descriptor()})
+        self._wake_up_and_next_loop()
 
     def _main_loop(self, sec_wait):
         try:
@@ -73,24 +82,19 @@ class Strategy:
 
                 if self._need_stop():
                     self.stop()
-                    continue
+                    break
 
-                trade_logger.info('process running',
-                                  extra={'strategyid': self._descriptor()})
+                trade_logger.info('process running', extra={'strategyid': self._descriptor()})
 
                 self._trading_routine()
-
-                time.sleep(sec_wait)
+                self._sleep(sec_wait)
         except Exception as e:
             trade_logger.exception(e, extra={'strategyid': self._descriptor()})
             trade_logger.error('exception occurred, process will stop',
                                extra={'strategyid': self._descriptor()})
             self.stop()
         finally:
-            trade_logger.info('process will stop',
-                              extra={'strategyid': self._descriptor()})
-            trade_logger.info('process stopped',
-                              extra={'strategyid': self._descriptor()})
+            trade_logger.info('process stopped', extra={'strategyid': self._descriptor()})
 
     def _check_entry(self):
         trade_logger.info('check entry',
@@ -141,10 +145,13 @@ class Strategy:
         new_trade.process_id = self.id_
         return new_trade
 
-    @staticmethod
-    def generate_id():
-        id_ = uuid.uuid4().hex
-        return id_
+    def _sleep(self, sec_wait):
+        with self._cv:
+            self._cv.wait(timeout=sec_wait)
+
+    def _wake_up_and_next_loop(self):
+        with self._cv:
+            self._cv.notify_all()
 
 
 class Status:
@@ -194,3 +201,8 @@ class Status:
 
     def wait_until_continuable(self):
         self._can_continue.wait()
+
+
+def _generate_id():
+    id_ = uuid.uuid4().hex
+    return id_

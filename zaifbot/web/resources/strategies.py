@@ -37,7 +37,7 @@ def show(id_):
     raise InvalidRequest('strategy not found', status_code=404)
 
 
-@resource.route('/<id_>', methods=['DELETE'])
+@resource.route('/<id_>/stop', methods=['GET'])
 def stop(id_):
     strategy = app.portfolio.find_strategy(id_)
     if strategy is None:
