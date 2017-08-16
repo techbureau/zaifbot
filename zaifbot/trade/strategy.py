@@ -3,17 +3,12 @@ import uuid
 import datetime
 from collections import OrderedDict
 from threading import Event
-from zaifbot.utils.observable import Observable
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
 
 
-class _AliveObservableMixIn(Observable):
-    pass
-
-
-class Strategy(_AliveObservableMixIn):
+class Strategy:
     def __init__(self, entry_rule, exit_rule, stop_rule=None, name=None):
         super().__init__()
         self.entry_rule = entry_rule
@@ -62,16 +57,14 @@ class Strategy(_AliveObservableMixIn):
         return info
 
     def stop(self):
-        self._status.to_stopped()
-        self.notify_observers()
         trade_logger.info('stop request accepted, process will soon stop',
                           extra={'strategyid': self._descriptor()})
+        self._status.to_stopped()
 
     def pause(self):
-        self._status.to_paused()
-        self.notify_observers()
-        trade_logger.info('suspend request accepted, process will soon be paused',
+        trade_logger.info('pause request accepted, process will soon be paused',
                           extra={'strategyid': self._descriptor()})
+        self._status.to_paused()
 
     def _main_loop(self, sec_wait):
         try:
@@ -169,9 +162,12 @@ class Status:
         self._status = 'running'
 
     def to_stopped(self):
+        self._can_continue.clear()
+        self._is_alive.clear()
         self._status = 'stopped'
 
     def to_paused(self):
+        self._can_continue.clear()
         self._status = 'paused'
 
     def is_created(self):

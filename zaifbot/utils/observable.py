@@ -15,6 +15,6 @@ class Observable:
     def remove_observers(self, observer):
         self.__observers.discard(observer)
 
-    def notify_observers(self):
+    def notify_observers(self, *args, **kwargs):
         for observer in self.__observers:
-            observer.update(self)
+            observer.update(self, *args, **kwargs)

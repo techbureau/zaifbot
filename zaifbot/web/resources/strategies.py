@@ -49,6 +49,13 @@ def stop(id_):
     return res
 
 
-@resource.route('/<id_>/suspend', methods=['PATCH'])
+@resource.route('/<id_>/suspend', methods=['GET'])
 def suspend(id_):
-    pass
+    strategy = app.portfolio.find_strategy(id_)
+    if strategy is None:
+        raise InvalidRequest('strategy not found', status_code=404)
+
+    strategy.pause()
+    res = Response()
+    res.status_code = 204
+    return res

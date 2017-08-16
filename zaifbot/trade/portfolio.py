@@ -1,17 +1,8 @@
 import itertools
-from zaifbot.utils.observer import Observer
 from threading import Thread
 
 
-class _AliveObserverMixIn(Observer):
-    def update(self, strategy):
-        self._remove(strategy.id_)
-
-    def _remove(self, id_):
-        raise NotImplementedError
-
-
-class Portfolio(_AliveObserverMixIn):
+class Portfolio:
     def __init__(self):
         self._strategies = dict()
 
@@ -19,7 +10,6 @@ class Portfolio(_AliveObserverMixIn):
         for strategy in itertools.chain((strategy,), strategies):
             self._strategies[strategy.id_] = dict()
             self._strategies[strategy.id_]['strategy'] = strategy
-            strategy.register_observers(self)
 
     def start(self, *, sec_wait=1):
         strategies = self.collect_strategies()
@@ -49,6 +39,3 @@ class Portfolio(_AliveObserverMixIn):
     def collect_threads(self):
         return [strategy['thread'] for strategy in self._strategies.values()]
 
-    def _remove(self, id_):
-        if id_ in self._strategies:
-            del self._strategies[id_]
