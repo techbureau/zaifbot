@@ -4,7 +4,7 @@ from zaifbot.web.resources import strategies
 from zaifbot.errors import ZaifBotError, InvalidRequest
 
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 
 def zaifbot(import_name):
