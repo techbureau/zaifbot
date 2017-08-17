@@ -2,7 +2,6 @@ import uuid
 import datetime
 from collections import OrderedDict
 from threading import Event, Condition
-from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.trade import Trade
 from zaifbot.logger import trade_logger
 
@@ -20,7 +19,6 @@ class Strategy:
 
         self._status = Status()
         self._have_position = Event()
-        self._trade_api = BotTradeApi()
         self._trade = None
         self._cv = Condition()
 
