@@ -25,7 +25,6 @@ class TradeResult:
     def profit(self, from_datetime=None, to_datetime=None, filters=None):
         gross_profit = self.gross_profit(from_datetime, to_datetime, filters)
         gross_loss = self.gross_loss(from_datetime, to_datetime, filters)
-        # gross_loss is always negative value
         return gross_profit + gross_loss
 
     def profit_factor(self, from_datetime=None, to_datetime=None, filters=None):
