@@ -9,6 +9,7 @@ __version__ = '0.0.6'
 
 def zaifbot(import_name):
     app = ZaifBot(import_name)
+    app.url_map.strict_slashes = False
     app.config['JSON_SORT_KEYS'] = False
 
     @app.errorhandler(InvalidRequest)
