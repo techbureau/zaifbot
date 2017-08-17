@@ -22,7 +22,7 @@ def zaifbot(import_name):
 
     @app.route('/')
     def root():
-        return redirect('/strategies/', code=303)
+        return redirect('/strategies', code=303)
 
     resources = [strategies.resource]
     for resource in resources:
