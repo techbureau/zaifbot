@@ -35,7 +35,7 @@ setup(
         'zaifapi',
         'numpy',
         'pandas',
-        'flask',
+        'Flask',
     ],
     extras_require={
         'ta-lib': ['TA-Lib']
