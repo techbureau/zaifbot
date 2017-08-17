@@ -31,7 +31,6 @@ setup(
     install_requires=[
         'SQLAlchemy',
         'slackclient',
-        'pytz',
         'slack_logger',
         'zaifapi',
         'numpy',
