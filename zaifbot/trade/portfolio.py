@@ -13,13 +13,8 @@ class Portfolio:
 
     def start(self, *, sec_wait=1):
         strategies = self.collect_strategies()
-
         for strategy in strategies:
-            thread = Thread(target=strategy.start,
-                            kwargs={'sec_wait': sec_wait},
-                            daemon=True)
-            thread.start()
-            self._strategies[strategy.id_]['thread'] = thread
+            self._thread_start(strategy, sec_wait=sec_wait)
 
     def find_strategy(self, id_):
         strategy = self._strategies.get(id_, {})
@@ -38,4 +33,11 @@ class Portfolio:
 
     def collect_threads(self):
         return [strategy['thread'] for strategy in self._strategies.values()]
+
+    def _thread_start(self, strategy, *, sec_wait=1):
+        thread = Thread(target=strategy.start,
+                        kwargs={'sec_wait': sec_wait},
+                        daemon=True)
+        thread.start()
+        self._strategies[strategy.id_]['thread'] = thread
 

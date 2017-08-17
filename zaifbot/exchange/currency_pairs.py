@@ -13,15 +13,12 @@ class CurrencyPair:
                 cls._instances[name] = super().__new__(cls)
         return cls._instances[name]
 
-    def __init__(self, pair):
-        self._name = str(pair)
+    def __init__(self, name):
+        self._name = str(name)
         self._info = _ZaifCurrencyPairsInfo()[self._name]
 
     def __str__(self):
         return self._name
-
-    def __getnewargs__(self):
-        return (self._name,)
 
     @property
     def name(self):
