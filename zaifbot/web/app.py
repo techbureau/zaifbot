@@ -12,4 +12,4 @@ class ZaifBot(Flask):
 
     def start(self, *, sec_wait=1, host=None, port=None, debug=None, **options):
         self.portfolio.start(sec_wait=sec_wait)
-        super().run(host, port, debug, **options)
+        self.run(host, port, debug, **options)

@@ -42,4 +42,4 @@ def _customize_flask_logger():
         logger.removeHandler(hdlr)
 
     logger.addHandler(bot_console_handler)
-    logger.addHandler(bot_file_handler)
+    # fixme: add multiple process file handler 
