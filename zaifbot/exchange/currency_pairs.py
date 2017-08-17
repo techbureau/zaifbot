@@ -6,12 +6,12 @@ class CurrencyPair:
     _lock = Lock()
     _instances = {}
 
-    def __new__(cls, pair):
+    def __new__(cls, name):
         with cls._lock:
-            pair = str(pair)
-            if cls._instances.get(pair, None) is None:
-                cls._instances[pair] = super().__new__(cls)
-        return cls._instances[pair]
+            name = str(name)
+            if cls._instances.get(name, None) is None:
+                cls._instances[name] = super().__new__(cls)
+        return cls._instances[name]
 
     def __init__(self, pair):
         self._name = str(pair)
@@ -19,6 +19,9 @@ class CurrencyPair:
 
     def __str__(self):
         return self._name
+
+    def __getnewargs__(self):
+        return (self._name,)
 
     @property
     def name(self):
