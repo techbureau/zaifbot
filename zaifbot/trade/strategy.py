@@ -38,7 +38,12 @@ class Strategy:
         self._main_loop(sec_wait=sec_wait)
 
     def get_info(self):
-        # much of position
+        # fixme
+        def _position(trade):
+            if trade:
+                return trade.entry_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            return False
+
         info = OrderedDict()
         info['id_'] = self.id_
         info['name'] = self.name
@@ -49,11 +54,9 @@ class Strategy:
         info['amount'] = self.entry_rule.amount
         info['entry_rule'] = self.entry_rule.name
         info['exit_rule'] = self.exit_rule.name
-        info['position'] = self.have_position
+        info['position'] = _position(self._trade)
         info['trade_count'] = self.total_trades_counts
         info['profit'] = self.total_profit
-        info['id_'] = self.id_
-        info['id_'] = self.id_
         return info
 
     def stop(self):
