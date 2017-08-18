@@ -42,7 +42,7 @@ class Strategy:
         info = OrderedDict()
         info['id_'] = self.id_
         info['name'] = self.name
-        info['started'] =  self.started
+        info['started'] = self.started
         info['status'] = self.status
         info['currency_pair'] = self.entry_rule.currency_pair.name
         info['action'] = self.entry_rule.action.name
