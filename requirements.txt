@@ -21,4 +21,3 @@ urllib3==1.22
 websocket-client==0.44.0
 Werkzeug==0.12.2
 zaifapi==1.5.5
-zaifbot==0.0.7
