@@ -57,18 +57,27 @@ class Strategy:
         return info
 
     def stop(self):
-        trade_logger.info('stop request accepted', extra={'strategyid': self._descriptor()})
+        if self._status.is_stopped():
+            trade_logger.info('process already stopped', extra={'strategyid': self._descriptor()})
+            return
+
         self._status.to_stopped()
         self._wake_up_and_next_loop()
 
     def pause(self):
-        trade_logger.info('pause request accepted', extra={'strategyid': self._descriptor()})
+        if self._status.is_paused():
+            trade_logger.info('process already paused', extra={'strategyid': self._descriptor()})
+            return
+
         self._status.to_paused()
         trade_logger.info('process paused', extra={'strategyid': self._descriptor()})
         self._wake_up_and_next_loop()
 
     def restart(self):
-        trade_logger.info('restart request accepted', extra={'strategyid': self._descriptor()})
+        if self._status.is_running():
+            trade_logger.info('process already running', extra={'strategyid': self._descriptor()})
+            return
+
         self._status.to_running()
         trade_logger.info('process restarted', extra={'strategyid': self._descriptor()})
         self._wake_up_and_next_loop()
