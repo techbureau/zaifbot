@@ -1,11 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-
+import numbers
 from sqlalchemy.exc import SQLAlchemyError
 
 from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
-from zaifbot.utils.utils import is_float
 
 
 class DaoBase(metaclass=ABCMeta):
@@ -80,8 +79,9 @@ class DaoBase(metaclass=ABCMeta):
 
     @staticmethod
     def row2dict(row):
-        dict_row = row.__dict__
-        dict_row.pop('_sa_instance_state', None)
+        dict_row = dict()
+        for column in row.__table__.columns:
+            dict_row[column.name] = getattr(row, column.name)
         return dict_row
 
     @classmethod
@@ -89,13 +89,22 @@ class DaoBase(metaclass=ABCMeta):
         return [cls.row2dict(row) for row in rows]
 
     def _custom_filters(self, q, filters):
+        # fixme: dirty code
         for key, value in filters.items():
-            try:
-                operator, boundary = value.replace(",", " ").split()
-            except ValueError:
-                operator, boundary = '==', value
+            operator = boundary = str('')
 
-            if is_float(boundary)is False:
+            if isinstance(value, bool):
+                operator, boundary = 'is', str(value)
+
+            if isinstance(value, numbers.Number):
+                operator, boundary = '==', str(value)
+
+            if isinstance(value, str):
+                try:
+                    operator, boundary = value.replace(",", " ").split()
+                except ValueError:
+                    operator, boundary = '==', value
+
                 boundary = "'" + boundary + "'"
             source = "self._Model.{} {} {}".format(key, operator, boundary)
             q = q.filter(eval(source))

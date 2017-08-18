@@ -1,13 +1,13 @@
-from flask import jsonify, redirect
-from zaifbot.web.app import ZaifBot
-from zaifbot.web.resources import strategies
-from zaifbot.errors import ZaifBotError, InvalidRequest
 
-
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 
 def zaifbot(import_name):
+    from flask import jsonify, redirect
+    from zaifbot.web.app import ZaifBot
+    from zaifbot.web.resources import strategies
+    from zaifbot.errors import ZaifBotError, InvalidRequest
+
     app = ZaifBot(import_name)
     app.url_map.strict_slashes = False
     app.config['JSON_SORT_KEYS'] = False
@@ -22,7 +22,7 @@ def zaifbot(import_name):
 
     @app.route('/')
     def root():
-        return redirect('/strategies/', code=303)
+        return redirect('/strategies', code=303)
 
     resources = [strategies.resource]
     for resource in resources:

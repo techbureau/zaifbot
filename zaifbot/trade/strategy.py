@@ -38,37 +38,49 @@ class Strategy:
         self._main_loop(sec_wait=sec_wait)
 
     def get_info(self):
-        # much of position
+        # fixme
+        def _position(trade):
+            if trade:
+                return trade.entry_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            return False
+
         info = OrderedDict()
         info['id_'] = self.id_
         info['name'] = self.name
-        info['started'] =  self.started
+        info['started'] = self.started
         info['status'] = self.status
         info['currency_pair'] = self.entry_rule.currency_pair.name
         info['action'] = self.entry_rule.action.name
         info['amount'] = self.entry_rule.amount
         info['entry_rule'] = self.entry_rule.name
         info['exit_rule'] = self.exit_rule.name
-        info['position'] = self.have_position
+        info['position'] = _position(self._trade)
         info['trade_count'] = self.total_trades_counts
         info['profit'] = self.total_profit
-        info['id_'] = self.id_
-        info['id_'] = self.id_
         return info
 
     def stop(self):
-        trade_logger.info('stop request accepted', extra={'strategyid': self._descriptor()})
+        if self._status.is_stopped():
+            trade_logger.info('process already stopped', extra={'strategyid': self._descriptor()})
+            return
+
         self._status.to_stopped()
         self._wake_up_and_next_loop()
 
     def pause(self):
-        trade_logger.info('pause request accepted', extra={'strategyid': self._descriptor()})
+        if self._status.is_paused():
+            trade_logger.info('process already paused', extra={'strategyid': self._descriptor()})
+            return
+
         self._status.to_paused()
         trade_logger.info('process paused', extra={'strategyid': self._descriptor()})
         self._wake_up_and_next_loop()
 
     def restart(self):
-        trade_logger.info('restart request accepted', extra={'strategyid': self._descriptor()})
+        if self._status.is_running():
+            trade_logger.info('process already running', extra={'strategyid': self._descriptor()})
+            return
+
         self._status.to_running()
         trade_logger.info('process restarted', extra={'strategyid': self._descriptor()})
         self._wake_up_and_next_loop()

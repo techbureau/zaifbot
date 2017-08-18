@@ -114,12 +114,12 @@ class BotPublicApi(ZaifPublicApi):
     def currencies(self, currency):
         return super().currencies(currency)
 
-    @_with_retry
-    def everything(self, func_name, currency_pair, params):
-        currency_pair = str(currency_pair)
-        if params.get('period'):
-            params['period'] = str(params['period'])
-        return super().everything(func_name, currency_pair, params)
+    # @_with_retry
+    # def everything(self, func_name, currency_pair, params):
+    #     currency_pair = str(currency_pair)
+    #     if params.get('period'):
+    #         params['period'] = str(params['period'])
+    #     return super().everything(func_name, currency_pair, params)
 
 
 class BotChartApi:

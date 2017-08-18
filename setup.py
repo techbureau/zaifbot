@@ -31,11 +31,11 @@ setup(
     install_requires=[
         'SQLAlchemy',
         'slackclient',
-        'pytz',
         'slack_logger',
         'zaifapi',
         'numpy',
         'pandas',
+        'Flask',
     ],
     extras_require={
         'ta-lib': ['TA-Lib']
