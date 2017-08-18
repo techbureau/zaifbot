@@ -1,12 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 import numbers
-from collections import OrderedDict
 from sqlalchemy.exc import SQLAlchemyError
 
 from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
-from zaifbot.utils.utils import is_float
 
 
 class DaoBase(metaclass=ABCMeta):
