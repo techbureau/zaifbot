@@ -13,7 +13,11 @@ class MACD(Indicator):
 
     def request_data(self, count=100, to_epoch_time=None):
         candlesticks_df = self._get_candlesticks_df(count, to_epoch_time)
-        macd = self._exec_talib_func(candlesticks_df, price='close', fastperiod=self._short, slowperiod=self._long, signalperiod=self._signal)
+        macd = self._exec_talib_func(candlesticks_df,
+                                     price='close',
+                                     fastperiod=self._short,
+                                     slowperiod=self._long,
+                                     signalperiod=self._signal)
 
         formatted_macd = self._formatting(candlesticks_df, macd)
         return formatted_macd
