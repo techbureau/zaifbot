@@ -12,9 +12,11 @@ class Trades(Base):
     amount = Column('amount', Float, nullable=False)
     action = Column('action', String, nullable=False)
     entry_price = Column('entry_price', Float, nullable=False)
-    entry_datetime = Column('entry_time', DateTime, default=datetime.datetime.now(), nullable=False)
+    entry_datetime = Column('entry_datetime', DateTime, default=datetime.datetime.now(), nullable=False)
     exit_price = Column('exit_price', Float)
-    exit_datetime = Column('exit_time', DateTime, default=datetime.datetime.now())
+    exit_datetime = Column('exit_datetime', DateTime)
+    strategy_name = Column('strategy_name', String, nullable=True)
+    process_id = Column('process_id', String, nullable=True)
     profit = Column('profit', Float)
     closed = Column('closed', Boolean, default=False, nullable=False)
 

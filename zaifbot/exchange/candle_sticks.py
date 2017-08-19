@@ -2,7 +2,7 @@ from zaifbot.db.dao.candle_sticks import CandleSticksDao
 from zaifbot.exchange.api.http import BotChartApi
 from zaifbot.exchange.period import Period
 from zaifbot.exchange.currency_pairs import CurrencyPair
-from zaifbot.utils import merge_dict, int_epoch_time
+from zaifbot.utils.utils import merge_dict, int_epoch_time
 
 
 class CandleSticks:
@@ -46,12 +46,5 @@ class CandleSticks:
         self._dao.create_multiple(new_records)
 
     def _fetch_data_from_db(self, start_time, end_time):
-        records = list(map(self._row2dict, self._dao.get_by_time_width(start_time, end_time, closed=True)))
-        return records
-
-    @staticmethod
-    # todo: move to candle_sticks_dao
-    def _row2dict(row):
-        dict_row = row.__dict__
-        dict_row.pop('_sa_instance_state', None)
-        return dict_row
+        records = self._dao.get_by_time_width(start_time, end_time, closed=True)
+        return self._dao.rows2dicts(records)

@@ -31,13 +31,11 @@ setup(
     install_requires=[
         'SQLAlchemy',
         'slackclient',
-        'pytz',
-        'requests==2.13.0',
         'slack_logger',
-        'zaifapi==1.5.3',
+        'zaifapi',
         'numpy',
         'pandas',
-        'websocket-client==0.40.0'
+        'Flask',
     ],
     extras_require={
         'ta-lib': ['TA-Lib']
@@ -47,6 +45,6 @@ setup(
       init_database = zaifbot.db.seed:init_database
       clear_database = zaifbot.db.seed:clear_database
       refresh_database = zaifbot.db.seed:refresh_database
-      install_ta_lib = zaifbot:install_ta_lib
+      install_ta_lib = zaifbot.setup.talib:install_ta_lib
       """,
 )

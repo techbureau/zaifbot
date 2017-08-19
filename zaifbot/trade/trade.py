@@ -20,6 +20,8 @@ class Trade:
         self.closed = False
         self._trade_api = BotTradeApi()
         self._dao = TradesDao()
+        self.strategy_name = None
+        self.process_id = None
 
     def entry(self, currency_pair, amount, action):
         self.currency_pair = CurrencyPair(currency_pair)
@@ -36,13 +38,12 @@ class Trade:
         trade_obj = self._dao.create(currency_pair=self.currency_pair.name,
                                      amount=self.amount,
                                      entry_price=self.entry_price,
-                                     action=self.action.name)
+                                     action=self.action.name,
+                                     strategy_name=self.strategy_name,
+                                     process_id=self.process_id)
 
         self.id_ = trade_obj.id_
-        log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
-                    " amount: {}, entry_price: {}, entry_datetime: {}}}"
-        trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.action,
-                                           self.amount, self.entry_price, self.entry_datetime))
+        self._logging_entry()
 
     def exit(self):
         self.exit_price = last_price(self.currency_pair)
@@ -53,15 +54,15 @@ class Trade:
                               price=self.exit_price,
                               action=self.action.opposite_action())
 
+        self.closed = True
+
         self._dao.update(id_=self.id_,
                          exit_price=self.exit_price,
                          exit_datetime=self.exit_datetime,
-                         profit=self.profit())
+                         profit=self.profit(),
+                         closed=self.closed)
 
-        log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
-        trade_logger.info(log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime))
-
-        self.closed = True
+        self._logging_exit()
 
     def profit(self):
         if self.action == Buy:
@@ -80,3 +81,18 @@ class Trade:
     @property
     def is_closed(self):
         return self.closed
+
+    def _logging_entry(self):
+        log_frame = "Entry: {{trade_id: {}, currency_pair: {}, action: {}," \
+                    " amount: {}, entry_price: {}, entry_datetime: {}}}"
+        log_msg = log_frame.format(self.id_, self.currency_pair, self.action,
+                                   self.amount, self.entry_price, self.entry_datetime)
+        trade_logger.info(log_msg, extra={'strategyid': self._strategy_descriptor()})
+
+    def _logging_exit(self):
+        log_frame = "Exit: {{trade_id: {}, currency_pair: {}, exit_price: {}, exit_datetime: {}}}"
+        log_msg = log_frame.format(self.id_, self.currency_pair, self.exit_price, self.exit_datetime)
+        trade_logger.info(log_msg, extra={'strategyid': self._strategy_descriptor()})
+
+    def _strategy_descriptor(self):
+        return self.strategy_name or self.process_id[:12] or ''

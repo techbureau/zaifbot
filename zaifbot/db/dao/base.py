@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-
+import numbers
 from sqlalchemy.exc import SQLAlchemyError
 
 from zaifbot.db.config import Session
@@ -8,7 +8,6 @@ from zaifbot.logger import bot_logger
 
 
 class DaoBase(metaclass=ABCMeta):
-    # todo: review implementation
     def __init__(self):
         self._Model = self._get_model()
 
@@ -77,3 +76,36 @@ class DaoBase(metaclass=ABCMeta):
             s.commit()
             s.refresh(item)
             return item
+
+    @staticmethod
+    def row2dict(row):
+        dict_row = dict()
+        for column in row.__table__.columns:
+            dict_row[column.name] = getattr(row, column.name)
+        return dict_row
+
+    @classmethod
+    def rows2dicts(cls, rows):
+        return [cls.row2dict(row) for row in rows]
+
+    def _custom_filters(self, q, filters):
+        # fixme: dirty code
+        for key, value in filters.items():
+            operator = boundary = str('')
+
+            if isinstance(value, bool):
+                operator, boundary = 'is', str(value)
+
+            if isinstance(value, numbers.Number):
+                operator, boundary = '==', str(value)
+
+            if isinstance(value, str):
+                try:
+                    operator, boundary = value.replace(",", " ").split()
+                except ValueError:
+                    operator, boundary = '==', value
+
+                boundary = "'" + boundary + "'"
+            source = "self._Model.{} {} {}".format(key, operator, boundary)
+            q = q.filter(eval(source))
+        return q
