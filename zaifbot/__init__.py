@@ -33,7 +33,7 @@ def zaifbot(import_name):
 
 def _customize_flask_logger():
     import logging
-    from zaifbot.logger import bot_logger, bot_file_handler, bot_console_handler
+    from zaifbot.logger import bot_file_handler, bot_console_handler
     logger = logging.getLogger('werkzeug')
     logger.name = 'Web'
     logger.setLevel(logging.INFO)
@@ -42,4 +42,4 @@ def _customize_flask_logger():
         logger.removeHandler(hdlr)
 
     logger.addHandler(bot_console_handler)
-    # fixme: add multiple process file handler 
+    logger.addHandler(bot_file_handler)
