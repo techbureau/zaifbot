@@ -1,4 +1,5 @@
 import time
+import random
 
 
 # for dict
@@ -24,3 +25,8 @@ def is_float(string):
         return True
     except ValueError:
         return False
+
+
+def random_sleep(from_, to_):
+    sleeping_time = random.uniform(from_, to_)
+    time.sleep(sleeping_time)
