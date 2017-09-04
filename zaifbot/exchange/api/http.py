@@ -140,7 +140,8 @@ class BotChartApi:
         response = requests.get(url, params=params)
         if response.status_code != 200:
             raise Exception('return status code is {}'.format(response.status_code))
-        return json.loads(json.loads(response.text))['ohlc_data']
+        ohlc_data = json.loads(json.loads(response.text))['ohlc_data']
+        return list(map(self._time_digits_adjust, ohlc_data))
 
     @staticmethod
     def _period_to_resolution(period):
@@ -165,3 +166,10 @@ class BotChartApi:
         if not isinstance(sec, int):
             raise TypeError("Only 'int' is acceptable")
         return
+
+    # fixme: not good code
+    @staticmethod
+    def _time_digits_adjust(an_olhc_data):
+        an_olhc_data['time'] = int(an_olhc_data['time'] / 1000)
+        return an_olhc_data
+
