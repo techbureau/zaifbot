@@ -15,7 +15,7 @@ def Action(action):
 
 
 class _TradeAction(metaclass=ABCMeta):
-    def __init__(self, action):
+    def __init__(self, action):  # necessary
         self._name = self.name
 
     def __str__(self):
