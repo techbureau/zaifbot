@@ -25,9 +25,9 @@ class TestEntry(unittest.TestCase):
         entry.entry()
 
         trade_mock.entry.assert_called_with(
-            currency_pair=entry._currency_pair,
-            amount=entry._amount,
-            action=entry._action
+            currency_pair=entry.currency_pair,
+            amount=entry.amount,
+            action=entry.action
         )
 
 if __name__ == '__main__':
