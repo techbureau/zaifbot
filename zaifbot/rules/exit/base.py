@@ -2,7 +2,7 @@ from zaifbot.rules.rule import Rule
 
 
 class Exit(Rule):
-    def __init__(self, name):
+    def __init__(self, name=None):
         self.name = name or self.__class__.__name__
 
     def can_exit(self, trade):
