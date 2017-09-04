@@ -29,5 +29,8 @@ class TestEntry(unittest.TestCase):
             action=self._entry.action,
         )
 
+    def test_name(self):
+        self.assertEqual(self._entry.name, 'Entry')
+
 if __name__ == '__main__':
     unittest.main()
