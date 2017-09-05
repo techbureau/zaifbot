@@ -5,6 +5,7 @@ from zaifbot.exchange.currency_pairs import CurrencyPair
 from zaifbot.logger import trade_logger
 from zaifbot.exchange.api.http import BotTradeApi
 from zaifbot.trade.tools import last_price
+from zaifbot.exchange.tick import Tick
 
 
 class Trade:
@@ -26,7 +27,7 @@ class Trade:
     def entry(self, currency_pair, amount, action):
         self.currency_pair = CurrencyPair(currency_pair)
         self.amount = amount
-        self.entry_price = last_price(currency_pair=self.currency_pair)
+        self.entry_price = self._rounded_last_price()
         self.action = Action(action)
         self.entry_datetime = datetime.now()
 
@@ -46,7 +47,7 @@ class Trade:
         self._logging_entry()
 
     def exit(self):
-        self.exit_price = last_price(self.currency_pair)
+        self.exit_price = self._rounded_last_price()
         self.exit_datetime = datetime.now()
 
         self._trade_api.trade(currency_pair=self.currency_pair,
@@ -96,3 +97,8 @@ class Trade:
 
     def _strategy_descriptor(self):
         return self.strategy_name or self.process_id[:12] or ''
+
+    def _rounded_last_price(self):
+        tick = Tick(self.currency_pair)
+        price = last_price(self.currency_pair)
+        return tick.truncate_price(price)

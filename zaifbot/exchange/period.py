@@ -73,7 +73,7 @@ class _TradePeriod(metaclass=ABCMeta):
 
     def calc_start(self, count, end_sec):
         round_end_sec = self.truncate_sec(end_sec)
-        start_sec = round_end_sec - self.sec * (count -1)
+        start_sec = round_end_sec - self.sec * (count - 1)
         return start_sec
 
 
