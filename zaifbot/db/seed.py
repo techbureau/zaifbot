@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
-
-from zaifbot.db.config import Base
 import datetime
 import os
+
+from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
+from zaifbot.config.db import Base
 
 
 class Trades(Base):

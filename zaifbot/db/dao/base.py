@@ -1,9 +1,9 @@
+import numbers
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-import numbers
-from sqlalchemy.exc import SQLAlchemyError
 
-from zaifbot.db.config import Session
+from sqlalchemy.exc import SQLAlchemyError
+from zaifbot.config.db import Session
 from zaifbot.logger import bot_logger
 
 
