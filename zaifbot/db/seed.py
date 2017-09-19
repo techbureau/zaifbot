@@ -2,7 +2,11 @@ import datetime
 import os
 
 from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
-from zaifbot.config.db import Base
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.ext.declarative import declarative_base
+from zaifbot.config.db import enginemaker
+
+Base = declarative_base()
 
 
 class Trades(Base):
@@ -35,13 +39,13 @@ class CandleSticks(Base):
     closed = Column('closed', Boolean, nullable=False)
 
 
-def init_database():
-    db = os.path.join(os.path.dirname(__file__), 'zaifbot.db')
-    if os.path.exists(db):
+def init_database(url=None):
+    engine = enginemaker(url)
+    try:
+        Base.metadata.create_all(engine, checkfirst=False)
+        print('Database was created, successfully ')
+    except OperationalError:
         print('Database already exists')
-        return
-    Base.metadata.create_all()
-    print('Database was created, successfully ')
 
 
 def clear_database():
