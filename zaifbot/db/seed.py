@@ -52,7 +52,7 @@ def init_database():
 def clear_database():
     engine = Engine
     if not engine.dialect.has_table(engine, 'Trades'):
-        print("you haven't created db yet, run init_database")
+        print("you don't have a database, run init_database")
         return
     answer = input('Really want to clear db? All trade data will lost [y/n]')
     if answer in ('y', 'yes'):
