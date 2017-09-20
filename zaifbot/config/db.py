@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from .handler import ConfigFileHandler
+from sqlalchemy.engine.url import URL as EngineURL
 
 
 def _default_database_path():
@@ -9,13 +10,12 @@ def _default_database_path():
     return 'sqlite:///{}'.format(os.path.join(targetdir, 'zaifbot.db'))
 
 
-def _get_database_url():
+def get_database_url():
     config = ConfigFileHandler()
-    url_option = config.read_by_section_and_key('db', 'url')
-    if url_option:
-        return url_option
+    engine_option = config.read_by_section('db')
+    if engine_option is None:
+        return _default_database_path()
+    return EngineURL(**engine_option)
 
-    return _default_database_path()
 
-
-Engine = create_engine(_get_database_url())
+Engine = create_engine(get_database_url())
