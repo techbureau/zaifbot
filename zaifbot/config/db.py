@@ -9,10 +9,7 @@ def _default_database_path():
     return 'sqlite:///{}'.format(os.path.join(targetdir, 'zaifbot.db'))
 
 
-def _get_database_url(url=None):
-    if url:
-        return url
-
+def _get_database_url():
     config = ConfigFileHandler()
     url_option = config.read_by_section_and_key('db', 'url')
     if url_option:
@@ -21,6 +18,4 @@ def _get_database_url(url=None):
     return _default_database_path()
 
 
-def enginemaker(url=None):
-    url = _get_database_url(url)
-    return create_engine(url)
+Engine = create_engine(_get_database_url())

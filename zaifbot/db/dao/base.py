@@ -4,10 +4,10 @@ from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from zaifbot.logger import bot_logger
-from zaifbot.config.db import enginemaker
+from zaifbot.config.db import Engine
 
 
-Session = sessionmaker(enginemaker())
+Session = sessionmaker(Engine)
 
 
 class DaoBase(metaclass=ABCMeta):

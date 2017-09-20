@@ -4,7 +4,8 @@ import os
 from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.declarative import declarative_base
-from zaifbot.config.db import enginemaker
+from zaifbot.config.db import Engine
+
 
 Base = declarative_base()
 
@@ -39,11 +40,11 @@ class CandleSticks(Base):
     closed = Column('closed', Boolean, nullable=False)
 
 
-def init_database(url=None):
-    engine = enginemaker(url)
+def init_database():
+    engine = Engine()
     try:
         Base.metadata.create_all(engine, checkfirst=False)
-        print('Database was created, successfully ')
+        print('Database was created, successfully')
     except OperationalError:
         print('Database already exists')
 
