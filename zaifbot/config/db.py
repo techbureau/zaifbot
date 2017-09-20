@@ -10,8 +10,8 @@ def _default_database_path():
     return 'sqlite:///{}'.format(os.path.join(targetdir, 'zaifbot.db'))
 
 
-def get_database_url():
-    config = ConfigFileHandler()
+def get_database_url(config=None):
+    config = config or ConfigFileHandler()
     engine_option = config.read_by_section('db')
     if engine_option is None:
         return _default_database_path()
