@@ -1,6 +1,6 @@
 import os
 from sqlalchemy import create_engine
-from .handler import ConfigFileHandler
+from .file import ConfigFileHandler
 from sqlalchemy.engine.url import URL as EngineURL
 
 

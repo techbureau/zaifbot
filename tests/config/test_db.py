@@ -1,6 +1,6 @@
 import unittest
 from zaifbot.config.db import get_database_url
-from zaifbot.config.handler import ConfigFileHandler
+from zaifbot.config.file import ConfigFileHandler
 import tempfile
 import os
 from unittest.mock import Mock
