@@ -1,10 +1,13 @@
+import numbers
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-import numbers
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-
-from zaifbot.db.config import Session
 from zaifbot.logger import bot_logger
+from zaifbot.config.db import Engine
+
+
+Session = sessionmaker(Engine)
 
 
 class DaoBase(metaclass=ABCMeta):
