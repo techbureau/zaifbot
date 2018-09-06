@@ -7,7 +7,7 @@
 
 
 ZaifBot is a Pythonic algorithmic trading library that run on [Zaif Exchange][zaifen].  
-It is developed by using Python 3.5.3 and tested in Python 3.4, 3.5, 3.6.
+It is developed by using Python 3.5.3 and tested in Python 3.4, 3.5, 3.6 and 3.7.
 
 ## Features
 
