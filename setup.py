@@ -6,6 +6,7 @@ def readme():
     with open('README.rst', encoding='utf-8') as f:
         return f.read()
 
+
 setup(
     name='zaifbot',
     version=__version__,

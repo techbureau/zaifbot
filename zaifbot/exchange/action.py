@@ -65,5 +65,6 @@ class _Sell(_TradeAction):
     def name(self):
         return 'ask'
 
+
 Sell = Action('ask')
 Buy = Action('bid')

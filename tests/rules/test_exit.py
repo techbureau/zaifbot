@@ -23,5 +23,6 @@ class TestEntry(unittest.TestCase):
     def test_name(self):
         self.assertEqual(self._exit.name, 'Exit')
 
+
 if __name__ == '__main__':
     unittest.main()

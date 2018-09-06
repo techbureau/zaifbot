@@ -57,5 +57,6 @@ class TestPeriod(unittest.TestCase):
             period = Period(self.secs[i])
             self.assertEqual(period.label, self.labels[i])
 
+
 if __name__ == '__main__':
     unittest.main()

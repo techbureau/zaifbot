@@ -40,4 +40,3 @@ class Portfolio:
                         daemon=True)
         thread.start()
         self._strategies[strategy.id_]['thread'] = thread
-
