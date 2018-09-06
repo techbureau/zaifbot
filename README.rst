@@ -79,7 +79,7 @@ Quick Start
 -----------
 
 See our `getting started
-tutorial <https://github.com/techbureau/zaifbot/wiki/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB1>`__
+tutorial <https://github.com/techbureau/zaifbot/wiki/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB>`__
 
 The following code implements a simple trading algorithm using zaifbot
 
