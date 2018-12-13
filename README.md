@@ -79,7 +79,7 @@ set_keys(key='your_key', secret='your_secret')
 # creating rule to buy
 class BuyWhenCheap(Entry):
     def can_entry(self):
-        if last_price(self._currency_pair.name) < 25000:
+        if last_price(self.currency_pair.name) < 25000:
             return True
         return False
 
