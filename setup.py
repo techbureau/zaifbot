@@ -3,7 +3,7 @@ from zaifbot import __version__
 
 
 def readme():
-    with open('README.rst', encoding='utf-8') as f:
+    with open('README.md', encoding='utf-8') as f:
         return f.read()
 
 
@@ -12,6 +12,7 @@ setup(
     version=__version__,
     description='trading bot framework for zaif exchange',
     long_description=readme(),
+    long_description_content_type='text/markdown',
     url='https://github.com/techbureau/zaifbot',
     author='AkiraTaniguchi DaikiShiroi Monji',
     author_email='a.taniguchi@techbureau.jp daikishiroi@gmail.com',
