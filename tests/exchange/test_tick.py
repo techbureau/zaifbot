@@ -68,5 +68,6 @@ class TestTick(unittest.TestCase):
         expected_values = (0.00000001, 0.00000001, 0.00000341, 1.0)
         self.assertEqual(cases, expected_values)
 
+
 if __name__ == '__main__':
     unittest.main()

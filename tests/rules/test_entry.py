@@ -32,5 +32,6 @@ class TestEntry(unittest.TestCase):
     def test_name(self):
         self.assertEqual(self._entry.name, 'Entry')
 
+
 if __name__ == '__main__':
     unittest.main()

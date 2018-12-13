@@ -54,5 +54,5 @@ class CandleSticksDao(DaoBase):
                                 'closed': True}
                        )
             for record in records
-            ]
+        ]
         self.create_multiple(new_records)

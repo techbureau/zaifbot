@@ -30,5 +30,6 @@ class TestCurrencyPair(unittest.TestCase):
         expected = 'btc_jpy'
         self.assertEqual(expected, str(self._btc_jpy))
 
+
 if __name__ == '__main__':
     unittest.main()

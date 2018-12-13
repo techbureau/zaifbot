@@ -20,5 +20,5 @@ class CandleSticks:
 
         return self._dao.get_by_duration(count, start_time, end_time_rounded)
 
-    def last_price(self,  timestamp):
+    def last_price(self, timestamp):
         return self.request_data(count=1, to_epoch_time=timestamp)[0]['close']
